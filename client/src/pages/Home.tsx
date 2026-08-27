@@ -45,7 +45,7 @@ export default function Home() {
 
       <section className="page-section">
         <div className="page-wrap intro-grid">
-          <div className="wendy-way-aside"><p className="eyebrow">The Wendy way</p><img src="/manus-storage/wendy-city_77f5e3e7.png" alt="Wendy, your personal travel advisor" /><p>Meet Wendy, your personal travel advisor.</p></div>
+          <div className="wendy-way-aside"><p className="eyebrow">The Wendy way</p><img src="/manus-storage/wendy-rome_0ee9b386.png" alt="Wendy, your personal travel advisor" /><p><span>Meet Wendy.</span>Your personal travel advisor.</p></div>
           <div>
             <h2 className="display display--medium">Travel should feel <em>like you</em> from the very first conversation.</h2>
             <p className="body-copy">The Wendy Collective is a personal travel advisory for people who value both beautiful experiences and a calm, thoughtfully considered plan. Share the feeling you are after; Wendy will help shape the details that make it real.</p>

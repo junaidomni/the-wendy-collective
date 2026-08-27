@@ -50,3 +50,6 @@
 - [x] Extend no-dash regression coverage to the Contact and Private Experience copy states.
 - [x] Complete a visual writing review of the remaining public pages after the no-dash editorial pass.
 - [x] Save the verified hero-copy and no-dash refinement as a reviewable website version.
+- [x] Replace The Wendy Way’s duplicate photo with an unused Wendy portrait that does not appear on About Wendy or Destinations.
+- [x] Enlarge The Wendy Way advisor introduction and use the available space to create a balanced, intentional feature.
+- [x] Verify the updated homepage introduction on desktop and mobile, then save the revision.

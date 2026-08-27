@@ -11,3 +11,7 @@ The Destinations page now uses one Santorini evening portrait in the Wendy in th
 ## Hero Copy and Punctuation Review
 
 The homepage now uses Wendy’s supplied first person description beneath the hero headline. Desktop and 375-pixel mobile review confirmed that the added copy remains readable within the cinematic hero composition. Public-page rendering coverage now checks that visible public copy contains no em dashes, en dashes, or hyphenated words. The remaining hyphens in route paths and code identifiers are technical and are not shown as website writing.
+
+## Wendy Way Feature Refinement
+
+The homepage now uses Wendy’s Rome portrait for The Wendy Way, which avoids repeating the city portrait used in the lower Why Choose Wendy section. The larger circular treatment and expanded advisor caption use the previously open left column as an intentional introduction feature. Desktop and 375-pixel mobile review confirmed that the hierarchy remains balanced with the adjacent opening copy.
