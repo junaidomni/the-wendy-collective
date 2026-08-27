@@ -18,3 +18,5 @@
 - [x] Add automated public-page rendering tests covering homepage, About, Destinations, and FAQ content.
 - [x] Complete an accessibility review for page landmarks, labeled form controls, keyboard focus, and reduced-motion behavior.
 - [x] Re-verify the key inquiry and protected-client conversion states without adding artificial customer data to the live database.
+- [x] Create a seamless 30-second homepage travel-film loop that retains the existing imagery while adding luxury cruising, globally inclusive couples, and varied travel moments.
+- [x] Replace the homepage hero film with the expanded loop and verify its desktop and mobile presentation.
