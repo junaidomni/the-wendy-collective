@@ -53,3 +53,15 @@
 - [x] Replace The Wendy Way’s duplicate photo with an unused Wendy portrait that does not appear on About Wendy or Destinations.
 - [x] Enlarge The Wendy Way advisor introduction and use the available space to create a balanced, intentional feature.
 - [x] Verify the updated homepage introduction on desktop and mobile, then save the revision.
+- [x] Audit the full public journey for visual balance, readability, wording clarity, and conversion consistency across desktop and mobile.
+- [x] Reposition and brighten The Wendy Way introduction so Wendy’s portrait and advisor message use the opening space more effectively.
+- [x] Replace the unclear personal invitation wording and refine the homepage closing call to action.
+- [x] Reduce unintentional empty space and improve editorial balance on the About Wendy and Destinations pages.
+- [x] Refine the trip brief sidebar copy and layout to avoid awkward line wrapping and improve scanning.
+- [x] Remove Private Experience from public navigation and add a discreet Wendy-only login link in the footer.
+- [x] Replace the public Private Experience route with a Wendy-only protected inquiry workspace that lists submitted trip briefs.
+- [x] Enforce owner-level access for the Wendy inquiry workspace so authenticated visitors cannot view travel requests.
+- [x] Ensure Wendy’s private workspace uses The Wendy Collective naming rather than exposing the current account holder’s name.
+- [x] Test all updated public navigation, layouts, copy, and access paths before saving the comprehensive refinement.
+- [x] Tighten the Destinations page editorial spacing and align its Wendy in the World lead-in with the collection grid.
+- [x] Save the complete verified public-site and Wendy workspace refinement as a reviewable website version.

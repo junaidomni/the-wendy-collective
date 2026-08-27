@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
-const mocks = vi.hoisted(() => ({ createTripInquiry: vi.fn(), createPrivateClientRequest: vi.fn(), getPrivateClientRequests: vi.fn(), notifyOwner: vi.fn() }));
-vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createTripInquiry: mocks.createTripInquiry, createPrivateClientRequest: mocks.createPrivateClientRequest, getPrivateClientRequests: mocks.getPrivateClientRequests }));
+const mocks = vi.hoisted(() => ({ createTripInquiry: vi.fn(), getTripInquiries: vi.fn(), notifyOwner: vi.fn() }));
+vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createTripInquiry: mocks.createTripInquiry, getTripInquiries: mocks.getTripInquiries }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
 
 import { appRouter } from "./routers";
@@ -12,7 +12,7 @@ function context(user: TrpcContext["user"] = null): TrpcContext {
 }
 
 describe("trip inquiry workflow", () => {
-  beforeEach(() => { mocks.createTripInquiry.mockReset(); mocks.createPrivateClientRequest.mockReset(); mocks.getPrivateClientRequests.mockReset(); mocks.notifyOwner.mockReset(); mocks.createTripInquiry.mockResolvedValue({ id: 17 }); mocks.createPrivateClientRequest.mockResolvedValue({ id: 18 }); mocks.getPrivateClientRequests.mockResolvedValue([]); mocks.notifyOwner.mockResolvedValue(true); });
+  beforeEach(() => { mocks.createTripInquiry.mockReset(); mocks.getTripInquiries.mockReset(); mocks.notifyOwner.mockReset(); mocks.createTripInquiry.mockResolvedValue({ id: 17 }); mocks.getTripInquiries.mockResolvedValue([]); mocks.notifyOwner.mockResolvedValue(true); });
 
   it("stores a public inquiry and notifies the owner with its travel details", async () => {
     const caller = appRouter.createCaller(context());
@@ -22,17 +22,23 @@ describe("trip inquiry workflow", () => {
     expect(mocks.notifyOwner).toHaveBeenCalledWith(expect.objectContaining({ title: "New trip inquiry · The Wendy Collective", content: expect.stringContaining("Avery Lane") }));
   });
 
-  it("keeps private experience details behind authenticated access", async () => {
+  it("blocks anonymous visitors from the Wendy workspace", async () => {
     const caller = appRouter.createCaller(context());
-    await expect(caller.privateExperience.dashboard()).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(caller.privateExperience.dashboard()).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
-  it("records and alerts Wendy about an authenticated private-client request", async () => {
+  it("blocks authenticated non-owners from Wendy’s inquiry workspace", async () => {
     const user = { id: 9, openId: "client-9", email: "client@example.com", name: "Jordan Ellis", loginMethod: "manus", role: "user" as const, createdAt: new Date(), updatedAt: new Date(), lastSignedIn: new Date() };
     const caller = appRouter.createCaller(context(user));
-    const result = await caller.privateExperience.requestHelp({ requestType: "documents", message: "Could you resend the hotel confirmation when you have a moment?" });
-    expect(result).toEqual({ success: true, requestId: 18 });
-    expect(mocks.createPrivateClientRequest).toHaveBeenCalledWith({ userId: 9, requestType: "documents", message: "Could you resend the hotel confirmation when you have a moment?" });
-    expect(mocks.notifyOwner).toHaveBeenCalledWith(expect.objectContaining({ title: "Private client request · The Wendy Collective", content: expect.stringContaining("Jordan Ellis") }));
+    await expect(caller.privateExperience.dashboard()).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("shows submitted trip briefs only to Wendy", async () => {
+    const owner = { id: 1, openId: "owner-1", email: "wendy@example.com", name: "Wendy Carter", loginMethod: "manus", role: "admin" as const, createdAt: new Date(), updatedAt: new Date(), lastSignedIn: new Date() };
+    mocks.getTripInquiries.mockResolvedValue([{ id: 4, firstName: "Avery", lastName: "Lane", email: "avery@example.com", phone: "555-010-1234", travelType: "cruise", destinations: "[\"Caribbean\"]", travelTiming: "November 2026", dateFlexibility: "flexible", budget: "$6,000", groupSize: 2, priorities: "A quiet balcony", status: "new", createdAt: new Date() }]);
+    const result = await appRouter.createCaller(context(owner)).privateExperience.dashboard();
+    expect(result.firstName).toBe("Wendy");
+    expect(result.inquiries).toHaveLength(1);
+    expect(mocks.getTripInquiries).toHaveBeenCalledTimes(1);
   });
 });

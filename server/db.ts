@@ -43,6 +43,12 @@ export async function createTripInquiry(input: CreateTripInquiryInput) {
   return { id: Number(result[0].insertId) };
 }
 
+export async function getTripInquiries(limit = 75) {
+  const db = await getDb();
+  if (!db) throw new Error("Trip inquiry storage is unavailable");
+  return db.select().from(tripInquiries).orderBy(desc(tripInquiries.createdAt)).limit(limit);
+}
+
 export type CreatePrivateClientRequestInput = Pick<InsertPrivateClientRequest, "userId" | "requestType" | "message">;
 
 export async function createPrivateClientRequest(input: CreatePrivateClientRequestInput) {

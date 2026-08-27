@@ -5,7 +5,6 @@ const navigation = [
   { href: "/about", label: "About Wendy" },
   { href: "/destinations", label: "Destinations" },
   { href: "/faq", label: "FAQ" },
-  { href: "/private-experience", label: "Private Experience" },
 ];
 
 type SiteShellProps = {
@@ -86,9 +85,9 @@ export default function SiteShell({ children, darkHeader = false }: SiteShellPro
               </nav>
             </div>
             <div>
-              <p className="footer-heading">A private invitation</p>
-              <nav className="footer-links" aria-label="Client resources">
-                <Link href="/private-experience">Private Experience</Link>
+              <p className="footer-heading">Get in touch</p>
+              <nav className="footer-links" aria-label="Contact The Wendy Collective">
+                <Link href="/contact">Share your travel vision</Link>
                 <a href="mailto:info@thewendycollective.com">info@thewendycollective.com</a>
               </nav>
             </div>
@@ -96,6 +95,7 @@ export default function SiteShell({ children, darkHeader = false }: SiteShellPro
           <div className="footer-bottom">
             <span>© {new Date().getFullYear()} The Wendy Collective</span>
             <span>Thoughtfully planned travel</span>
+            <Link href="/wendy" className="wendy-login">Wendy login</Link>
           </div>
         </div>
       </footer>

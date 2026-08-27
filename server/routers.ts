@@ -1,11 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
-import { createPrivateClientRequest, createTripInquiry, getPrivateClientRequests } from "./db";
+import { createTripInquiry, getTripInquiries } from "./db";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
-import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 
 const tripInquiryInput = z.object({
   firstName: z.string().trim().min(2).max(80),
@@ -61,23 +61,10 @@ export const appRouter = router({
     }),
   }),
   privateExperience: router({
-    dashboard: protectedProcedure.query(async ({ ctx }) => ({
+    dashboard: adminProcedure.query(async ({ ctx }) => ({
       firstName: ctx.user.name?.trim().split(/\s+/)[0] ?? null,
-      requests: await getPrivateClientRequests(ctx.user.id),
+      inquiries: await getTripInquiries(),
     })),
-    requestHelp: protectedProcedure.input(z.object({
-      requestType: z.enum(["itinerary", "documents", "question", "support"]),
-      message: z.string().trim().min(10).max(2000),
-    })).mutation(async ({ ctx, input }) => {
-      const request = await createPrivateClientRequest({ userId: ctx.user.id, ...input });
-      await notifyOwnerOrThrow("Private client request · The Wendy Collective", [
-        `Client: ${ctx.user.name ?? "Returning client"}`,
-        `Email: ${ctx.user.email ?? "Not available"}`,
-        `Request type: ${input.requestType}`,
-        `Message: ${input.message}`,
-      ].join("\n"));
-      return { success: true, requestId: request.id };
-    }),
   }),
 });
 

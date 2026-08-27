@@ -43,10 +43,10 @@ export default function Home() {
         <span className="hero-scroll" aria-hidden="true">Scroll to explore</span>
       </section>
 
-      <section className="page-section">
+      <section className="page-section wendy-way-section">
         <div className="page-wrap intro-grid">
-          <div className="wendy-way-aside"><p className="eyebrow">The Wendy way</p><img src="/manus-storage/wendy-rome_0ee9b386.png" alt="Wendy, your personal travel advisor" /><p><span>Meet Wendy.</span>Your personal travel advisor.</p></div>
-          <div>
+          <div className="wendy-way-aside"><p className="eyebrow">The Wendy way</p><div className="wendy-way-portrait"><img src="/manus-storage/wendy-rome_0ee9b386.png" alt="Wendy, your personal travel advisor" /><span aria-hidden="true">01</span></div><p><span>Meet Wendy.</span>Your personal travel advisor.</p></div>
+          <div className="wendy-way-content">
             <h2 className="display display--medium">Travel should feel <em>like you</em> from the very first conversation.</h2>
             <p className="body-copy">The Wendy Collective is a personal travel advisory for people who value both beautiful experiences and a calm, thoughtfully considered plan. Share the feeling you are after; Wendy will help shape the details that make it real.</p>
             <div className="lead-mark"><span>“</span><p>Every journey starts with your priorities: the pace, the people, the reason to go, and the moments you do not want to miss.</p></div>
@@ -90,7 +90,7 @@ export default function Home() {
 
       <section className="page-section page-section--mist"><div className="page-wrap"><div className="story-placeholder"><div className="story-placeholder__copy"><p className="eyebrow">Client stories</p><h2 className="display display--small">The best stories begin <em>after you arrive.</em></h2><p className="body-copy body-copy--light">This space is reserved for Wendy’s approved client reflections, real stories of meaningful travel shared when the time is right.</p></div><div className="story-placeholder__art" role="img" aria-label="A quiet Mexico coastal retreat" /></div></div></section>
 
-      <section className="page-section"><div className="page-wrap"><div className="cta-panel"><p className="eyebrow" style={{ color: "#0d1c22" }}>A personal invitation</p><h2 className="display display--medium">Tell Wendy what you have been <em>imagining.</em></h2><p>Whether you know exactly where you are headed or simply know you are ready to go, a thoughtful first conversation is the best place to begin.</p><Link href="/contact" className="button-link button-link--ink">Plan My Trip <span aria-hidden="true">↗</span></Link></div></div></section>
+      <section className="page-section"><div className="page-wrap"><div className="cta-panel"><p className="eyebrow" style={{ color: "#0d1c22" }}>A personal invitation</p><h2 className="display display--medium">Tell Wendy what you are <em>dreaming about.</em></h2><p>Start with a destination, a celebration, or simply a feeling. Wendy will make planning it feel easy.</p><Link href="/contact" className="button-link button-link--ink">Plan My Trip <span aria-hidden="true">↗</span></Link></div></div></section>
     </SiteShell>
   );
 }
