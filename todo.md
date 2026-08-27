@@ -36,3 +36,7 @@
 - [x] Replace the public FAQ answers with Wendy’s supplied service, payment, inquiry, timing, specialty, insurance, support, and researched-trip copy.
 - [x] Remove em dash and hyphen punctuation from the revised FAQ content while retaining the existing accessible accordion layout.
 - [x] Verify the revised FAQ at desktop and mobile sizes, then save the update.
+- [x] Add Wendy’s professional portrait to the About page as the primary advisor image.
+- [x] Integrate Wendy’s travel portraits into selected curated destination and personal-planning sections without displacing the destination-led visual story.
+- [x] Add a personal advisor cue to the inquiry experience using Wendy’s supplied photography.
+- [x] Verify the photo placements across desktop and mobile, then save the completed visual refinement.

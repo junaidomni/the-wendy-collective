@@ -79,7 +79,7 @@ export default function Home() {
 
       <section className="page-section">
         <div className="page-wrap why-grid">
-          <div className="why-visual" role="img" aria-label="A secluded Caribbean shoreline"><div className="why-note">Planning that feels personal, never transactional.</div></div>
+          <div className="why-visual"><img src="/manus-storage/wendy-city_77f5e3e7.png" alt="Wendy in the city, ready to help plan the next journey" /><div className="why-note">Planning that feels personal, never transactional.</div></div>
           <div><p className="eyebrow">Why choose Wendy</p><h2 className="display display--small">More than a booking. <em>A trusted point of view.</em></h2><p className="body-copy">Wendy listens closely, shares what she genuinely recommends, and approaches your travel plans with the care she would want for her own.</p><ol className="why-list">{whyChoose.map(([number, title, copy]) => <li key={title}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></li>)}</ol></div>
         </div>
       </section>
