@@ -104,3 +104,9 @@
 - [x] Verify the full-frame hero sequence on desktop and mobile, then save the update.
 - [x] Validate the expanded hero film’s ending-to-beginning continuity through an explicit boundary review and adjust the loop-back segment if required.
 - [x] Save a new reviewable checkpoint after the expanded fullscreen hero film passes loop and responsive verification.
+- [x] Review the supplied hero-film recording and map the repeated sailboat, rough cruise, and weak ending moments for replacement.
+- [x] Source and evaluate properly licensed high-quality travel footage for people-first destination moments, selecting only clips that fit the premium visual tone.
+- [x] Remove all repeated sailboat moments, preserve the strongest Disney and Greece scenes, and remove the weak final sailboat transition.
+- [x] Rebuild the hero sequence with smoother, people-first destination transitions and consistent fullscreen framing.
+- [x] Verify the refreshed hero loop on desktop and mobile, then save the update.
+- [x] Save a new reviewable checkpoint containing the refreshed no-sailboat hero loop after confirmed desktop and mobile verification.

@@ -53,3 +53,7 @@ The extended hero experience now combines the retained cloud opening and artifac
 ## Exact Hero Loop Boundary Review
 
 The expanded film now concludes with a one-second H.264 cloud anchor created from its own opening frame. The final output is 1280 by 720, 52 seconds, and the final displayed cloud frame matches the first frame, so the browser’s next loop begins from the same composition rather than a mismatched sky view. The desktop and 375-pixel mobile homepage checks confirmed the full-bleed background fills the hero edge to edge with no top or bottom black bars.
+
+## Simplified People First Hero Film Review
+
+The refreshed hero sequence removes the repeated sailboat and tropical-resort transition chapters entirely. It now moves from the opening clouds to the retained family theme-park and Greece chapters, a licensed real-world adult-couple travel scene, the Alaskan glacier cruise, African landscape, and an exact cloud anchor that returns to the opening composition. The final video is 1280 by 720 H.264, 37 seconds, with full-frame dissolves and no letterboxing. Desktop and 375-pixel mobile checks confirmed full-bleed coverage and legible homepage content.
