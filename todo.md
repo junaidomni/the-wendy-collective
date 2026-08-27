@@ -44,3 +44,9 @@
 - [x] Remove the unwanted dark top strip from the About Wendy portrait treatment while retaining the selected image.
 - [x] Simplify Wendy in the World into a single Santorini evening feature and tighten its visual hierarchy and spacing.
 - [x] Verify the refined photo hierarchy and responsive layouts before saving the update.
+- [x] Replace the homepage hero description with Wendy’s supplied first-person travel-planning message.
+- [x] Remove visible hyphen and dash punctuation from all public-facing website copy without changing the meaning of the content.
+- [x] Verify the revised writing across public pages and save the completed copy refinement.
+- [x] Extend no-dash regression coverage to the Contact and Private Experience copy states.
+- [x] Complete a visual writing review of the remaining public pages after the no-dash editorial pass.
+- [x] Save the verified hero-copy and no-dash refinement as a reviewable website version.

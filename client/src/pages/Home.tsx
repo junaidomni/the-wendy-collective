@@ -8,7 +8,7 @@ const travelStyles = [
 ];
 
 const services = [
-  ["01", "All-Inclusive Escapes", "A resort experience shaped around your preferred rhythm, setting, and level of ease.", "/destinations/all-inclusive"],
+  ["01", "All Inclusive Escapes", "A resort experience shaped around your preferred rhythm, setting, and level of ease.", "/destinations/all-inclusive"],
   ["02", "Group Journeys", "Clear coordination for milestone trips, multigenerational time together, and shared celebrations.", "/destinations/groups"],
   ["03", "Cruises & Coastlines", "Sailings selected with care, plus the stay and shore moments that make the journey feel complete.", "/destinations/cruises"],
   ["04", "Custom Itineraries", "Thoughtful stays, transitions, and experiences connected into one seamless trip.", "/contact?type=custom"],
@@ -16,7 +16,7 @@ const services = [
 
 const whyChoose = [
   ["01", "Clear, honest guidance", "Every option is explained with the insight and context to help you choose confidently."],
-  ["02", "Thoughtful recommendations", "Your plans begin with what matters to you, not with a one-size-fits-all itinerary."],
+  ["02", "Thoughtful recommendations", "Your plans begin with what matters to you, never with a generic itinerary."],
   ["03", "A real person to call", "When questions arise or plans shift, you have one trusted advisor in your corner."],
   ["04", "Details handled with care", "From the early ideas to the travel days ahead, the moving pieces stay organized."],
 ];
@@ -33,7 +33,7 @@ export default function Home() {
           <div className="hero-copy">
             <p className="eyebrow reveal">Thoughtful travel, personally planned</p>
             <h1 id="hero-title" className="hero-title reveal reveal--delay">Let’s plan a journey<br /><em>worth remembering.</em></h1>
-            <p className="hero-description reveal reveal--delay-2">Beautiful places, memorable stays, local flavor, and every detail in between—planned around the way you want to travel.</p>
+            <p className="hero-description reveal reveal--delay-2">I love discovering beautiful places, memorable hotels, local flavors, and the details that make a trip feel truly special. Tell me what you’re dreaming about, and I’ll make planning it feel easy.</p>
             <div className="hero-actions reveal reveal--delay-2">
               <Link href="/contact" className="button-link">Plan Your Journey <span aria-hidden="true">↗</span></Link>
               <Link href="/destinations" className="button-link button-link--ghost">Explore Destinations</Link>
@@ -48,13 +48,13 @@ export default function Home() {
           <div className="wendy-way-aside"><p className="eyebrow">The Wendy way</p><img src="/manus-storage/wendy-city_77f5e3e7.png" alt="Wendy, your personal travel advisor" /><p>Meet Wendy, your personal travel advisor.</p></div>
           <div>
             <h2 className="display display--medium">Travel should feel <em>like you</em> from the very first conversation.</h2>
-            <p className="body-copy">The Wendy Collective is a personal travel advisory for people who value both beautiful experiences and a calm, well-considered plan. Share the feeling you are after; Wendy will help shape the details that make it real.</p>
-            <div className="lead-mark"><span>“</span><p>Every journey starts with your priorities—the pace, the people, the reason to go, and the moments you do not want to miss.</p></div>
+            <p className="body-copy">The Wendy Collective is a personal travel advisory for people who value both beautiful experiences and a calm, thoughtfully considered plan. Share the feeling you are after; Wendy will help shape the details that make it real.</p>
+            <div className="lead-mark"><span>“</span><p>Every journey starts with your priorities: the pace, the people, the reason to go, and the moments you do not want to miss.</p></div>
           </div>
         </div>
       </section>
 
-      <div className="marquee" aria-hidden="true"><div className="marquee-track"><span>Group Cruises</span><span>All-Inclusive Resorts</span><span>Destination Celebrations</span><span>Honeymoons</span><span>Family Time</span><span>Custom Itineraries</span><span>Group Cruises</span><span>All-Inclusive Resorts</span><span>Destination Celebrations</span><span>Honeymoons</span><span>Family Time</span><span>Custom Itineraries</span></div></div>
+      <div className="marquee" aria-hidden="true"><div className="marquee-track"><span>Group Cruises</span><span>All Inclusive Resorts</span><span>Destination Celebrations</span><span>Honeymoons</span><span>Family Time</span><span>Custom Itineraries</span><span>Group Cruises</span><span>All Inclusive Resorts</span><span>Destination Celebrations</span><span>Honeymoons</span><span>Family Time</span><span>Custom Itineraries</span></div></div>
 
       <section className="page-section page-section--warm">
         <div className="page-wrap">
@@ -88,7 +88,7 @@ export default function Home() {
         <div className="page-wrap"><p className="eyebrow">The process</p><div className="section-heading"><h2 className="display display--medium">Easy to begin. <em>Beautifully managed.</em></h2></div><div className="process-grid"><article className="process-step"><span className="process-step__number">01 / Share</span><h3>Tell me what matters.</h3><p>Dates, ideas, budget, and the kind of time you want to have together.</p></article><article className="process-step"><span className="process-step__number">02 / Discover</span><h3>I research the details.</h3><p>Options are compared carefully and narrowed through your priorities.</p></article><article className="process-step"><span className="process-step__number">03 / Decide</span><h3>Choose with confidence.</h3><p>Talk through your favorites, then let each reservation fall into place.</p></article><article className="process-step"><span className="process-step__number">04 / Go</span><h3>Pack your bags.</h3><p>Travel with the clarity of a considered plan and a real person to call.</p></article></div></div>
       </section>
 
-      <section className="page-section page-section--mist"><div className="page-wrap"><div className="story-placeholder"><div className="story-placeholder__copy"><p className="eyebrow">Client stories</p><h2 className="display display--small">The best stories begin <em>after you arrive.</em></h2><p className="body-copy body-copy--light">This space is reserved for Wendy’s approved client reflections—real stories of meaningful travel, shared when the time is right.</p></div><div className="story-placeholder__art" role="img" aria-label="A quiet Mexico coastal retreat" /></div></div></section>
+      <section className="page-section page-section--mist"><div className="page-wrap"><div className="story-placeholder"><div className="story-placeholder__copy"><p className="eyebrow">Client stories</p><h2 className="display display--small">The best stories begin <em>after you arrive.</em></h2><p className="body-copy body-copy--light">This space is reserved for Wendy’s approved client reflections, real stories of meaningful travel shared when the time is right.</p></div><div className="story-placeholder__art" role="img" aria-label="A quiet Mexico coastal retreat" /></div></div></section>
 
       <section className="page-section"><div className="page-wrap"><div className="cta-panel"><p className="eyebrow" style={{ color: "#0d1c22" }}>A personal invitation</p><h2 className="display display--medium">Tell Wendy what you have been <em>imagining.</em></h2><p>Whether you know exactly where you are headed or simply know you are ready to go, a thoughtful first conversation is the best place to begin.</p><Link href="/contact" className="button-link button-link--ink">Plan My Trip <span aria-hidden="true">↗</span></Link></div></div></section>
     </SiteShell>

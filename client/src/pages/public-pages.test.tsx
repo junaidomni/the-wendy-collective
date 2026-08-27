@@ -1,5 +1,6 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import About from "./About";
@@ -7,6 +8,7 @@ import DestinationGuide from "./DestinationGuide";
 import Destinations from "./Destinations";
 import Faq from "./Faq";
 import Home from "./Home";
+import { destinationGuides } from "../lib/destinationGuides";
 
 function renderPage(page: React.ReactElement, path = "/") {
   return renderToStaticMarkup(<Router hook={() => [path, () => undefined]}>{page}</Router>);
@@ -16,9 +18,33 @@ describe("public site content", () => {
   it("renders the homepage promise, Why Choose Wendy content, and consultation path", () => {
     const page = renderPage(<Home />);
     expect(page).toContain("Let’s plan a journey");
+    expect(page).toContain("I love discovering beautiful places, memorable hotels, local flavors, and the details that make a trip feel truly special.");
     expect(page).toContain("Why choose Wendy");
     expect(page).toContain("Plan Your Journey");
     expect(page).toContain("/contact");
+  });
+
+  it("keeps visitor-facing copy free of dash punctuation", () => {
+    const publicText = [
+      renderPage(<Home />),
+      renderPage(<About />),
+      renderPage(<Destinations />),
+      renderPage(<Faq />),
+      renderPage(<DestinationGuide />, "/destinations/caribbean"),
+    ].join(" ").replace(/<[^>]*>/g, " ");
+    const destinationCopy = destinationGuides.flatMap((guide) => [guide.label, guide.title, guide.italic, guide.summary, guide.imageAlt, guide.planningNote, guide.inquiryLabel, ...guide.idealFor, ...guide.moments]).join(" ");
+    expect(`${publicText} ${destinationCopy}`).not.toMatch(/[—–]/);
+    expect(`${publicText} ${destinationCopy}`).not.toMatch(/\b[A-Za-z]+-[A-Za-z]+\b/);
+  });
+
+  it("keeps contact and private-experience messaging free of dash punctuation", () => {
+    const extractJsxText = (source: string) => Array.from(source.matchAll(/>([^<>{]+)</g)).map((match) => match[1]).join(" ");
+    const clientAreaText = [
+      readFileSync(new URL("./Contact.tsx", import.meta.url), "utf8"),
+      readFileSync(new URL("./PrivateExperience.tsx", import.meta.url), "utf8"),
+    ].map(extractJsxText).join(" ");
+    expect(clientAreaText).not.toMatch(/[—–]/);
+    expect(clientAreaText).not.toMatch(/\b[A-Za-z]+-[A-Za-z]+\b/);
   });
 
   it("renders the approved public information architecture", () => {
@@ -28,7 +54,7 @@ describe("public site content", () => {
     const guide = renderPage(<DestinationGuide />, "/destinations/caribbean");
     expect(about).toContain("A travel advisor with a");
     expect(destinations).toContain("Explore the collections");
-    expect(destinations).toContain("All-Inclusive Escapes");
+    expect(destinations).toContain("All Inclusive Escapes");
     expect(faq).toContain("How much do your services cost?");
     expect(faq).toContain("How do you get paid if it’s free?");
     expect(faq).toContain("My services are completely free to you.");
