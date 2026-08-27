@@ -2,16 +2,16 @@ import { Link } from "wouter";
 import SiteShell from "@/components/SiteShell";
 
 const travelStyles = [
-  { number: "01", title: "Caribbean", meta: "Salt air, still water, unhurried days", image: "/manus-storage/twc-caribbean_1a3e0036.jpg" },
-  { number: "02", title: "Mexico", meta: "Culture, coastlines, and exquisite stays", image: "/manus-storage/twc-mexico_b427d449.jpg" },
-  { number: "03", title: "At Sea", meta: "Space to gather, time to explore", image: "/manus-storage/twc-hero-travel-film_89224a2a.jpg" },
+  { number: "01", title: "Caribbean", meta: "Salt air, still water, unhurried days", image: "/manus-storage/twc-caribbean_1a3e0036.jpg", href: "/destinations/caribbean" },
+  { number: "02", title: "Mexico", meta: "Culture, coastlines, and exquisite stays", image: "/manus-storage/twc-mexico_b427d449.jpg", href: "/destinations/mexico" },
+  { number: "03", title: "At Sea", meta: "Space to gather, time to explore", image: "/manus-storage/twc-hero-travel-film_89224a2a.jpg", href: "/destinations/cruises" },
 ];
 
 const services = [
-  ["01", "All-Inclusive Escapes", "A resort experience shaped around your preferred rhythm, setting, and level of ease."],
-  ["02", "Group Journeys", "Clear coordination for milestone trips, multigenerational time together, and shared celebrations."],
-  ["03", "Cruises & Coastlines", "Sailings selected with care, plus the stay and shore moments that make the journey feel complete."],
-  ["04", "Custom Itineraries", "Thoughtful stays, transitions, and experiences connected into one seamless trip."],
+  ["01", "All-Inclusive Escapes", "A resort experience shaped around your preferred rhythm, setting, and level of ease.", "/destinations/all-inclusive"],
+  ["02", "Group Journeys", "Clear coordination for milestone trips, multigenerational time together, and shared celebrations.", "/destinations/groups"],
+  ["03", "Cruises & Coastlines", "Sailings selected with care, plus the stay and shore moments that make the journey feel complete.", "/destinations/cruises"],
+  ["04", "Custom Itineraries", "Thoughtful stays, transitions, and experiences connected into one seamless trip.", "/contact?type=custom"],
 ];
 
 const whyChoose = [
@@ -63,7 +63,7 @@ export default function Home() {
             <p className="body-copy">Begin with a place, an occasion, or simply the desire for a different kind of week. The rest can take shape from there.</p>
           </div>
           <div className="experience-grid">
-            {travelStyles.map((style) => <Link href="/destinations" className="experience-card" key={style.title}><img className="experience-card__image" src={style.image} alt="" /><div className="experience-card__copy"><p className="experience-card__index">{style.number}</p><h3 className="experience-card__title">{style.title}</h3><p className="experience-card__meta">{style.meta} <span aria-hidden="true">↗</span></p></div></Link>)}
+            {travelStyles.map((style) => <Link href={style.href} className="experience-card" key={style.title}><img className="experience-card__image" src={style.image} alt="" /><div className="experience-card__copy"><p className="experience-card__index">{style.number}</p><h3 className="experience-card__title">{style.title}</h3><p className="experience-card__meta">{style.meta} <span aria-hidden="true">↗</span></p></div></Link>)}
           </div>
         </div>
       </section>
@@ -72,7 +72,7 @@ export default function Home() {
         <div className="page-wrap">
           <div className="section-heading"><div><p className="eyebrow">What I offer</p><h2 className="display display--medium">A trip that feels <em>considered</em> at every turn.</h2></div><Link href="/contact" className="button-link button-link--ghost">Start a trip brief</Link></div>
           <div className="service-list">
-            {services.map(([number, title, copy]) => <Link href="/contact" className="service-row" key={title}><span className="service-row__index">{number}</span><h3>{title}</h3><p>{copy}</p><span className="round-arrow" aria-hidden="true">↗</span></Link>)}
+            {services.map(([number, title, copy, href]) => <Link href={href} className="service-row" key={title}><span className="service-row__index">{number}</span><h3>{title}</h3><p>{copy}</p><span className="round-arrow" aria-hidden="true">↗</span></Link>)}
           </div>
         </div>
       </section>

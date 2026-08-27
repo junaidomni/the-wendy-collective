@@ -20,3 +20,17 @@ The experience should feel like a refined travel journal rather than an online b
 ## Content Still Needed From Wendy
 
 Before launch, collect Wendy’s approved biography, certifications or host-agency affiliations, headshot, preferred contact details, service-fee wording, desired destinations and partners, genuine approved client feedback (if used), privacy-policy terms, and the exact contact address to receive trip-inquiry notifications.
+
+## Destination Discovery & Conversion Follow-up
+
+| Reference | Observed approach | Relevant lesson |
+| --- | --- | --- |
+| [Black Tomato](https://www.blacktomato.com/) | Begins with the traveller’s desired feeling, uses editorial inspiration and specialist authority, then maintains a single clear enquiry path rather than an online inventory checkout. | Keep emotion-led browsing, but use high-intent calls to action when a visitor recognizes a desirable travel style or destination. |
+| [Scott Dunn](https://www.scottdunn.com/us) | Pairs broad destination and trip-type exploration with a visible advisor and consultation pathway. | Let visitors explore before they enquire, while keeping Wendy’s personal expertise—and an obvious path to a conversation—present throughout. |
+| [TCS World Travel](https://www.tcsworldtravel.com/luxury-custom-travel) | Positions custom travel around dates, destinations, and expertise, then routes the visitor into a bespoke-consultation model. | A boutique advisory can offer enough inspiration to build confidence without presenting unverified live inventory or reducing its role to a booking engine. |
+
+### Recommended Model: Curated Discovery, Then a Contextual Trip Brief
+
+The recommended next phase is **not** a live package-search engine. That type of experience requires maintained supplier inventory, accurate availability and pricing, payment and terms handling, and a meaningful amount of ongoing operational support. It would also make The Wendy Collective feel more transactional at the point where its strongest differentiator is Wendy’s personal judgement.
+
+Instead, expand the current destination page into a small collection of **curated destination guides**. Each guide should offer a signature travel feeling, ideal traveller or occasion, a few examples of experiences Wendy can arrange, seasonality or trip-planning context, and a dedicated “Plan this escape” call to action. That action should preselect the relevant interest in the trip brief, rather than making a visitor start from scratch. This approach borrows the browse-then-consult pattern of the leading references while preserving the exclusive, advisor-led positioning of The Wendy Collective.

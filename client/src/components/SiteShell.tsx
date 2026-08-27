@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 const navigation = [
   { href: "/about", label: "About Wendy" },
@@ -33,6 +33,14 @@ function ScrollRevealObserver() {
 }
 
 export default function SiteShell({ children, darkHeader = false }: SiteShellProps) {
+  const [location] = useLocation();
+  const isActive = (href: string) => location === href || (href === "/destinations" && location.startsWith("/destinations/"));
+  const navClass = (href: string) => `nav-link${isActive(href) ? " nav-link--active" : ""}`;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location]);
+
   return (
     <div className="site-shell">
       <header className={`site-header${darkHeader ? " site-header--solid" : ""}`}>
@@ -43,16 +51,16 @@ export default function SiteShell({ children, darkHeader = false }: SiteShellPro
           </Link>
           <nav className="site-nav" aria-label="Primary navigation">
             {navigation.map((item) => (
-              <Link key={item.href} href={item.href}>{item.label}</Link>
+              <Link key={item.href} href={item.href} className={navClass(item.href)} aria-current={isActive(item.href) ? "page" : undefined}>{item.label}</Link>
             ))}
-            <Link href="/contact" className="button-link">Plan Your Journey <span aria-hidden="true">↗</span></Link>
+            <Link href="/contact" className={`button-link${isActive("/contact") ? " button-link--active" : ""}`} aria-current={isActive("/contact") ? "page" : undefined}>Plan Your Journey <span aria-hidden="true">↗</span></Link>
           </nav>
           <details className="header-mobile">
             <summary>Menu</summary>
             <nav className="mobile-nav-panel" aria-label="Mobile navigation">
-              <Link href="/">Home</Link>
-              {navigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
-              <Link href="/contact">Plan Your Journey</Link>
+              <Link href="/" className={navClass("/")} aria-current={isActive("/") ? "page" : undefined}>Home</Link>
+              {navigation.map((item) => <Link key={item.href} href={item.href} className={navClass(item.href)} aria-current={isActive(item.href) ? "page" : undefined}>{item.label}</Link>)}
+              <Link href="/contact" className={navClass("/contact")} aria-current={isActive("/contact") ? "page" : undefined}>Plan Your Journey</Link>
             </nav>
           </details>
         </div>

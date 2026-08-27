@@ -20,3 +20,16 @@
 - [x] Re-verify the key inquiry and protected-client conversion states without adding artificial customer data to the live database.
 - [x] Create a seamless 30-second homepage travel-film loop that retains the existing imagery while adding luxury cruising, globally inclusive couples, and varied travel moments.
 - [x] Replace the homepage hero film with the expanded loop and verify its desktop and mobile presentation.
+- [x] Ensure all internal destination and consultation links begin at the top of their target page rather than preserving prior scroll position.
+- [x] Add clear active-page styling to desktop and mobile navigation, including the current destination and private client sections.
+- [x] Research and document how successful premium travel advisors balance destination browsing, package discovery, and high-touch inquiry conversion.
+- [x] Recommend and implement the appropriate next-stage destination discovery experience for The Wendy Collective.
+- [x] Create five curated guide routes for Caribbean, Mexico, all-inclusive escapes, groups, and cruises.
+- [x] Add a destination-guide template with travel feeling, ideal occasion, sample experiences, planning notes, and a contextual consultation call to action.
+- [x] Connect each destination and service card to its relevant guide and prefill the related trip interest in the contact form.
+- [x] Test curated guide routing, page-top navigation, active navigation styling, and the contextual inquiry conversion flow.
+- [x] Ensure trip-brief prefills reset correctly whenever visitors navigate to a plain or different contextual contact route.
+- [x] Verify the homepage-card-to-guide-to-prefilled-brief click path, active navigation, and page-top reset through focused browser-level checks.
+- [x] Add deterministic route-state coverage for homepage guide links, guide active navigation, and contextual inquiry URLs.
+- [x] Verify every homepage destination and service entry points to its intended guide or contextual trip brief.
+- [x] Verify the Destinations navigation item itself is marked current on nested guide routes.
