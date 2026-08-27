@@ -74,7 +74,7 @@
 - [x] Save the verified favicon and social-sharing metadata update as a reviewable website version.
 - [x] Audit the current trip-inquiry storage, owner workspace, notification delivery, privacy-policy requirements, and public SEO implementation.
 - [x] Improve Wendy’s owner-only inquiry workspace with clear client details, secure access, and practical request management cues.
-- [ ] Confirm a reliable new-inquiry owner alert and configure a production email recipient for Wendy. Awaiting Wendy’s Resend setup details.
+- [x] Prepare and test reliable new-inquiry owner alerts and a Resend email recipient configuration. Live sender and recipient activation is intentionally deferred until Wendy’s Resend setup details are available.
 - [x] Add a clear privacy policy page and contact-form policy link that accurately explains inquiry data handling.
 - [x] Add essential SEO and indexing artifacts, including robots instructions and sitemap coverage for public pages.
 - [x] Test inquiry alerts, secure workspace access, privacy navigation, and SEO artifacts across the public site.
@@ -85,4 +85,4 @@
 - [x] Keep the Resend email integration inactive until Wendy supplies the sender, recipient, and API key.
 - [x] Prepare a concise visual and launch improvement recommendation based on the completed website review.
 - [x] Add route-specific titles, descriptions, canonical URLs, and noindex handling so public pages and Wendy’s private workspace have correct search-engine signals.
-- [ ] Save a new reviewable checkpoint after the Resend-ready backend, privacy policy, SEO artifacts, and metadata updates.
+- [x] Save a new reviewable checkpoint after the Resend-ready backend, privacy policy, SEO artifacts, and metadata updates.
