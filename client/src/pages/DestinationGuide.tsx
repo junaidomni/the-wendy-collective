@@ -1,13 +1,15 @@
 import { Link } from "wouter";
 import SiteShell from "@/components/SiteShell";
 import { getDestinationGuide, guideInquiryHref } from "@/lib/destinationGuides";
+import { useLocation } from "wouter";
 
 function GuideNotFound() {
   return <SiteShell darkHeader><section className="page-hero"><div className="page-wrap"><p className="eyebrow">Destination collection</p><h1 className="display">This guide is still <em>taking shape.</em></h1><p className="body-copy">Wendy would be happy to talk through the kind of journey you have in mind.</p><Link href="/contact" className="button-link">Plan Your Journey <span aria-hidden="true">↗</span></Link></div></section></SiteShell>;
 }
 
 export default function DestinationGuide() {
-  const slug = typeof window === "undefined" ? "caribbean" : window.location.pathname.split("/").filter(Boolean).pop() ?? "";
+  const [location] = useLocation();
+  const slug = location.split("/").filter(Boolean).pop() ?? "";
   const guide = getDestinationGuide(slug);
   if (!guide) return <GuideNotFound />;
 

@@ -86,3 +86,11 @@
 - [x] Prepare a concise visual and launch improvement recommendation based on the completed website review.
 - [x] Add route-specific titles, descriptions, canonical URLs, and noindex handling so public pages and Wendy’s private workspace have correct search-engine signals.
 - [x] Save a new reviewable checkpoint after the Resend-ready backend, privacy policy, SEO artifacts, and metadata updates.
+- [x] Audit technical SEO, on-page travel-service content, metadata coverage, indexing signals, and launch-domain dependencies.
+- [x] Strengthen the site’s SEO signals using verified business information without inventing Wendy’s location, service area, credentials, or contact details.
+- [x] Research and document the value, eligibility, and setup requirements for Wendy’s Google Business Profile.
+- [x] Validate the revised SEO artifacts and deliver the local-discovery recommendation and next actions.
+- [x] Convert the public marketing pages to server-rendered HTML so search engines and link-preview crawlers receive the correct page content and metadata before JavaScript runs.
+- [x] Correct the stale group-travel sitemap URL and verify every sitemap location resolves to the intended public page.
+- [x] Verify server-rendered route content, one canonical tag, route-specific metadata, structured data, and noindex handling before closing the SEO pass.
+- [x] Ensure every dynamic destination guide derives its slug from the router so server-rendered content matches the requested guide URL.

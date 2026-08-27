@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import PrivateExperience from "./pages/PrivateExperience";
 import Privacy from "./pages/Privacy";
 import { usePageMetadata } from "./hooks/usePageMetadata";
+import ClientOnly from "./components/ClientOnly";
 
 function Router() {
   const [location] = useLocation();
@@ -25,7 +26,7 @@ function Router() {
     <Route path="/faq" component={Faq} />
     <Route path="/contact" component={Contact} />
     <Route path="/privacy" component={Privacy} />
-    <Route path="/wendy" component={PrivateExperience} />
+    <Route path="/wendy"><ClientOnly><PrivateExperience /></ClientOnly></Route>
     <Route path="/404" component={NotFound} />
     <Route component={NotFound} />
   </Switch>;
