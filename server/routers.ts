@@ -6,6 +6,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
+import { sendTripBriefEmail } from "./resendAlerts";
 
 const tripInquiryInput = z.object({
   firstName: z.string().trim().min(2).max(80),
@@ -21,15 +22,15 @@ const tripInquiryInput = z.object({
   priorities: z.string().trim().max(2000).optional().default(""),
 });
 
-async function notifyOwnerOrThrow(title: string, content: string) {
+async function notifyOwnerWithRetry(title: string, content: string) {
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      if (await notifyOwner({ title, content })) return;
+      if (await notifyOwner({ title, content })) return true;
     } catch (error) {
       console.error("[Notifications] Owner alert attempt failed", error);
     }
   }
-  throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Your details were saved, but Wendy’s alert could not be confirmed. Please try again shortly or email her directly." });
+  return false;
 }
 
 export const appRouter = router({
@@ -56,8 +57,14 @@ export const appRouter = router({
         `Travelers: ${input.groupSize}`,
         `Priorities: ${input.priorities || "Not provided"}`,
       ].join("\n");
-      await notifyOwnerOrThrow("New trip inquiry · The Wendy Collective", content);
-      return { success: true, inquiryId: inquiry.id, notificationSent: true };
+      const [ownerNotificationSent, emailAlertStatus] = await Promise.all([
+        notifyOwnerWithRetry("New trip inquiry · The Wendy Collective", content),
+        sendTripBriefEmail({ inquiryId: inquiry.id, ...input }),
+      ]);
+      if (!ownerNotificationSent && emailAlertStatus !== "sent") {
+        console.error("[Inquiries] All owner alert channels failed", { inquiryId: inquiry.id });
+      }
+      return { success: true, inquiryId: inquiry.id, ownerNotificationSent, emailAlertStatus };
     }),
   }),
   privateExperience: router({

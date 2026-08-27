@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /wendy
+
+Sitemap: https://wendytravel-g2nn4krv.manus.space/sitemap.xml

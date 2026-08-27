@@ -30,4 +30,10 @@ The public menu and footer contain only visitor-facing navigation. The quiet Wen
 
 ## Brand Asset Review
 
-The social preview uses a cinematic, text-free airplane-window sunrise above clouds and a distant sailboat. Its generous dark teal left-side negative space and warm gold horizon extend the homepage’s visual system without relying on fragile text rendering. The favicon uses a crisp antique-gold compass emblem on deep teal so it stays recognizable at small tab scale.
+The social preview uses a cinematic, text-free airplane-window sunrise above clouds and a distant sailboat. Its generous dark teal left-side negative space and warm gold horizon extend the homepage’s visual system without relying on fragile text rendering. The favicon uses an exact antique-gold TWC monogram on deep teal so it stays recognizable at small tab scale.
+
+## Launch Readiness Review
+
+The Resend alert module is ready but intentionally inactive until the API key, verified sender identity, and Wendy alert recipient are provided through project settings. Automated tests confirm that the module does nothing without those values and sends an idempotent branded request when all values are available. Every successful public trip brief remains stored in the protected workspace, and the existing owner alert continues as a fallback notification.
+
+The public site now has a privacy-policy route, a footer and form link to that policy, an XML sitemap with 11 public URLs, a robots file that disallows the Wendy workspace, and route-specific client-side titles, descriptions, canonical URLs, social metadata, and noindex state for the private workspace. The public routes, SEO artifacts, email module, access controls, type check, and production build were validated successfully.

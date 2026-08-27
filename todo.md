@@ -72,3 +72,17 @@
 - [x] Document the remaining high-priority launch tasks for The Wendy Collective.
 - [x] Replace the abstract browser favicon with a compact, exact TWC monogram favicon in the established teal and antique-gold brand system.
 - [x] Save the verified favicon and social-sharing metadata update as a reviewable website version.
+- [x] Audit the current trip-inquiry storage, owner workspace, notification delivery, privacy-policy requirements, and public SEO implementation.
+- [x] Improve Wendy’s owner-only inquiry workspace with clear client details, secure access, and practical request management cues.
+- [ ] Confirm a reliable new-inquiry owner alert and configure a production email recipient for Wendy. Awaiting Wendy’s Resend setup details.
+- [x] Add a clear privacy policy page and contact-form policy link that accurately explains inquiry data handling.
+- [x] Add essential SEO and indexing artifacts, including robots instructions and sitemap coverage for public pages.
+- [x] Test inquiry alerts, secure workspace access, privacy navigation, and SEO artifacts across the public site.
+- [x] Save the verified launch-ready website and document any remaining one-time activation steps.
+- [x] Add a Resend-ready transactional email configuration with secure environment variables for the sender, recipient, and API key.
+- [x] Create a branded new-trip-brief email template with client contact and travel details, plus clear delivery fallback behavior.
+- [x] Document the exact one-time Resend domain-verification and recipient setup required before enabling live alerts.
+- [x] Keep the Resend email integration inactive until Wendy supplies the sender, recipient, and API key.
+- [x] Prepare a concise visual and launch improvement recommendation based on the completed website review.
+- [x] Add route-specific titles, descriptions, canonical URLs, and noindex handling so public pages and Wendy’s private workspace have correct search-engine signals.
+- [ ] Save a new reviewable checkpoint after the Resend-ready backend, privacy policy, SEO artifacts, and metadata updates.

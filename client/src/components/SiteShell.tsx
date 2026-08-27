@@ -89,6 +89,7 @@ export default function SiteShell({ children, darkHeader = false }: SiteShellPro
               <nav className="footer-links" aria-label="Contact The Wendy Collective">
                 <Link href="/contact">Share your travel vision</Link>
                 <a href="mailto:info@thewendycollective.com">info@thewendycollective.com</a>
+                <Link href="/privacy">Privacy policy</Link>
               </nav>
             </div>
           </div>

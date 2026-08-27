@@ -8,6 +8,7 @@ import DestinationGuide from "./DestinationGuide";
 import Destinations from "./Destinations";
 import Faq from "./Faq";
 import Home from "./Home";
+import Privacy from "./Privacy";
 import { destinationGuides } from "../lib/destinationGuides";
 
 function renderPage(page: React.ReactElement, path = "/") {
@@ -30,6 +31,7 @@ describe("public site content", () => {
       renderPage(<About />),
       renderPage(<Destinations />),
       renderPage(<Faq />),
+      renderPage(<Privacy />),
       renderPage(<DestinationGuide />, "/destinations/caribbean"),
     ].join(" ").replace(/<[^>]*>/g, " ");
     const destinationCopy = destinationGuides.flatMap((guide) => [guide.label, guide.title, guide.italic, guide.summary, guide.imageAlt, guide.planningNote, guide.inquiryLabel, ...guide.idealFor, ...guide.moments]).join(" ");
@@ -80,5 +82,18 @@ describe("public site content", () => {
     const destinationsNavigation = guide.match(/<a[^>]*href="\/destinations"[^>]*>Destinations<\/a>/)?.[0] ?? "";
     expect(destinationsNavigation).toContain("nav-link--active");
     expect(destinationsNavigation).toContain("aria-current=\"page\"");
+  });
+
+  it("renders the privacy policy and publishes focused indexing artifacts", () => {
+    const privacy = renderPage(<Privacy />, "/privacy");
+    const robots = readFileSync(new URL("../../public/robots.txt", import.meta.url), "utf8");
+    const sitemap = readFileSync(new URL("../../public/sitemap.xml", import.meta.url), "utf8");
+    expect(privacy).toContain("Privacy policy");
+    expect(privacy).toContain("Information you share");
+    expect(privacy).toContain("We do not sell your personal information.");
+    expect(robots).toContain("Disallow: /wendy");
+    expect(robots).toContain("Sitemap:");
+    expect(sitemap).toContain("/destinations/caribbean");
+    expect(sitemap).toContain("/privacy");
   });
 });
