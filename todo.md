@@ -94,3 +94,7 @@
 - [x] Correct the stale group-travel sitemap URL and verify every sitemap location resolves to the intended public page.
 - [x] Verify server-rendered route content, one canonical tag, route-specific metadata, structured data, and noindex handling before closing the SEO pass.
 - [x] Ensure every dynamic destination guide derives its slug from the router so server-rendered content matches the requested guide URL.
+- [x] Replace the hero-film walking-couple moment that shows a visible AI hand artifact with a clean premium travel scene.
+- [x] Reassemble and validate the 30-second hero loop so the replacement is seamless and preserves the existing visual narrative.
+- [x] Verify the revised hero film on desktop and mobile, then save the update.
+- [ ] Save a new reviewable checkpoint containing the cleaned hero-film replacement after the successful desktop and mobile verification.

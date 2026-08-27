@@ -37,3 +37,7 @@ The social preview uses a cinematic, text-free airplane-window sunrise above clo
 The Resend alert module is ready but intentionally inactive until the API key, verified sender identity, and Wendy alert recipient are provided through project settings. Automated tests confirm that the module does nothing without those values and sends an idempotent branded request when all values are available. Every successful public trip brief remains stored in the protected workspace, and the existing owner alert continues as a fallback notification.
 
 The public site now has a privacy-policy route, a footer and form link to that policy, an XML sitemap with 11 public URLs, a robots file that disallows the Wendy workspace, and route-specific client-side titles, descriptions, canonical URLs, social metadata, and noindex state for the private workspace. The public routes, SEO artifacts, email module, access controls, type check, and production build were validated successfully.
+
+## Hero Film Replacement Review
+
+The affected walking-couple chapter was replaced with an eight-second cruise and coastline sequence that keeps people and hands out of frame. The rebuilt H.264 homepage film is 1280 by 720, approximately 30 seconds, and retains its existing loop-back chapter. Desktop and 375-pixel mobile review confirmed that the revised film loads behind the hero copy and preserves clear headline, body-copy, and call-to-action contrast.
