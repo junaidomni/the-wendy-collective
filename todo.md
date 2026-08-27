@@ -33,3 +33,6 @@
 - [x] Add deterministic route-state coverage for homepage guide links, guide active navigation, and contextual inquiry URLs.
 - [x] Verify every homepage destination and service entry points to its intended guide or contextual trip brief.
 - [x] Verify the Destinations navigation item itself is marked current on nested guide routes.
+- [x] Replace the public FAQ answers with Wendy’s supplied service, payment, inquiry, timing, specialty, insurance, support, and researched-trip copy.
+- [x] Remove em dash and hyphen punctuation from the revised FAQ content while retaining the existing accessible accordion layout.
+- [x] Verify the revised FAQ at desktop and mobile sizes, then save the update.

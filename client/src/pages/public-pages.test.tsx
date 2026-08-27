@@ -29,8 +29,9 @@ describe("public site content", () => {
     expect(about).toContain("A travel advisor with a");
     expect(destinations).toContain("Explore the collections");
     expect(destinations).toContain("All-Inclusive Escapes");
-    expect(faq).toContain("How does the planning process begin?");
-    expect(faq).toContain("How much do your planning services cost?");
+    expect(faq).toContain("How much do your services cost?");
+    expect(faq).toContain("How do you get paid if it’s free?");
+    expect(faq).toContain("My services are completely free to you.");
     expect(guide).toContain("Caribbean, at your");
     expect(guide).toContain("Plan a Caribbean escape");
     expect(guide).toContain("/contact?type=caribbean&amp;destination=Caribbean&amp;guide=caribbean");
