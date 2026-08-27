@@ -40,3 +40,7 @@
 - [x] Integrate Wendy’s travel portraits into selected curated destination and personal-planning sections without displacing the destination-led visual story.
 - [x] Add a personal advisor cue to the inquiry experience using Wendy’s supplied photography.
 - [x] Verify the photo placements across desktop and mobile, then save the completed visual refinement.
+- [x] Add a discreet circular Wendy portrait and brief introductory cue beside The Wendy Way on the homepage.
+- [x] Remove the unwanted dark top strip from the About Wendy portrait treatment while retaining the selected image.
+- [x] Simplify Wendy in the World into a single Santorini evening feature and tighten its visual hierarchy and spacing.
+- [x] Verify the refined photo hierarchy and responsive layouts before saving the update.
