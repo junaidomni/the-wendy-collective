@@ -98,3 +98,9 @@
 - [x] Reassemble and validate the 30-second hero loop so the replacement is seamless and preserves the existing visual narrative.
 - [x] Verify the revised hero film on desktop and mobile, then save the update.
 - [x] Save a new reviewable checkpoint containing the cleaned hero-film replacement after the successful desktop and mobile verification.
+- [x] Add full-frame cinematic hero-film moments featuring a family Disney trip, Greece or recognizable Europe, an Alaskan glacier cruise, and Africa travel.
+- [x] Replace or reframe all letterboxed hero-film footage so every scene fills the full hero background without black bars.
+- [x] Rebuild the expanded travel film into a seamless homepage loop with consistent landscape composition and performance-conscious encoding.
+- [x] Verify the full-frame hero sequence on desktop and mobile, then save the update.
+- [x] Validate the expanded hero film’s ending-to-beginning continuity through an explicit boundary review and adjust the loop-back segment if required.
+- [x] Save a new reviewable checkpoint after the expanded fullscreen hero film passes loop and responsive verification.

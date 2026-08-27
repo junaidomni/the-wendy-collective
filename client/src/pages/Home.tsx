@@ -27,7 +27,7 @@ export default function Home() {
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-fallback" aria-hidden="true" />
         <video className="hero-video" autoPlay muted loop playsInline poster="/manus-storage/twc-hero-travel-film_89224a2a.jpg" aria-hidden="true">
-          <source src="/manus-storage/twc-hero-loop-extended-clean_9140d928.mp4" type="video/mp4" />
+          <source src="/manus-storage/twc-hero-loop-expanded-seamless_289afad8.mp4" type="video/mp4" />
         </video>
         <div className="hero-content">
           <div className="hero-copy">

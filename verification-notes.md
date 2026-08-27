@@ -41,3 +41,15 @@ The public site now has a privacy-policy route, a footer and form link to that p
 ## Hero Film Replacement Review
 
 The affected walking-couple chapter was replaced with an eight-second cruise and coastline sequence that keeps people and hands out of frame. The rebuilt H.264 homepage film is 1280 by 720, approximately 30 seconds, and retains its existing loop-back chapter. Desktop and 375-pixel mobile review confirmed that the revised film loads behind the hero copy and preserves clear headline, body-copy, and call-to-action contrast.
+
+## Expanded Fullscreen Hero Film Review
+
+The homepage film now includes a family theme-park travel moment, a Santorini Greece discovery view, an Alaskan glacier cruise, and an African sunrise landscape alongside the retained opening and refined cruise scene. Every chapter is encoded at 1280 by 720 and the final 50-second H.264 asset uses an explicit fullscreen scale and crop pipeline. Desktop and 375-pixel mobile checks confirmed the background fills the complete hero area without top or bottom letterboxing and keeps the opening content legible.
+
+## Fullscreen Global Journey Film Review
+
+The extended hero experience now combines the retained cloud opening and artifact-free cruise moment with full-frame family theme park, Santorini, Alaska, and African destination chapters. Each chapter is 1280 by 720 and eight seconds, except the four-second cloud return. The final 51-second H.264 sequence uses gentle crossfades across the interior chapters and finishes on a cloudscape selected to return naturally to the opening sky. The production build, 19 automated checks, desktop review, and 375-pixel mobile review all passed. The hero stays full-bleed without top or bottom black bars.
+
+## Exact Hero Loop Boundary Review
+
+The expanded film now concludes with a one-second H.264 cloud anchor created from its own opening frame. The final output is 1280 by 720, 52 seconds, and the final displayed cloud frame matches the first frame, so the browser’s next loop begins from the same composition rather than a mismatched sky view. The desktop and 375-pixel mobile homepage checks confirmed the full-bleed background fills the hero edge to edge with no top or bottom black bars.
