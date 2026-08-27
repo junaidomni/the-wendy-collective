@@ -97,4 +97,4 @@
 - [x] Replace the hero-film walking-couple moment that shows a visible AI hand artifact with a clean premium travel scene.
 - [x] Reassemble and validate the 30-second hero loop so the replacement is seamless and preserves the existing visual narrative.
 - [x] Verify the revised hero film on desktop and mobile, then save the update.
-- [ ] Save a new reviewable checkpoint containing the cleaned hero-film replacement after the successful desktop and mobile verification.
+- [x] Save a new reviewable checkpoint containing the cleaned hero-film replacement after the successful desktop and mobile verification.
