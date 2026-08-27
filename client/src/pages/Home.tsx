@@ -26,8 +26,8 @@ export default function Home() {
     <SiteShell>
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-fallback" aria-hidden="true" />
-        <video className="hero-video" autoPlay muted loop playsInline poster="/manus-storage/twc-hero-travel-film_89224a2a.jpg" aria-hidden="true">
-          <source src="/manus-storage/twc-hero-loop-people-first-final_9e26f56b.mp4" type="video/mp4" />
+        <video className="hero-video" autoPlay muted loop playsInline poster="/manus-storage/twc-hero-poster-japan_afa471da.jpg" aria-hidden="true">
+          <source src="/manus-storage/twc-hero-loop-real-world-no-sailboats_8a6909b9.mp4" type="video/mp4" />
         </video>
         <div className="hero-content">
           <div className="hero-copy">

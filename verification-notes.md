@@ -57,3 +57,11 @@ The expanded film now concludes with a one-second H.264 cloud anchor created fro
 ## Simplified People First Hero Film Review
 
 The refreshed hero sequence removes the repeated sailboat and tropical-resort transition chapters entirely. It now moves from the opening clouds to the retained family theme-park and Greece chapters, a licensed real-world adult-couple travel scene, the Alaskan glacier cruise, African landscape, and an exact cloud anchor that returns to the opening composition. The final video is 1280 by 720 H.264, 37 seconds, with full-frame dissolves and no letterboxing. Desktop and 375-pixel mobile checks confirmed full-bleed coverage and legible homepage content.
+
+## Residual Sailboat Investigation
+
+The initial preview showed that the assumed Disney-family opening and assumed Greece chapter were both generated sailboat footage. They have been rejected for the no-sailboat rebuild. The hero will be reconstructed from non-sailboat footage only, beginning with a verified destination scene rather than using an incorrectly labeled anchor or poster.
+
+## Verified Real World Hero Film Review
+
+The final hero now uses a real Japan train-platform travel moment for the opening poster and loop anchor, a licensed real adult-couple beach scene, a real group sunset vacation moment, and a real desert destination scene. The previously generated “Disney,” “Greece,” “Alaska,” and “Africa” clips were rejected because their actual visual content did not match the intended destinations and repeatedly showed a sailboat. The replacement is a 27.5-second 1280 by 720 H.264 film with full-bleed composition, gentle dissolves, no sailboats, no visible watermarks, and no visible logos. Desktop and 375-pixel mobile views confirmed its clean opening, readable copy, and edge-to-edge fit.

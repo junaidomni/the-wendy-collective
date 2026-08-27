@@ -110,3 +110,8 @@
 - [x] Rebuild the hero sequence with smoother, people-first destination transitions and consistent fullscreen framing.
 - [x] Verify the refreshed hero loop on desktop and mobile, then save the update.
 - [x] Save a new reviewable checkpoint containing the refreshed no-sailboat hero loop after confirmed desktop and mobile verification.
+- [x] Remove the residual sailboat visible in the hero-film opening anchor and use a clean non-sailboat fullscreen start and end anchor.
+- [x] Rebuild and reverify the hero sequence to confirm no sailboat scenes remain anywhere in the displayed loop.
+- [x] Verify every source clip in the real-world hero sequence is sailboat-free and review representative frames covering the full rebuilt loop.
+- [x] Document the representative-frame review of the final hero loop and confirm no sailboats appear in any displayed segment.
+- [x] Run a whole-sequence visual review of the final real-world hero film and record the absence of sailboats across its complete duration.
