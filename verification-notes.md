@@ -27,3 +27,7 @@ Private Experience has been removed from all public navigation. A small footer-o
 The closing personal invitation now uses clear, specific language that invites visitors to share what they are dreaming about. The larger, brighter Wendy Way feature occupies the opening space with a centered travel advisor introduction rather than a detached small portrait. The mobile trip brief copy has been shortened to keep the travel-style instruction readable and avoid an orphaned final word. The About value card provides visual balance to the closing advisor statement, and the Destinations journal now has a closer, clearly aligned transition from curated cards to Wendy’s personal travel note.
 
 The public menu and footer contain only visitor-facing navigation. The quiet Wendy login at the footer bottom opens an admin-guarded workspace for viewing submitted trip briefs. Anonymous and non-admin access are both rejected in automated tests. The final responsive screens confirm the public homepage, About, Destinations, FAQ, and contact journey remain clear at 375 pixels, while the owner workspace has a separate compact layout.
+
+## Brand Asset Review
+
+The social preview uses a cinematic, text-free airplane-window sunrise above clouds and a distant sailboat. Its generous dark teal left-side negative space and warm gold horizon extend the homepage’s visual system without relying on fragile text rendering. The favicon uses a crisp antique-gold compass emblem on deep teal so it stays recognizable at small tab scale.

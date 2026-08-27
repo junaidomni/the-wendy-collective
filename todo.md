@@ -65,3 +65,10 @@
 - [x] Test all updated public navigation, layouts, copy, and access paths before saving the comprehensive refinement.
 - [x] Tighten the Destinations page editorial spacing and align its Wendy in the World lead-in with the collection grid.
 - [x] Save the complete verified public-site and Wendy workspace refinement as a reviewable website version.
+- [x] Create a cohesive favicon using The Wendy Collective’s signature TWC mark and color system.
+- [x] Create a social-sharing preview image for iMessage, WhatsApp, and other link previews.
+- [x] Add Open Graph, Twitter card, canonical, and favicon metadata to the website.
+- [x] Verify the generated metadata and production build, then save the branded sharing update.
+- [x] Document the remaining high-priority launch tasks for The Wendy Collective.
+- [x] Replace the abstract browser favicon with a compact, exact TWC monogram favicon in the established teal and antique-gold brand system.
+- [x] Save the verified favicon and social-sharing metadata update as a reviewable website version.
