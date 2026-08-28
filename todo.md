@@ -127,3 +127,6 @@
 - [x] Replace the initially selected people-of-color vacation scene with a real, clean coastal conversation scene that has no visible Santa Monica text or product branding.
 - [x] Record that the Japan traveler and hotel-arrival scenes are user-approved legacy footage and remain intentionally unchanged despite automated motion-blur flags.
 - [x] Re-run full-sequence hero verification after the replacement, reconcile the verification record with the final film, then publish the completed nine-scene update.
+- [x] Remove reverse-flash frames at the affected hero transitions so every cut advances directly to the next scene without briefly returning to earlier footage.
+- [x] Reorder the hotel moments so the oceanfront hotel view plays immediately before the hotel-door arrival scene.
+- [x] Verify every edit boundary and the updated responsive hero, then publish the corrected loop.

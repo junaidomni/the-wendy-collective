@@ -37,8 +37,14 @@ Whole-sequence review confirms the required progression: Japan train-platform tr
 
 ## Reordered nine-scene film, August 28, 2026
 
-The homepage now uses `/manus-storage/twc-hero-loop-nine-scenes-final-clean_d318c9b4.mp4`, a 45.5-second silent H.264, 1280 by 720, 24 fps, full-frame hero film. It follows the user-approved order: adult beach couple, group sunset vacation, Japan train-platform traveler, Africa desert view, airplane-window clouds, hotel arrival, oceanfront hotel, vacation travelers of color at the coast, then Dubai. The earlier end-of-film Japan return anchor has been removed, so the browser repeat starts directly with the beach couple as requested.
+The homepage now uses `/manus-storage/twc-hero-loop-nine-scenes-forward-only_03e8ceac.mp4`, a 41.7-second silent H.264, 1280 by 720, 24 fps, full-frame hero film. It follows the user-approved order: adult beach couple, group sunset vacation, Japan train-platform traveler, Africa desert view, airplane-window clouds, oceanfront hotel, hotel arrival, vacation travelers of color at the coast, then Dubai. The earlier end-of-film Japan return anchor has been removed, so the browser repeat starts directly with the beach couple as requested.
 
 The new inclusive vacation scene uses a real landscape Pexels clip featuring two travelers of color in a relaxed coastal conversation. The new Dubai scene uses a real landscape Pexels clip showing the Museum of the Future and an elevated metro train. Both were selected from sources whose [Pexels License](https://www.pexels.com/license/) permits use on websites and in marketing, without attribution, subject to its listed restrictions. Direct video review found no black bars, watermarks, logos, product brands, sailboats, or artificial artifacts in either selected source.
 
 During final frame review, the initial inclusive-vacation candidate showed `Santa Monica` on volleyball-net tape and a product logo on its ball. That candidate was not published. It was replaced with the clean coastal conversation scene, which retains the requested inclusive vacation moment without visible text or product branding. The Japan traveler and hotel-arrival clips remain intentionally unchanged because they are the user-approved legacy scenes; their content was confirmed unchanged in the final sequence.
+
+## Forward-only transition correction, August 28, 2026
+
+The final edit was rebuilt from standalone source chapters rather than by trimming the prior composite. The beach, sunset, Japan, and Africa scenes now use direct source sections; the Japan clip ends at 4.7 seconds, before its original repetition begins. The change removes the brief returns to earlier imagery reported at the train and following transitions. Each boundary is now a direct forward-only cut, with no crossfade or reverse-flash frame.
+
+The requested hospitality order is also corrected: airplane clouds lead to the oceanfront hotel view, then to the hotel-door arrival. Whole-sequence review confirms the exact progression and no black bars, sailboats, watermarks, logos, repeated earlier frames, or final Japan return anchor.
