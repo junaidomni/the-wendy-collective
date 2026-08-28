@@ -6,8 +6,9 @@ const homeSource = readFileSync(fileURLToPath(new URL("./Home.tsx", import.meta.
 
 describe("homepage hero film", () => {
   it("uses the seven-scene full-frame hero asset", () => {
-    expect(homeSource).toContain('/manus-storage/twc-hero-loop-seven-scenes_b751cd60.mp4');
+    expect(homeSource).toContain('/manus-storage/twc-hero-loop-nine-scenes-final-clean_d318c9b4.mp4');
+    expect(homeSource).toContain('/manus-storage/twc-hero-poster-nine-scenes-beach-opening_aaddc342.jpg');
     expect(homeSource).toContain('className="hero-video"');
-    expect(homeSource).not.toContain('twc-hero-loop-real-world-no-sailboats_8a6909b9.mp4');
+    expect(homeSource).not.toContain('twc-hero-loop-nine-scenes-clean-reordered_950b82ab.mp4');
   });
 });

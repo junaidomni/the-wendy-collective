@@ -121,3 +121,9 @@
 - [x] Locate and validate the previously approved airplane-window cloud and hotel ocean hero moments, and replace the artifact-prone historic lobby clip with a licensed real hotel-arrival scene.
 - [x] Preserve the four current approved hero scenes unchanged and append the three validated earlier clips as a seven-scene full-frame sequence.
 - [x] Verify the extended hero loop on desktop and mobile for full-bleed playback and smooth transitions, then save the update.
+- [x] Reorder the existing seven hero scenes as 2, 3, 1, 4, 5, 7, 6 and remove the added Japan return anchor from the end.
+- [x] Source and validate a properly licensed, real-world vacation scene centered on people of color for the hero film.
+- [x] Source and validate properly licensed, real-world Dubai travel footage for the hero film.
+- [x] Replace the initially selected people-of-color vacation scene with a real, clean coastal conversation scene that has no visible Santa Monica text or product branding.
+- [x] Record that the Japan traveler and hotel-arrival scenes are user-approved legacy footage and remain intentionally unchanged despite automated motion-blur flags.
+- [x] Re-run full-sequence hero verification after the replacement, reconcile the verification record with the final film, then publish the completed nine-scene update.
