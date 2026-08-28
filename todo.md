@@ -115,3 +115,9 @@
 - [x] Verify every source clip in the real-world hero sequence is sailboat-free and review representative frames covering the full rebuilt loop.
 - [x] Document the representative-frame review of the final hero loop and confirm no sailboats appear in any displayed segment.
 - [x] Run a whole-sequence visual review of the final real-world hero film and record the absence of sailboats across its complete duration.
+- [ ] Future scope deferred at the user’s direction: source four properly licensed, full-frame additions showing Black family travel, Middle Eastern family travel, cloud and airplane movement, and a large cruise ship at sea.
+- [ ] Future scope deferred at the user’s direction: preserve the four approved current hero scenes unchanged and append the four new scenes with smooth full-frame transitions.
+- [ ] Future scope deferred at the user’s direction: verify all eight hero scenes on desktop and mobile for seamless playback, full-bleed coverage, and consistent visual quality before saving the update.
+- [x] Locate and validate the previously approved airplane-window cloud and hotel ocean hero moments, and replace the artifact-prone historic lobby clip with a licensed real hotel-arrival scene.
+- [x] Preserve the four current approved hero scenes unchanged and append the three validated earlier clips as a seven-scene full-frame sequence.
+- [x] Verify the extended hero loop on desktop and mobile for full-bleed playback and smooth transitions, then save the update.
