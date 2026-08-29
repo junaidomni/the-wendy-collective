@@ -19,6 +19,12 @@ describe("server-rendered page metadata", () => {
     expect(metadata.noindex).not.toBe(true);
   });
 
+  it("keeps opaque private proposal links out of search results", () => {
+    const metadata = prefetchForPath("/proposal/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk");
+    expect(metadata.title).toContain("Private Proposal");
+    expect(metadata.noindex).toBe(true);
+  });
+
   it("does not index Wendy’s protected workspace and returns a genuine 404 for unknown paths", () => {
     expect(prefetchForPath("/wendy")).toMatchObject({ noindex: true });
     expect(prefetchForPath("/wendy").notFound).not.toBe(true);

@@ -1,13 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
-import { createTripInquiry, getTripInquiries } from "./db";
+import { createAdvisorDeal, createTripInquiry, getTripInquiries } from "./db";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { sendTripBriefEmail } from "./resendAlerts";
 import { groupCruisesRouter } from "./routers/groupCruises";
+import { crmRouter } from "./routers/crm";
 
 const tripInquiryInput = z.object({
   firstName: z.string().trim().min(2).max(80),
@@ -47,6 +48,20 @@ export const appRouter = router({
   inquiries: router({
     create: publicProcedure.input(tripInquiryInput).mutation(async ({ input }) => {
       const inquiry = await createTripInquiry({ ...input, destinations: JSON.stringify(input.destinations) });
+      try {
+        await createAdvisorDeal({
+          sourceType: "trip_inquiry",
+          sourceId: inquiry.id,
+          contactFirstName: input.firstName,
+          contactLastName: input.lastName,
+          email: input.email,
+          phone: input.phone,
+          title: `${input.travelType} travel inquiry`,
+          travelSummary: `Destinations: ${input.destinations.join(", ")}. Timing: ${input.travelTiming}. Travelers: ${input.groupSize}. ${input.priorities || ""}`,
+          stage: "new_inquiry",
+          nextAction: "Review inquiry and schedule discovery call",
+        });
+      } catch (error) { console.error("[Inquiries] CRM handoff failed", { inquiryId: inquiry.id, error }); }
       const content = [
         `New trip inquiry from ${input.firstName} ${input.lastName}`,
         `Email: ${input.email}`,
@@ -75,6 +90,7 @@ export const appRouter = router({
     })),
   }),
   groupCruises: groupCruisesRouter,
+  crm: crmRouter,
 });
 
 export type AppRouter = typeof appRouter;

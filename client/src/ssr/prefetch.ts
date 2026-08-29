@@ -35,6 +35,7 @@ export function prefetchForPath(url: string): HeadMeta {
   const clean = path.replace(/\/+$/, "") || "/";
   const route = publicRoutes[clean];
   if (route) return { ...route, canonicalPath: clean, ogImage: SOCIAL_IMAGE, ogImageAlt: SOCIAL_ALT };
+  if (clean.startsWith("/proposal/")) return { title: `Private Proposal | ${SITE}`, description: "A private travel proposal from The Wendy Collective.", noindex: true };
   if (clean === "/wendy") return { title: `Wendy Workspace | ${SITE}`, description: "Protected trip brief workspace for The Wendy Collective.", noindex: true };
   return { title: `${SITE} | Page Not Found`, description: DEFAULT_DESCRIPTION, notFound: true };
 }

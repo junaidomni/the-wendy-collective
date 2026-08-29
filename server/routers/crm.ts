@@ -1,0 +1,74 @@
+import { randomBytes } from "node:crypto";
+import { z } from "zod";
+import { createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, ensureGrimsleyCruiseExperience, getPrivateClientProposal, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, markClientProposalShared, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateProposalResponseStatus } from "../db";
+import { notifyOwner } from "../_core/notification";
+import { storagePut } from "../storage";
+import { adminProcedure, publicProcedure, router } from "../_core/trpc";
+
+const dealStages = ["new_inquiry", "discovery_call", "building_proposal", "proposal_shared", "ready_to_book", "booked", "closed"] as const;
+const roomInput = z.object({ occupancy: z.number().int().min(1).max(8), roomType: z.string().trim().min(2).max(80), locationPreference: z.string().trim().min(2).max(80), travelerDetails: z.array(z.object({ fullName: z.string().trim().min(2).max(160), dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) })).min(1).max(8) });
+
+async function notifyWendy(title: string, content: string) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try { if (await notifyOwner({ title, content })) return true; } catch (error) { console.error("[CRM] Owner alert failed", error); }
+  }
+  return false;
+}
+
+export const crmRouter = router({
+  dashboard: adminProcedure.query(async () => {
+    const grimsleyExperience = await ensureGrimsleyCruiseExperience();
+    await syncExistingRequestsToAdvisorDeals();
+    const [deals, experiences, proposals, responses] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses()]);
+    return { deals, experiences, proposals, responses, grimsleyExperience };
+  }),
+  createDeal: adminProcedure.input(z.object({
+    contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), title: z.string().trim().min(3).max(180), travelSummary: z.string().trim().max(4000).optional().default(""), nextAction: z.string().trim().max(1000).optional().default(""), experienceId: z.number().int().positive().optional(),
+  })).mutation(async ({ input }) => {
+    const deal = await createAdvisorDeal({ ...input, sourceType: "manual", stage: "new_inquiry" });
+    return { success: true, dealId: deal.id };
+  }),
+  createExperience: adminProcedure.input(z.object({
+    slug: z.string().trim().min(3).max(160).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), title: z.string().trim().min(3).max(180), groupName: z.string().trim().max(180).optional().default(""), cruiseLine: z.string().trim().min(2).max(120), shipName: z.string().trim().min(2).max(160), embarkPort: z.string().trim().min(2).max(160), sailingSummary: z.string().trim().min(2).max(180), heroImageUrl: z.string().trim().url().optional().or(z.literal("")).default(""), heroImageAlt: z.string().trim().max(240).optional().default(""), publicSummary: z.string().trim().max(4000).optional().default(""), roomGuidance: z.string().trim().max(4000).optional().default(""), status: z.enum(["draft", "ready", "archived"]).default("draft"),
+  })).mutation(async ({ input }) => {
+    const experience = await createCruiseExperience(input);
+    return { success: true, experienceId: experience.id };
+  }),
+  uploadExperienceImage: adminProcedure.input(z.object({ dataUrl: z.string().min(32).max(7_000_000) })).mutation(async ({ input }) => {
+    const match = input.dataUrl.match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
+    if (!match) throw new Error("Please upload a JPG, PNG, or WebP image.");
+    const bytes = Buffer.from(match[2], "base64");
+    if (bytes.length > 5 * 1024 * 1024) throw new Error("Please use an image smaller than 5 MB.");
+    const extension = match[1] === "image/jpeg" ? "jpg" : match[1].split("/")[1];
+    const stored = await storagePut(`cruise-experiences/${Date.now()}.${extension}`, bytes, match[1]);
+    return { url: stored.url };
+  }),
+  updateDeal: adminProcedure.input(z.object({ id: z.number().int().positive(), stage: z.enum(dealStages), experienceId: z.number().int().positive().optional(), nextAction: z.string().trim().max(1000).optional().default(""), advisorNotes: z.string().trim().max(5000).optional().default(""), reservationReference: z.string().trim().max(160).optional().default("") })).mutation(async ({ input }) => {
+    await updateAdvisorDeal(input.id, input);
+    return { success: true };
+  }),
+  createProposal: adminProcedure.input(z.object({ dealId: z.number().int().positive(), experienceId: z.number().int().positive().optional(), title: z.string().trim().min(3).max(180), summary: z.string().trim().max(5000).optional().default(""), roomGuidance: z.string().trim().max(5000).optional().default(""), pricingSummary: z.string().trim().max(5000).optional().default(""), validForDays: z.number().int().min(1).max(180).default(30) })).mutation(async ({ input }) => {
+    const privateToken = randomBytes(32).toString("base64url");
+    const proposal = await createClientProposal({ ...input, privateToken, expiresAt: new Date(Date.now() + input.validForDays * 24 * 60 * 60 * 1000) });
+    return { success: true, proposalId: proposal.id, privateToken };
+  }),
+  markProposalShared: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
+    await markClientProposalShared(input.id);
+    return { success: true };
+  }),
+  updateProposalResponse: adminProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(["new", "reviewed", "quoted", "closed"]) })).mutation(async ({ input }) => {
+    await updateProposalResponseStatus(input.id, input.status);
+    return { success: true };
+  }),
+  getPrivateProposal: publicProcedure.input(z.object({ token: z.string().trim().min(32).max(96) })).query(({ input }) => getPrivateClientProposal(input.token)),
+  submitProposalResponse: publicProcedure.input(z.object({
+    token: z.string().trim().min(32).max(96), contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), rooms: z.array(roomInput).min(1).max(12), notes: z.string().trim().max(2000).optional().default(""), consent: z.literal(true),
+  })).mutation(async ({ input }) => {
+    const privateProposal = await getPrivateClientProposal(input.token);
+    if (!privateProposal) return { success: false, unavailable: true };
+    const response = await createProposalResponse({ proposalId: privateProposal.proposal.id, contactFirstName: input.contactFirstName, contactLastName: input.contactLastName, email: input.email, phone: input.phone, roomsJson: JSON.stringify(input.rooms), notes: input.notes });
+    const travelerCount = input.rooms.reduce((total, room) => total + room.travelerDetails.length, 0);
+    const ownerNotificationSent = await notifyWendy("New proposal response · The Wendy Collective", [`${input.contactFirstName} ${input.contactLastName} responded to ${privateProposal.proposal.title}.`, `Email: ${input.email}`, `Rooms: ${input.rooms.length}`, `Travelers: ${travelerCount}`, "Open Wendy’s workspace to review the request and prepare the live quote."].join("\n"));
+    return { success: true, responseId: response.id, ownerNotificationSent, unavailable: false };
+  }),
+});

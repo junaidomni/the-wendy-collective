@@ -139,3 +139,9 @@
 - [x] Create a public group-cruise landing page and a discreet Wendy-only management workspace for the school group.
 - [x] Preserve the approved Carnival Mardi Gras itinerary, customer-facing cabin information, and manual advisor-led quote and booking process; do not promise live availability or an automatic reservation.
 - [x] Add regression tests, validate desktop and mobile flows, and publish the completed school-cruise launch version.
+- [x] Review the supplied expanded workflow content and translate it into prioritized Wendy Collective implementation requirements before making further changes.
+- [x] Build a polished Wendy-only CRM home with stages for new inquiries, discovery calls, proposal preparation, proposal shared, ready to book, and booked travel.
+- [x] Add secure proposal records, shareable private proposal links, client room and traveler request intake, private advisor notes, and reservation reference tracking without storing payment-card or passport data.
+- [x] Create a reusable cruise experience library with ship details, visual assets, room guidance, and proposal content that Wendy can select before sending a client link.
+- [x] Move Grimsley Graduation Cruise into the new proposal pipeline after the reusable workflow is complete, keeping its group-rate rules distinct from individual quotes.
+- [ ] Defer IntelliTravel, Carnival, or other supplier API connections until Wendy provides authorized access and confirms the provider’s approved integration method.

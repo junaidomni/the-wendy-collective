@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
-const mocks = vi.hoisted(() => ({ createGroupCabinRequest: vi.fn(), getGroupCabinRequests: vi.fn(), updateGroupCabinRequestStatus: vi.fn(), notifyOwner: vi.fn(), sendGroupCabinRequestEmail: vi.fn() }));
-vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createGroupCabinRequest: mocks.createGroupCabinRequest, getGroupCabinRequests: mocks.getGroupCabinRequests, updateGroupCabinRequestStatus: mocks.updateGroupCabinRequestStatus }));
+const mocks = vi.hoisted(() => ({ createGroupCabinRequest: vi.fn(), createAdvisorDeal: vi.fn(), getGroupCabinRequests: vi.fn(), updateGroupCabinRequestStatus: vi.fn(), notifyOwner: vi.fn(), sendGroupCabinRequestEmail: vi.fn() }));
+vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createGroupCabinRequest: mocks.createGroupCabinRequest, createAdvisorDeal: mocks.createAdvisorDeal, getGroupCabinRequests: mocks.getGroupCabinRequests, updateGroupCabinRequestStatus: mocks.updateGroupCabinRequestStatus }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
 vi.mock("./resendAlerts", async (importOriginal) => ({ ...(await importOriginal<typeof import("./resendAlerts")>()), sendGroupCabinRequestEmail: mocks.sendGroupCabinRequestEmail }));
 
@@ -25,12 +25,13 @@ const request = {
 };
 
 describe("group cabin request workflow", () => {
-  beforeEach(() => { mocks.createGroupCabinRequest.mockReset(); mocks.getGroupCabinRequests.mockReset(); mocks.updateGroupCabinRequestStatus.mockReset(); mocks.notifyOwner.mockReset(); mocks.sendGroupCabinRequestEmail.mockReset(); mocks.createGroupCabinRequest.mockResolvedValue({ id: 28 }); mocks.getGroupCabinRequests.mockResolvedValue([]); mocks.notifyOwner.mockResolvedValue(true); mocks.sendGroupCabinRequestEmail.mockResolvedValue("not_configured"); });
+  beforeEach(() => { mocks.createGroupCabinRequest.mockReset(); mocks.createAdvisorDeal.mockReset(); mocks.getGroupCabinRequests.mockReset(); mocks.updateGroupCabinRequestStatus.mockReset(); mocks.notifyOwner.mockReset(); mocks.sendGroupCabinRequestEmail.mockReset(); mocks.createGroupCabinRequest.mockResolvedValue({ id: 28 }); mocks.createAdvisorDeal.mockResolvedValue({ id: 38 }); mocks.getGroupCabinRequests.mockResolvedValue([]); mocks.notifyOwner.mockResolvedValue(true); mocks.sendGroupCabinRequestEmail.mockResolvedValue("not_configured"); });
 
   it("stores room and traveler details then alerts Wendy without payment or passport fields", async () => {
     const result = await appRouter.createCaller(context()).groupCruises.createCabinRequest(request);
     expect(result).toEqual({ success: true, requestId: 28, ownerNotificationSent: true, emailAlertStatus: "not_configured" });
     expect(mocks.createGroupCabinRequest).toHaveBeenCalledWith(expect.objectContaining({ groupKey: request.groupKey, rooms: expect.arrayContaining([expect.objectContaining({ locationPreference: "midship", travelers: expect.arrayContaining([expect.objectContaining({ firstName: "Morgan", age: 18 })]) })]) }));
+    expect(mocks.createAdvisorDeal).toHaveBeenCalledWith(expect.objectContaining({ sourceType: "group_cabin_request", sourceId: 28, title: "Grimsley High School Graduation Cruise 2027", stage: "new_inquiry" }));
     expect(mocks.notifyOwner).toHaveBeenCalledWith(expect.objectContaining({ title: "New Grimsley cabin request · The Wendy Collective", content: expect.stringContaining("Rooms requested: 1") }));
     expect(mocks.sendGroupCabinRequestEmail).toHaveBeenCalledWith(expect.objectContaining({ requestId: 28, rooms: 1, travelers: 2 }));
   });

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createGroupCabinRequest, getGroupCabinRequests, updateGroupCabinRequestStatus } from "../db";
+import { createAdvisorDeal, createGroupCabinRequest, getGroupCabinRequests, updateGroupCabinRequestStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 import { sendGroupCabinRequestEmail } from "../resendAlerts";
@@ -45,6 +45,20 @@ export const groupCruisesRouter = router({
   createCabinRequest: publicProcedure.input(cabinRequestInput).mutation(async ({ input }) => {
     const request = await createGroupCabinRequest(input);
     const travelerCount = input.rooms.reduce((total, room) => total + room.travelers.length, 0);
+    try {
+      await createAdvisorDeal({
+        sourceType: "group_cabin_request",
+        sourceId: request.id,
+        contactFirstName: input.contactFirstName,
+        contactLastName: input.contactLastName,
+        email: input.email,
+        phone: input.phone,
+        title: "Grimsley High School Graduation Cruise 2027",
+        travelSummary: `${input.rooms.length} requested rooms for ${travelerCount} travelers. ${input.notes || ""}`,
+        stage: "new_inquiry",
+        nextAction: "Review school cruise cabin request and prepare quote",
+      });
+    } catch (error) { console.error("[Group cruise] CRM handoff failed", { requestId: request.id, error }); }
     const content = [
       `New Grimsley cabin request from ${input.contactFirstName} ${input.contactLastName}`,
       `Email: ${input.email}`,

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
-const mocks = vi.hoisted(() => ({ createTripInquiry: vi.fn(), getTripInquiries: vi.fn(), notifyOwner: vi.fn(), sendTripBriefEmail: vi.fn() }));
-vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createTripInquiry: mocks.createTripInquiry, getTripInquiries: mocks.getTripInquiries }));
+const mocks = vi.hoisted(() => ({ createTripInquiry: vi.fn(), createAdvisorDeal: vi.fn(), getTripInquiries: vi.fn(), notifyOwner: vi.fn(), sendTripBriefEmail: vi.fn() }));
+vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createTripInquiry: mocks.createTripInquiry, createAdvisorDeal: mocks.createAdvisorDeal, getTripInquiries: mocks.getTripInquiries }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
 vi.mock("./resendAlerts", () => ({ sendTripBriefEmail: mocks.sendTripBriefEmail }));
 
@@ -13,13 +13,14 @@ function context(user: TrpcContext["user"] = null): TrpcContext {
 }
 
 describe("trip inquiry workflow", () => {
-  beforeEach(() => { mocks.createTripInquiry.mockReset(); mocks.getTripInquiries.mockReset(); mocks.notifyOwner.mockReset(); mocks.sendTripBriefEmail.mockReset(); mocks.createTripInquiry.mockResolvedValue({ id: 17 }); mocks.getTripInquiries.mockResolvedValue([]); mocks.notifyOwner.mockResolvedValue(true); mocks.sendTripBriefEmail.mockResolvedValue("not_configured"); });
+  beforeEach(() => { mocks.createTripInquiry.mockReset(); mocks.createAdvisorDeal.mockReset(); mocks.getTripInquiries.mockReset(); mocks.notifyOwner.mockReset(); mocks.sendTripBriefEmail.mockReset(); mocks.createTripInquiry.mockResolvedValue({ id: 17 }); mocks.createAdvisorDeal.mockResolvedValue({ id: 27 }); mocks.getTripInquiries.mockResolvedValue([]); mocks.notifyOwner.mockResolvedValue(true); mocks.sendTripBriefEmail.mockResolvedValue("not_configured"); });
 
   it("stores a public inquiry and notifies the owner with its travel details", async () => {
     const caller = appRouter.createCaller(context());
     const result = await caller.inquiries.create({ firstName: "Avery", lastName: "Lane", email: "avery@example.com", phone: "555-010-1234", travelType: "cruise", destinations: ["Caribbean", "Aruba"], travelTiming: "November 2026", dateFlexibility: "flexible", budget: "$6,000–$8,000", groupSize: 2, priorities: "A quiet balcony and memorable shore days." });
     expect(result).toEqual({ success: true, inquiryId: 17, ownerNotificationSent: true, emailAlertStatus: "not_configured" });
     expect(mocks.createTripInquiry).toHaveBeenCalledWith(expect.objectContaining({ destinations: "[\"Caribbean\",\"Aruba\"]", groupSize: 2 }));
+    expect(mocks.createAdvisorDeal).toHaveBeenCalledWith(expect.objectContaining({ sourceType: "trip_inquiry", sourceId: 17, stage: "new_inquiry", contactFirstName: "Avery" }));
     expect(mocks.notifyOwner).toHaveBeenCalledWith(expect.objectContaining({ title: "New trip inquiry · The Wendy Collective", content: expect.stringContaining("Avery Lane") }));
     expect(mocks.sendTripBriefEmail).toHaveBeenCalledWith(expect.objectContaining({ inquiryId: 17, email: "avery@example.com" }));
   });
