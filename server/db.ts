@@ -1,6 +1,16 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertPrivateClientRequest, InsertTripInquiry, InsertUser, privateClientRequests, tripInquiries, users } from "../drizzle/schema";
+import {
+  groupCabinRequestRooms,
+  groupCabinRequestTravelers,
+  groupCabinRequests,
+  InsertPrivateClientRequest,
+  InsertTripInquiry,
+  InsertUser,
+  privateClientRequests,
+  tripInquiries,
+  users,
+} from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -62,4 +72,82 @@ export async function getPrivateClientRequests(userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Private request storage is unavailable");
   return db.select().from(privateClientRequests).where(eq(privateClientRequests.userId, userId)).orderBy(desc(privateClientRequests.createdAt)).limit(8);
+}
+
+export type CreateGroupCabinRequestInput = {
+  groupKey: string;
+  contactFirstName: string;
+  contactLastName: string;
+  email: string;
+  phone: string;
+  notes: string;
+  rooms: Array<{
+    occupancy: number;
+    roomType: string;
+    locationPreference: string;
+    travelers: Array<{
+      firstName: string;
+      middleName?: string;
+      lastName: string;
+      age: number;
+      loyaltyNumber?: string;
+    }>;
+  }>;
+};
+
+export async function createGroupCabinRequest(input: CreateGroupCabinRequestInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Group cabin request storage is unavailable");
+  const result = await db.insert(groupCabinRequests).values({
+    groupKey: input.groupKey,
+    contactFirstName: input.contactFirstName,
+    contactLastName: input.contactLastName,
+    email: input.email,
+    phone: input.phone,
+    roomCount: input.rooms.length,
+    notes: input.notes || null,
+  });
+  const cabinRequestId = Number(result[0].insertId);
+  for (let roomIndex = 0; roomIndex < input.rooms.length; roomIndex += 1) {
+    const room = input.rooms[roomIndex];
+    const roomResult = await db.insert(groupCabinRequestRooms).values({
+      cabinRequestId,
+      roomNumber: roomIndex + 1,
+      occupancy: room.occupancy,
+      roomType: room.roomType,
+      locationPreference: room.locationPreference,
+    });
+    const roomId = Number(roomResult[0].insertId);
+    await db.insert(groupCabinRequestTravelers).values(room.travelers.map((traveler) => ({
+      roomId,
+      firstName: traveler.firstName,
+      middleName: traveler.middleName || null,
+      lastName: traveler.lastName,
+      age: traveler.age,
+      loyaltyNumber: traveler.loyaltyNumber || null,
+    })));
+  }
+  return { id: cabinRequestId };
+}
+
+export async function getGroupCabinRequests(groupKey = "grimsley-hs-graduation-cruise-2027") {
+  const db = await getDb();
+  if (!db) throw new Error("Group cabin request storage is unavailable");
+  const requests = await db.select().from(groupCabinRequests).where(eq(groupCabinRequests.groupKey, groupKey)).orderBy(desc(groupCabinRequests.createdAt)).limit(100);
+  if (!requests.length) return [];
+  const rooms = await db.select().from(groupCabinRequestRooms).where(inArray(groupCabinRequestRooms.cabinRequestId, requests.map((request) => request.id)));
+  const travelers = rooms.length ? await db.select().from(groupCabinRequestTravelers).where(inArray(groupCabinRequestTravelers.roomId, rooms.map((room) => room.id))) : [];
+  return requests.map((request) => ({
+    ...request,
+    rooms: rooms.filter((room) => room.cabinRequestId === request.id).map((room) => ({
+      ...room,
+      travelers: travelers.filter((traveler) => traveler.roomId === room.id),
+    })),
+  }));
+}
+
+export async function updateGroupCabinRequestStatus(id: number, status: "new" | "contacted" | "details_received" | "quote_in_progress" | "quote_shared" | "booked" | "closed", advisorNotes: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Group cabin request storage is unavailable");
+  await db.update(groupCabinRequests).set({ status, advisorNotes: advisorNotes || null }).where(eq(groupCabinRequests.id, id));
 }

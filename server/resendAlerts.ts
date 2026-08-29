@@ -15,6 +15,16 @@ export type TripBriefAlert = {
 
 export type EmailAlertStatus = "sent" | "not_configured" | "failed";
 
+export type GroupCabinRequestAlert = {
+  requestId: number;
+  contactFirstName: string;
+  contactLastName: string;
+  email: string;
+  phone: string;
+  rooms: number;
+  travelers: number;
+};
+
 const htmlEscape = (value: string) => value.replace(/[&<>'"]/g, (character) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
 })[character] ?? character);
@@ -92,6 +102,43 @@ export async function sendTripBriefEmail(input: TripBriefAlert): Promise<EmailAl
     return "sent";
   } catch (error) {
     console.error("[Resend] Trip brief email request failed", { inquiryId: input.inquiryId, error });
+    return "failed";
+  }
+}
+
+export async function sendGroupCabinRequestEmail(input: GroupCabinRequestAlert): Promise<EmailAlertStatus> {
+  const config = getResendConfiguration();
+  if (!config) return "not_configured";
+  const contactName = `${input.contactFirstName} ${input.contactLastName}`;
+  const text = [
+    `New Grimsley cabin request from ${contactName}`,
+    "",
+    `Email: ${input.email}`,
+    `Phone: ${input.phone}`,
+    `Rooms requested: ${input.rooms}`,
+    `Travelers listed: ${input.travelers}`,
+    "",
+    "Open Wendy’s workspace to review the complete request and prepare a live quote.",
+  ].join("\n");
+  const html = `<!doctype html><html><body style="margin:0;background:#edf0ed;padding:28px 12px"><main style="max-width:620px;margin:0 auto;background:#fffdf8;color:#0d1c22"><header style="padding:36px 38px;background:#0d1c22;color:#f6f2e9"><p style="margin:0 0 15px;color:#c4a26b;font:600 10px Arial,sans-serif;letter-spacing:2px;text-transform:uppercase">The Wendy Collective</p><h1 style="margin:0;font:500 32px Georgia,serif;line-height:1.1">A school-cruise cabin request is waiting.</h1></header><section style="padding:34px 38px"><p style="margin:0 0 20px;color:#425056;font:16px Arial,sans-serif;line-height:1.6">${htmlEscape(contactName)} has requested a cabin for the Grimsley High School Graduation Cruise.</p><p style="margin:0;color:#425056;font:15px Arial,sans-serif;line-height:1.7">${htmlEscape(input.rooms.toString())} room${input.rooms === 1 ? "" : "s"} requested · ${htmlEscape(input.travelers.toString())} traveler${input.travelers === 1 ? "" : "s"} listed</p><p style="margin:20px 0 0;color:#59666a;font:13px Arial,sans-serif;line-height:1.6">Sign in to Wendy’s workspace to review the request and prepare the live quote.</p></section></main></body></html>`;
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${config.apiKey}`, "Content-Type": "application/json", "Idempotency-Key": `group-cabin-request/${input.requestId}` },
+      body: JSON.stringify({
+        from: config.from,
+        to: [config.recipient],
+        reply_to: input.email,
+        subject: `New Grimsley cabin request from ${contactName}`,
+        html,
+        text,
+        tags: [{ name: "category", value: "group_cabin_request" }, { name: "request_id", value: String(input.requestId) }],
+      }),
+    });
+    if (!response.ok) { console.error("[Resend] Group cabin request email was not accepted", { status: response.status, requestId: input.requestId }); return "failed"; }
+    return "sent";
+  } catch (error) {
+    console.error("[Resend] Group cabin request email request failed", { requestId: input.requestId, error });
     return "failed";
   }
 }

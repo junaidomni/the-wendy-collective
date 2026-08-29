@@ -25,6 +25,7 @@ const publicRoutes: Record<string, { title: string; description: string }> = {
   "/faq": { title: "Travel Planning FAQ | The Wendy Collective", description: "Answers to common travel planning questions about Wendy’s services, timing, group travel, insurance, and more." },
   "/contact": { title: "Plan Your Journey | The Wendy Collective", description: "Share your travel vision with Wendy and begin a thoughtfully planned journey made around you." },
   "/privacy": { title: "Privacy Policy | The Wendy Collective", description: "Learn how The Wendy Collective handles the information you share when beginning a travel conversation." },
+  "/experiences/grimsley-hs-graduation-cruise-2027": { title: "Grimsley High School Graduation Cruise 2027 | The Wendy Collective", description: "Explore the Class of 2027 Carnival Mardi Gras graduation cruise and request a cabin with personal support from Wendy." },
 };
 
 export function prefetchForPath(url: string): HeadMeta {

@@ -12,6 +12,13 @@ describe("server-rendered page metadata", () => {
     }
   });
 
+  it("returns crawler-visible metadata for the public school cruise experience", () => {
+    const metadata = prefetchForPath("/experiences/grimsley-hs-graduation-cruise-2027");
+    expect(metadata.title).toContain("Grimsley High School Graduation Cruise 2027");
+    expect(metadata.canonicalPath).toBe("/experiences/grimsley-hs-graduation-cruise-2027");
+    expect(metadata.noindex).not.toBe(true);
+  });
+
   it("does not index Wendy’s protected workspace and returns a genuine 404 for unknown paths", () => {
     expect(prefetchForPath("/wendy")).toMatchObject({ noindex: true });
     expect(prefetchForPath("/wendy").notFound).not.toBe(true);

@@ -7,6 +7,7 @@ import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { sendTripBriefEmail } from "./resendAlerts";
+import { groupCruisesRouter } from "./routers/groupCruises";
 
 const tripInquiryInput = z.object({
   firstName: z.string().trim().min(2).max(80),
@@ -73,6 +74,7 @@ export const appRouter = router({
       inquiries: await getTripInquiries(),
     })),
   }),
+  groupCruises: groupCruisesRouter,
 });
 
 export type AppRouter = typeof appRouter;

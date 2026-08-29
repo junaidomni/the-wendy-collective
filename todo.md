@@ -130,3 +130,12 @@
 - [x] Remove reverse-flash frames at the affected hero transitions so every cut advances directly to the next scene without briefly returning to earlier footage.
 - [x] Reorder the hotel moments so the oceanfront hotel view plays immediately before the hotel-door arrival scene.
 - [x] Verify every edit boundary and the updated responsive hero, then publish the corrected loop.
+- [x] Review the supplied proposal handoffs in read-only mode and summarize the requested decisions without making website changes.
+- [x] Research and design a human-led cruise inquiry, proposal, reservation-request, group-deal, and Wendy workspace workflow without implementing it.
+- [x] Define a school-cruise-first implementation roadmap that separates changing individual pricing from locked group rates and protects traveler data.
+- [x] Superseded the legacy Vercel cabin selector instead of copying or altering it: the new school request form lets families state forward, mid ship, aft, or no preference, and Wendy confirms the actual live cabin placement before booking.
+- [x] Build a new Wendy-branded Grimsley High School Graduation Cruise 2027 experience inside the current site, using legacy content only as a verified reference and not copying its design or infrastructure.
+- [x] Add secure group-cruise records, cabin-request submissions, repeating room and traveler details, and Wendy-only status tracking without collecting payment-card, passport, or account-password data.
+- [x] Create a public group-cruise landing page and a discreet Wendy-only management workspace for the school group.
+- [x] Preserve the approved Carnival Mardi Gras itinerary, customer-facing cabin information, and manual advisor-led quote and booking process; do not promise live availability or an automatic reservation.
+- [x] Add regression tests, validate desktop and mobile flows, and publish the completed school-cruise launch version.

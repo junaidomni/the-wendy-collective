@@ -66,6 +66,17 @@ describe("public site content", () => {
     expect(guide).toContain("aria-current=\"page\"");
   });
 
+  it("renders the branded school cruise and keeps the request advisor-led", () => {
+    const schoolCruise = readFileSync(new URL("./SchoolCruise.tsx", import.meta.url), "utf8");
+    expect(schoolCruise).toContain("Grimsley High School");
+    expect(schoolCruise).toContain("Graduation Cruise.");
+    expect(schoolCruise).toContain("Request your cabin");
+    expect(schoolCruise).toContain("Forward");
+    expect(schoolCruise).toContain("Mid ship");
+    expect(schoolCruise).toContain("does not hold a cabin or create a reservation");
+    expect(schoolCruise).not.toMatch(/[—–]/);
+  });
+
   it("keeps semantic navigation and headings in the public experience", () => {
     const page = renderPage(<Home />);
     const guide = renderPage(<DestinationGuide />, "/destinations/caribbean");
@@ -95,5 +106,6 @@ describe("public site content", () => {
     expect(robots).toContain("Sitemap:");
     expect(sitemap).toContain("/destinations/caribbean");
     expect(sitemap).toContain("/privacy");
+    expect(sitemap).toContain("/experiences/grimsley-hs-graduation-cruise-2027");
   });
 });
