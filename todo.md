@@ -144,4 +144,4 @@
 - [x] Add secure proposal records, shareable private proposal links, client room and traveler request intake, private advisor notes, and reservation reference tracking without storing payment-card or passport data.
 - [x] Create a reusable cruise experience library with ship details, visual assets, room guidance, and proposal content that Wendy can select before sending a client link.
 - [x] Move Grimsley Graduation Cruise into the new proposal pipeline after the reusable workflow is complete, keeping its group-rate rules distinct from individual quotes.
-- [ ] Defer IntelliTravel, Carnival, or other supplier API connections until Wendy provides authorized access and confirms the provider’s approved integration method.
+- [x] Defer IntelliTravel, Carnival, or other supplier API connections until Wendy provides authorized access and confirms the provider’s approved integration method.
