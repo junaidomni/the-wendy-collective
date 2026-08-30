@@ -175,3 +175,5 @@
 - [x] Add a client-side cabin and extras estimator that updates with traveler count, cabin category, optional Wi-Fi, beverage, dining, protection, and qualifying-rate choices while clearly marking totals as estimates Wendy must confirm.
 - [x] Preserve the detailed traveler, room, deck-area, loyalty, optional date-of-birth, and amenity-request intake so every submitted family request reaches Wendy’s protected review workflow.
 - [x] Add noindex metadata and regression coverage for the shareable proposal, calculations, and request safeguards, then verify desktop and mobile layouts before publishing.
+- [x] Fix the Grimsley family-link generator so it visibly presents a secure URL, copies it when permitted, and always offers a manual copy fallback after a successful share action.
+- [x] Verify the generated Grimsley URL opens the intended direct-share proposal and retain clear eligible-stage and error feedback for Wendy.
