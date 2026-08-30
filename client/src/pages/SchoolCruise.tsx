@@ -51,7 +51,14 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
   const [rateQualifiers, setRateQualifiers] = useState<RateQualifier[]>(() => parseRateQualifiers(initialRequest?.extrasJson));
   const [planning, setPlanning] = useState<GrimsleyPlanningSnapshot | null>(null);
   const [submitted, setSubmitted] = useState<FamilySubmission | null>(null);
+  const [showReturnToTop, setShowReturnToTop] = useState(false);
   const cabinRequest = trpc.groupCruises.createCabinRequest.useMutation();
+  useEffect(() => {
+    const updateReturnToTopVisibility = () => setShowReturnToTop(window.scrollY > 480);
+    updateReturnToTopVisibility();
+    window.addEventListener("scroll", updateReturnToTopVisibility, { passive: true });
+    return () => window.removeEventListener("scroll", updateReturnToTopVisibility);
+  }, []);
   useEffect(() => {
     if (!initialRequest) return;
     setContact({ firstName: initialRequest.contactFirstName, lastName: initialRequest.contactLastName, email: initialRequest.email, phone: initialRequest.phone, notes: initialRequest.notes || "", consent: false });
@@ -174,7 +181,7 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
         {cabinRequest.error && <p className="form-error" role="alert">Something interrupted your request. Please try again or email info@thewendycollective.com.</p>}
       </form>
     </div></section>
-    <button type="button" className="school-return-top" onClick={returnToTop} aria-label="Return to the top of the Grimsley proposal"><span aria-hidden="true">↑</span> Top</button>
+    {showReturnToTop ? <button type="button" className="school-return-top" onClick={returnToTop} aria-label="Return to the top of the Grimsley proposal"><span aria-hidden="true">↑</span> Top</button> : null}
   </SiteShell>;
 }
 

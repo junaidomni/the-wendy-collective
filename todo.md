@@ -201,3 +201,4 @@
 - [x] Restore the optional rate-qualifier choices and Vacation Protection selection to the family request flow and estimate summary.
 - [x] Correct the specialty-dining estimator so selected adult and child meals are reflected accurately in the optional-add-on and vacation-total calculation.
 - [x] Add regression coverage and responsive verification for restored Grimsley sections, controls, and estimator behavior.
+- [x] Show the Grimsley return-to-top control only after the visitor has scrolled beyond the opening proposal view, while keeping it accessible during the long mobile form flow.
