@@ -41,6 +41,8 @@ const cabinRequestInput = z.object({
     diningExperience: z.string().trim().max(120).optional(),
     diningAdults: z.number().int().min(0).max(12).optional(),
     diningChildren: z.number().int().min(0).max(12).optional(),
+    diningTotalCents: z.number().int().min(0).max(100_000).optional(),
+    rateQualifiers: z.array(z.enum(["military", "interline", "senior_55_plus"])).max(3).optional(),
   }).optional(),
   estimate: z.object({
     cabinTotalCents: z.number().int().min(0).max(20_000_000),

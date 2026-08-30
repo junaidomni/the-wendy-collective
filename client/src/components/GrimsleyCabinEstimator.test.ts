@@ -19,4 +19,11 @@ describe("Grimsley cabin estimator", () => {
     expect(estimate.cabinTotalCents).toBe(170400);
     expect(estimate.tripTotalCents).toBe(170400);
   });
+
+  it("adds the selected JiJi adult and child dining reference to extras and the vacation total", () => {
+    const estimate = calculateGrimsleyEstimate({ occupancy: 2, roomType: "interior", categoryId: "cabin-0", protection: false, wifiPlanId: "none", wifiUsers: 1, cheersAdults: 0, diningExperience: "JiJi Asian Kitchen", diningAdults: 1, diningChildren: 1 });
+    expect(estimate.diningCents).toBe(3500);
+    expect(estimate.extrasTotalCents).toBe(3500);
+    expect(estimate.tripTotalCents).toBe(154900);
+  });
 });

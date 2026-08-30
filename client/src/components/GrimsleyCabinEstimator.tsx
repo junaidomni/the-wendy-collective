@@ -25,6 +25,8 @@ export type GrimsleyPlanningSnapshot = {
     diningExperience: string;
     diningAdults: number;
     diningChildren: number;
+    diningTotalCents: number;
+    rateQualifiers?: ("military" | "interline" | "senior_55_plus")[];
   };
   estimate: {
     cabinTotalCents: number;
@@ -67,12 +69,23 @@ const wifiPlans = [
   { id: "premium_multi", label: "Premium multi device", perDay: 90 },
 ];
 const diningChoices = ["No dining preference", "Fahrenheit 555 Steakhouse", "JiJi Asian Kitchen", "Cucina del Capitano, additional visit", "Bonsai Teppanyaki dinner", "Bonsai Teppanyaki lunch", "Rudi’s Seagrill", "Il Viaggio", "Chef’s Table"];
+const diningRates: Record<string, { adult: number; child: number; note: string }> = {
+  "No dining preference": { adult: 0, child: 0, note: "Choose a restaurant to include a planning reference." },
+  "Fahrenheit 555 Steakhouse": { adult: 52, child: 15, note: "Current published planning reference. Wendy confirms the 2027 price." },
+  "JiJi Asian Kitchen": { adult: 24, child: 11, note: "Current published planning reference. Wendy confirms the 2027 price." },
+  "Cucina del Capitano, additional visit": { adult: 8, child: 8, note: "Mardi Gras additional visit planning reference. Wendy confirms the current rule." },
+  "Bonsai Teppanyaki dinner": { adult: 49, child: 49, note: "Current published planning reference. Wendy confirms the 2027 price." },
+  "Bonsai Teppanyaki lunch": { adult: 39, child: 39, note: "Current published planning reference. Wendy confirms the 2027 price." },
+  "Rudi’s Seagrill": { adult: 52, child: 15, note: "Current published planning reference. Wendy confirms the 2027 price." },
+  "Il Viaggio": { adult: 42, child: 14, note: "Current published planning reference. Wendy confirms the 2027 price." },
+  "Chef’s Table": { adult: 95, child: 0, note: "Ages 12 and older. Wendy confirms the current sailing price and availability." },
+};
 
 function formatCurrency(cents: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 }
 
-export function calculateGrimsleyEstimate(input: { occupancy: 2 | 3 | 4; roomType: RoomType; categoryId: string; protection: boolean; wifiPlanId: string; wifiUsers: number; cheersAdults: number }) {
+export function calculateGrimsleyEstimate(input: { occupancy: 2 | 3 | 4; roomType: RoomType; categoryId: string; protection: boolean; wifiPlanId: string; wifiUsers: number; cheersAdults: number; diningExperience?: string; diningAdults?: number; diningChildren?: number }) {
   const choices = cabinCategories.filter((category) => category.occupancy === input.occupancy && category.roomType === input.roomType);
   const selectedCategory = choices.find((category) => category.id === input.categoryId) || choices[0];
   const wifiPlan = wifiPlans.find((plan) => plan.id === input.wifiPlanId) || wifiPlans[0];
@@ -83,9 +96,11 @@ export function calculateGrimsleyEstimate(input: { occupancy: 2 | 3 | 4; roomTyp
   const protectionCents = input.protection ? protectionPerTraveler * input.occupancy * 100 : 0;
   const wifiCents = Math.round(wifiPlan.perDay * 4 * input.wifiUsers * 100);
   const cheersCents = Math.round(83.94 * 4 * input.cheersAdults * 100);
+  const diningRate = diningRates[input.diningExperience || "No dining preference"] || diningRates["No dining preference"];
+  const diningCents = Math.round((diningRate.adult * (input.diningAdults || 0) + diningRate.child * (input.diningChildren || 0)) * 100);
   const cabinTotalCents = fareCents + gratuitiesCents + protectionCents;
-  const extrasTotalCents = wifiCents + cheersCents;
-  return { selectedCategory, wifiPlan, protectionPerTraveler, fareCents, gratuitiesCents, protectionCents, cabinTotalCents, extrasTotalCents, tripTotalCents: cabinTotalCents + extrasTotalCents };
+  const extrasTotalCents = wifiCents + cheersCents + diningCents;
+  return { selectedCategory, wifiPlan, diningRate, protectionPerTraveler, fareCents, gratuitiesCents, protectionCents, diningCents, cabinTotalCents, extrasTotalCents, tripTotalCents: cabinTotalCents + extrasTotalCents };
 }
 
 export default function GrimsleyCabinEstimator({ onPlanningChange }: { onPlanningChange: (snapshot: GrimsleyPlanningSnapshot) => void }) {
@@ -102,8 +117,8 @@ export default function GrimsleyCabinEstimator({ onPlanningChange }: { onPlannin
   const [diningChildren, setDiningChildren] = useState(0);
 
   useEffect(() => { setCategoryId(choices[0]?.id || ""); }, [choices]);
-  const calculation = useMemo(() => calculateGrimsleyEstimate({ occupancy, roomType, categoryId, protection, wifiPlanId, wifiUsers, cheersAdults }), [occupancy, roomType, categoryId, protection, wifiPlanId, wifiUsers, cheersAdults]);
-  const { selectedCategory, wifiPlan, protectionPerTraveler, fareCents, gratuitiesCents, protectionCents, cabinTotalCents, extrasTotalCents, tripTotalCents } = calculation;
+  const calculation = useMemo(() => calculateGrimsleyEstimate({ occupancy, roomType, categoryId, protection, wifiPlanId, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren }), [occupancy, roomType, categoryId, protection, wifiPlanId, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren]);
+  const { selectedCategory, wifiPlan, diningRate, protectionPerTraveler, fareCents, gratuitiesCents, protectionCents, diningCents, cabinTotalCents, extrasTotalCents, tripTotalCents } = calculation;
 
   useEffect(() => {
     if (!selectedCategory) return;
@@ -114,7 +129,7 @@ export default function GrimsleyCabinEstimator({ onPlanningChange }: { onPlannin
       estimatedFareCents: fareCents,
       estimatedGratuitiesCents: gratuitiesCents,
       estimatedProtectionCents: protectionCents,
-      extras: { wifiPlan: wifiPlan.label, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren },
+      extras: { wifiPlan: wifiPlan.label, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren, diningTotalCents: diningCents },
       estimate: { cabinTotalCents, extrasTotalCents, tripTotalCents, depositCents: occupancy * 5000, onboardCreditCents: 0 },
     });
   }, [occupancy, roomType, selectedCategory, fareCents, gratuitiesCents, protectionCents, wifiPlan.label, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren, cabinTotalCents, extrasTotalCents, tripTotalCents, onPlanningChange]);
@@ -131,6 +146,6 @@ export default function GrimsleyCabinEstimator({ onPlanningChange }: { onPlannin
       </div>
       <aside className="cruise-estimator__total"><p className="eyebrow">Reference estimate</p><strong>{formatCurrency(cabinTotalCents)}</strong><span>{formatCurrency(Math.round(cabinTotalCents / occupancy))} average per traveler</span><dl><div><dt>Cruise fare</dt><dd>{formatCurrency(fareCents)}</dd></div><div><dt>Gratuities</dt><dd>{formatCurrency(gratuitiesCents)}</dd></div><div><dt>Vacation Protection</dt><dd>{protection ? formatCurrency(protectionCents) : "Not selected"}</dd></div></dl><p>Taxes or fees not reflected in the supplied fare data will be confirmed with your live quote.</p></aside>
     </div>
-    <div className="extras-planner"><div><p className="eyebrow">Optional planning costs</p><h3>Explore extras now. Add them later.</h3><p>Wi Fi and CHEERS! are shown separately from the cabin estimate. Specialty dining is saved as a preference for Wendy to quote.</p></div><div className="extras-planner__fields"><label>Wi Fi plan<select value={wifiPlanId} onChange={(event) => setWifiPlanId(event.target.value)}>{wifiPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.label}{plan.perDay ? `, ${formatCurrency(plan.perDay * 100)} per day` : ""}</option>)}</select></label><label>Wi Fi users<select value={wifiUsers} onChange={(event) => setWifiUsers(Number(event.target.value))}>{[1, 2, 3, 4].map((value) => <option key={value} value={value}>{value}</option>)}</select></label><label>CHEERS! eligible adults<select value={cheersAdults} onChange={(event) => setCheersAdults(Number(event.target.value))}>{Array.from({ length: occupancy + 1 }, (_, value) => <option key={value} value={value}>{value}</option>)}</select></label><label>Specialty dining preference<select value={diningExperience} onChange={(event) => setDiningExperience(event.target.value)}>{diningChoices.map((choice) => <option key={choice}>{choice}</option>)}</select></label><label>Dining adults<select value={diningAdults} onChange={(event) => setDiningAdults(Number(event.target.value))}>{Array.from({ length: occupancy + 1 }, (_, value) => <option key={value} value={value}>{value}</option>)}</select></label><label>Dining children<select value={diningChildren} onChange={(event) => setDiningChildren(Number(event.target.value))}>{Array.from({ length: occupancy + 1 }, (_, value) => <option key={value} value={value}>{value}</option>)}</select></label></div><aside><span>Optional extras selected</span><strong>{formatCurrency(extrasTotalCents)}</strong><p>Estimated vacation total</p><b>{formatCurrency(tripTotalCents)}</b><small>Specialty dining is a saved preference and is not included in this number.</small></aside></div>
+    <div className="extras-planner"><div><p className="eyebrow">Optional planning costs</p><h3>Explore extras now. Add them later.</h3><p>Wi Fi, CHEERS!, and specialty dining are shown separately from the cabin estimate. Wendy confirms each optional item before reservation.</p></div><div className="extras-planner__fields"><label>Wi Fi plan<select value={wifiPlanId} onChange={(event) => setWifiPlanId(event.target.value)}>{wifiPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.label}{plan.perDay ? `, ${formatCurrency(plan.perDay * 100)} per day` : ""}</option>)}</select></label><label>Wi Fi users<select value={wifiUsers} onChange={(event) => setWifiUsers(Number(event.target.value))}>{[1, 2, 3, 4].map((value) => <option key={value} value={value}>{value}</option>)}</select></label><label>CHEERS! eligible adults<select value={cheersAdults} onChange={(event) => setCheersAdults(Number(event.target.value))}>{Array.from({ length: occupancy + 1 }, (_, value) => <option key={value} value={value}>{value}</option>)}</select></label><label>Specialty dining preference<select value={diningExperience} onChange={(event) => setDiningExperience(event.target.value)}>{diningChoices.map((choice) => <option key={choice}>{choice}</option>)}</select></label><label>Dining adults<select value={diningAdults} onChange={(event) => { const nextAdults = Number(event.target.value); setDiningAdults(nextAdults); setDiningChildren((current) => Math.min(current, occupancy - nextAdults)); }}>{Array.from({ length: occupancy + 1 }, (_, value) => <option key={value} value={value}>{value}</option>)}</select></label><label>Dining children<select value={diningChildren} onChange={(event) => setDiningChildren(Number(event.target.value))}>{Array.from({ length: occupancy - diningAdults + 1 }, (_, value) => <option key={value} value={value}>{value}</option>)}</select></label></div><aside><span>Optional extras selected</span><strong>{formatCurrency(extrasTotalCents)}</strong><p>Estimated vacation total</p><b>{formatCurrency(tripTotalCents)}</b><small>{diningExperience === "No dining preference" ? "Select a restaurant to add a specialty-dining planning cost." : `${diningExperience}: ${formatCurrency(diningCents)}. ${diningRate.note}`}</small></aside></div>
   </div></section>;
 }

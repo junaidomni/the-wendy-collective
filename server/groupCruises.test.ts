@@ -21,7 +21,7 @@ const request = {
   phone: "555-010-1234",
   notes: "One room close to family if possible.",
   amenities: ["wifi", "travel_protection"] as const,
-  extras: { wifiPlan: "Premium", wifiUsers: 2, cheersAdults: 1, diningExperience: "Fahrenheit 555 Steakhouse", diningAdults: 2, diningChildren: 0 },
+  extras: { wifiPlan: "Premium", wifiUsers: 2, cheersAdults: 1, diningExperience: "Fahrenheit 555 Steakhouse", diningAdults: 2, diningChildren: 0, diningTotalCents: 10400, rateQualifiers: ["military"] as const },
   estimate: { cabinTotalCents: 223400, extrasTotalCents: 28794, tripTotalCents: 252194, depositCents: 10000, onboardCreditCents: 0 },
   consent: true as const,
   rooms: [{ occupancy: 2 as const, roomType: "balcony" as const, locationPreference: "midship" as const, selectedCabinCategory: "Standard Balcony, Deck 9 location", estimatedFareCents: 185800, estimatedGratuitiesCents: 13600, estimatedProtectionCents: 22000, travelers: [{ firstName: "Morgan", middleName: "", lastName: "Taylor", age: 18, dateOfBirth: "2008-06-24", loyaltyNumber: "" }, { firstName: "Robin", middleName: "A", lastName: "Taylor", age: 47, dateOfBirth: "1979-04-12", loyaltyNumber: "VIFP-001" }] }],
@@ -33,7 +33,7 @@ describe("group cabin request workflow", () => {
   it("stores room and traveler details then alerts Wendy without payment or passport fields", async () => {
     const result = await appRouter.createCaller(context()).groupCruises.createCabinRequest(request);
     expect(result).toEqual({ success: true, requestId: 28, familyPortalToken: "f".repeat(43), revisionNumber: 1, ownerNotificationSent: true, emailAlertStatus: "not_configured" });
-    expect(mocks.createFamilyPortalCabinRequest).toHaveBeenCalledWith(expect.objectContaining({ groupKey: request.groupKey, amenities: ["wifi", "travel_protection"], extras: expect.objectContaining({ wifiPlan: "Premium", diningExperience: "Fahrenheit 555 Steakhouse" }), estimate: expect.objectContaining({ tripTotalCents: 252194 }), rooms: expect.arrayContaining([expect.objectContaining({ locationPreference: "midship", selectedCabinCategory: "Standard Balcony, Deck 9 location", estimatedFareCents: 185800, travelers: expect.arrayContaining([expect.objectContaining({ firstName: "Morgan", age: 18, dateOfBirth: "2008-06-24" })]) })]) }));
+    expect(mocks.createFamilyPortalCabinRequest).toHaveBeenCalledWith(expect.objectContaining({ groupKey: request.groupKey, amenities: ["wifi", "travel_protection"], extras: expect.objectContaining({ wifiPlan: "Premium", diningExperience: "Fahrenheit 555 Steakhouse", diningTotalCents: 10400, rateQualifiers: ["military"] }), estimate: expect.objectContaining({ tripTotalCents: 252194 }), rooms: expect.arrayContaining([expect.objectContaining({ locationPreference: "midship", selectedCabinCategory: "Standard Balcony, Deck 9 location", estimatedFareCents: 185800, travelers: expect.arrayContaining([expect.objectContaining({ firstName: "Morgan", age: 18, dateOfBirth: "2008-06-24" })]) })]) }));
     expect(mocks.createFamilyPortalCabinRequest.mock.calls[0][0]).not.toHaveProperty("passportNumber");
     expect(mocks.createFamilyPortalCabinRequest.mock.calls[0][0]).not.toHaveProperty("paymentCard");
     expect(mocks.createAdvisorDeal).toHaveBeenCalledWith(expect.objectContaining({ sourceType: "group_cabin_request", sourceId: 28, title: "Grimsley High School Graduation Cruise 2027", stage: "new_inquiry" }));

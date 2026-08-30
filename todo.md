@@ -195,3 +195,9 @@
 - [x] Diagnose why the Grimsley private link uses a page snapshot in iMessage instead of the intended branded social preview card.
 - [x] Serve a dedicated Mardi Gras share image and clear proposal title for private group links while retaining noindex protection and secure token access.
 - [x] Verify crawler-compatible iMessage and WhatsApp metadata, response status, and social-image availability before release.
+- [x] Restore a persistent, accessible return-to-top control for the Grimsley proposal, including the long mobile form flow.
+- [x] Restore the Explore the Ship action at the Grimsley proposal hero and connect it to the ship information section.
+- [x] Add the approved Grimsley-specific FAQ and travel-document guidance without collecting passport or other document data.
+- [x] Restore the optional rate-qualifier choices and Vacation Protection selection to the family request flow and estimate summary.
+- [x] Correct the specialty-dining estimator so selected adult and child meals are reflected accurately in the optional-add-on and vacation-total calculation.
+- [x] Add regression coverage and responsive verification for restored Grimsley sections, controls, and estimator behavior.
