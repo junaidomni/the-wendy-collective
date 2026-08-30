@@ -47,6 +47,8 @@ export const groupCabinRequests = mysqlTable("group_cabin_requests", {
   phone: varchar("phone", { length: 40 }).notNull(),
   roomCount: int("roomCount").notNull(),
   amenitiesJson: text("amenitiesJson"),
+  extrasJson: text("extrasJson"),
+  estimateJson: text("estimateJson"),
   notes: text("notes"),
   status: mysqlEnum("status", ["new", "contacted", "details_received", "quote_in_progress", "quote_shared", "booked", "closed"]).default("new").notNull(),
   advisorNotes: text("advisorNotes"),
@@ -61,6 +63,10 @@ export const groupCabinRequestRooms = mysqlTable("group_cabin_request_rooms", {
   occupancy: int("occupancy").notNull(),
   roomType: varchar("roomType", { length: 40 }).notNull(),
   locationPreference: varchar("locationPreference", { length: 40 }).notNull(),
+  selectedCabinCategory: varchar("selectedCabinCategory", { length: 180 }),
+  estimatedFareCents: int("estimatedFareCents"),
+  estimatedGratuitiesCents: int("estimatedGratuitiesCents"),
+  estimatedProtectionCents: int("estimatedProtectionCents"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

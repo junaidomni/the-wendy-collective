@@ -13,7 +13,7 @@ const routeMetadata: Record<string, PageMetadata> = {
   "/faq": { title: "Travel Planning FAQ | The Wendy Collective", description: "Answers to common travel planning questions about Wendy’s services, timing, group travel, insurance, and more.", indexable: true },
   "/contact": { title: "Plan Your Journey | The Wendy Collective", description: "Share your travel vision with Wendy and begin a thoughtfully planned journey made around you.", indexable: true },
   "/privacy": { title: "Privacy Policy | The Wendy Collective", description: "Learn how The Wendy Collective handles the information you share when beginning a travel conversation.", indexable: true },
-  "/experiences/grimsley-hs-graduation-cruise-2027": { title: "Grimsley High School Graduation Cruise 2027 | The Wendy Collective", description: "Explore the Class of 2027 Carnival Mardi Gras graduation cruise and request a cabin with personal support from Wendy.", indexable: true },
+  "/experiences/grimsley-hs-graduation-cruise-2027": { title: "Grimsley High School Graduation Cruise 2027 | The Wendy Collective", description: "Explore the Class of 2027 Carnival Mardi Gras graduation cruise and request a cabin with personal support from Wendy.", indexable: false },
   "/wendy": { title: "Wendy Workspace | The Wendy Collective", description: "Protected trip brief workspace for The Wendy Collective.", indexable: false },
 };
 

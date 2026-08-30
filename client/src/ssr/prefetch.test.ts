@@ -12,11 +12,11 @@ describe("server-rendered page metadata", () => {
     }
   });
 
-  it("returns crawler-visible metadata for the public school cruise experience", () => {
+  it("keeps the direct-share school cruise proposal out of search results", () => {
     const metadata = prefetchForPath("/experiences/grimsley-hs-graduation-cruise-2027");
     expect(metadata.title).toContain("Grimsley High School Graduation Cruise 2027");
     expect(metadata.canonicalPath).toBe("/experiences/grimsley-hs-graduation-cruise-2027");
-    expect(metadata.noindex).not.toBe(true);
+    expect(metadata.noindex).toBe(true);
   });
 
   it("keeps opaque private proposal links out of search results", () => {

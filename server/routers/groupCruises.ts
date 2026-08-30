@@ -17,6 +17,10 @@ const roomInput = z.object({
   occupancy: z.number().int().min(2).max(4),
   roomType: z.enum(["interior", "ocean_view", "balcony", "suite"]),
   locationPreference: z.enum(["no_preference", "forward", "midship", "aft"]),
+  selectedCabinCategory: z.string().trim().min(2).max(180).optional(),
+  estimatedFareCents: z.number().int().min(0).max(5_000_000).optional(),
+  estimatedGratuitiesCents: z.number().int().min(0).max(1_000_000).optional(),
+  estimatedProtectionCents: z.number().int().min(0).max(1_000_000).optional(),
   travelers: z.array(travelerInput).min(2).max(4),
 }).superRefine((room, context) => {
   if (room.travelers.length !== room.occupancy) context.addIssue({ code: "custom", message: "Each room must include the selected number of travelers." });
@@ -30,6 +34,21 @@ const cabinRequestInput = z.object({
   phone: z.string().trim().min(7).max(40),
   notes: z.string().trim().max(2000).optional().default(""),
   amenities: z.array(z.enum(["wifi", "beverage_package", "soda_package", "specialty_dining", "travel_protection", "transfers"])).max(6).default([]),
+  extras: z.object({
+    wifiPlan: z.string().trim().max(80).optional(),
+    wifiUsers: z.number().int().min(0).max(4).optional(),
+    cheersAdults: z.number().int().min(0).max(4).optional(),
+    diningExperience: z.string().trim().max(120).optional(),
+    diningAdults: z.number().int().min(0).max(12).optional(),
+    diningChildren: z.number().int().min(0).max(12).optional(),
+  }).optional(),
+  estimate: z.object({
+    cabinTotalCents: z.number().int().min(0).max(20_000_000),
+    extrasTotalCents: z.number().int().min(0).max(10_000_000),
+    tripTotalCents: z.number().int().min(0).max(30_000_000),
+    depositCents: z.number().int().min(0).max(2_000_000),
+    onboardCreditCents: z.number().int().min(0).max(2_000_000),
+  }).optional(),
   consent: z.literal(true),
   privateToken: z.string().trim().min(32).max(96).optional(),
   rooms: z.array(roomInput).min(1).max(12),

@@ -106,6 +106,6 @@ describe("public site content", () => {
     expect(robots).toContain("Sitemap:");
     expect(sitemap).toContain("/destinations/caribbean");
     expect(sitemap).toContain("/privacy");
-    expect(sitemap).toContain("/experiences/grimsley-hs-graduation-cruise-2027");
+    expect(sitemap).not.toContain("/experiences/grimsley-hs-graduation-cruise-2027");
   });
 });

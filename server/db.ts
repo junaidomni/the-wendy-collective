@@ -88,11 +88,17 @@ export type CreateGroupCabinRequestInput = {
   email: string;
   phone: string;
   amenities: string[];
+  extras?: Record<string, unknown>;
+  estimate?: Record<string, unknown>;
   notes: string;
   rooms: Array<{
     occupancy: number;
     roomType: string;
     locationPreference: string;
+    selectedCabinCategory?: string;
+    estimatedFareCents?: number;
+    estimatedGratuitiesCents?: number;
+    estimatedProtectionCents?: number;
     travelers: Array<{
       firstName: string;
       middleName?: string;
@@ -115,6 +121,8 @@ export async function createGroupCabinRequest(input: CreateGroupCabinRequestInpu
     phone: input.phone,
     roomCount: input.rooms.length,
     amenitiesJson: JSON.stringify(input.amenities),
+    extrasJson: input.extras ? JSON.stringify(input.extras) : null,
+    estimateJson: input.estimate ? JSON.stringify(input.estimate) : null,
     notes: input.notes || null,
   });
   const cabinRequestId = Number(result[0].insertId);
@@ -126,6 +134,10 @@ export async function createGroupCabinRequest(input: CreateGroupCabinRequestInpu
       occupancy: room.occupancy,
       roomType: room.roomType,
       locationPreference: room.locationPreference,
+      selectedCabinCategory: room.selectedCabinCategory || null,
+      estimatedFareCents: room.estimatedFareCents ?? null,
+      estimatedGratuitiesCents: room.estimatedGratuitiesCents ?? null,
+      estimatedProtectionCents: room.estimatedProtectionCents ?? null,
     });
     const roomId = Number(roomResult[0].insertId);
     await db.insert(groupCabinRequestTravelers).values(room.travelers.map((traveler) => ({

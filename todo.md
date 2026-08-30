@@ -170,3 +170,8 @@
 - [x] Rebuild group-program profiles so Grimsley and future groups use the same stage engine while retaining coordinator, group terms, shared proposal, and household-response operations.
 - [x] Replace the free-form stage dropdown with stage-specific actions and protect private proposal links against sharing before the required proposal stage is complete.
 - [x] Add tests and responsive verification for stage gates, history, reopening, individual profiles, group profiles, and secure proposal access before publishing.
+- [x] Review the newly supplied workflow content and extract the next confirmed portal requirements before making further changes.
+- [x] Recreate the approved Grimsley Graduation Cruise 2027 proposal as an unlisted, Wendy-branded shareable page inside the current website, retaining the legacy itinerary and customer-facing cruise content without copying the legacy design or infrastructure.
+- [x] Add a client-side cabin and extras estimator that updates with traveler count, cabin category, optional Wi-Fi, beverage, dining, protection, and qualifying-rate choices while clearly marking totals as estimates Wendy must confirm.
+- [x] Preserve the detailed traveler, room, deck-area, loyalty, optional date-of-birth, and amenity-request intake so every submitted family request reaches Wendy’s protected review workflow.
+- [x] Add noindex metadata and regression coverage for the shareable proposal, calculations, and request safeguards, then verify desktop and mobile layouts before publishing.
