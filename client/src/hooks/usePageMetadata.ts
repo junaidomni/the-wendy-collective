@@ -26,7 +26,7 @@ const guideMetadata: Record<string, PageMetadata> = {
 };
 
 export function metadataForPath(path: string): PageMetadata {
-  if (path.startsWith("/proposal/")) return { title: "Private Proposal | The Wendy Collective", description: "A private travel proposal from The Wendy Collective.", indexable: false };
+  if (path.startsWith("/proposal/") || path.startsWith("/group/")) return { title: "Private Proposal | The Wendy Collective", description: "A private travel proposal from The Wendy Collective.", indexable: false };
   return routeMetadata[path] ?? guideMetadata[path] ?? { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION, indexable: false };
 }
 

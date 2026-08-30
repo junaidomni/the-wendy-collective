@@ -145,3 +145,7 @@
 - [x] Create a reusable cruise experience library with ship details, visual assets, room guidance, and proposal content that Wendy can select before sending a client link.
 - [x] Move Grimsley Graduation Cruise into the new proposal pipeline after the reusable workflow is complete, keeping its group-rate rules distinct from individual quotes.
 - [x] Defer IntelliTravel, Carnival, or other supplier API connections until Wendy provides authorized access and confirms the provider’s approved integration method.
+- [x] Promote Grimsley to a dedicated active client-deal profile in Wendy’s CRM rather than presenting it only as a reusable experience-library card.
+- [x] Add a clear Grimsley stage model, proposal-readiness checklist, group itinerary and room-strategy detail, and a deliberate create-and-share private family-link action.
+- [x] Show Grimsley family responses and school-cabin requests within the dedicated client profile while retaining the existing protected CRM controls.
+- [x] Verify the complete Grimsley profile workflow on desktop and mobile, then publish the refinement.

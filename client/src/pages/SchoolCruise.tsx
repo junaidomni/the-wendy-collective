@@ -5,6 +5,8 @@ import { trpc } from "@/lib/trpc";
 type Traveler = { firstName: string; middleName: string; lastName: string; age: string; loyaltyNumber: string };
 type Room = { occupancy: number; roomType: "interior" | "ocean_view" | "balcony" | "suite"; locationPreference: "no_preference" | "forward" | "midship" | "aft"; travelers: Traveler[] };
 type Contact = { firstName: string; lastName: string; email: string; phone: string; notes: string; consent: boolean };
+type GroupProfile = { title: string; organizationName: string; groupKey: string; groupTerms: string | null; roomStrategy: string | null; bookingWindow: string | null };
+type CruiseExperience = { cruiseLine: string; shipName: string; embarkPort: string; sailingSummary: string; heroImageUrl: string | null; heroImageAlt: string | null; itineraryJson: string | null; roomGuidance: string | null };
 
 const blankTraveler = (): Traveler => ({ firstName: "", middleName: "", lastName: "", age: "", loyaltyNumber: "" });
 const blankRoom = (occupancy = 2): Room => ({ occupancy, roomType: "interior", locationPreference: "no_preference", travelers: Array.from({ length: occupancy }, blankTraveler) });
@@ -21,7 +23,15 @@ const itinerary = [
 const roomLabels = { interior: "Interior", ocean_view: "Ocean View", balcony: "Balcony", suite: "Suite" } as const;
 const locationLabels = { no_preference: "No preference", forward: "Forward", midship: "Mid ship", aft: "Aft" } as const;
 
-export default function SchoolCruise() {
+function parseItinerary(raw?: string | null) {
+  try {
+    const parsed = raw ? JSON.parse(raw) : undefined;
+    if (Array.isArray(parsed)) return parsed.map((entry) => [entry.day, entry.place, entry.detail] as [string, string, string]);
+  } catch { /* Fall back to the approved itinerary below. */ }
+  return itinerary;
+}
+
+export function SchoolCruiseContent({ privateToken, profile, experience }: { privateToken?: string; profile?: GroupProfile; experience?: CruiseExperience }) {
   const [contact, setContact] = useState<Contact>(blankContact);
   const [rooms, setRooms] = useState<Room[]>([blankRoom()]);
   const [submitted, setSubmitted] = useState(false);
@@ -29,6 +39,14 @@ export default function SchoolCruise() {
     onSuccess: () => { setSubmitted(true); setContact(blankContact()); setRooms([blankRoom()]); },
   });
   const travelerCount = useMemo(() => rooms.reduce((total, room) => total + room.occupancy, 0), [rooms]);
+  const displayItinerary = useMemo(() => parseItinerary(experience?.itineraryJson), [experience?.itineraryJson]);
+  const groupTitle = profile?.title || "Grimsley High School Graduation Cruise 2027";
+  const groupName = profile?.organizationName || "The Class of 2027";
+  const shipName = experience?.shipName || "Mardi Gras";
+  const sailingSummary = experience?.sailingSummary || "June 24 to 28, 2027";
+  const embarkPort = experience?.embarkPort || "Port Canaveral, Florida";
+  const shipImage = experience?.heroImageUrl || "/manus-storage/mardi-gras-approved_10fa6e55.png";
+  const shipImageAlt = experience?.heroImageAlt || "Carnival Mardi Gras at sea near Port Canaveral";
 
   const updateContact = (field: keyof Contact, value: string | boolean) => setContact((current) => ({ ...current, [field]: value }));
   const updateRoom = <K extends keyof Omit<Room, "travelers">>(roomIndex: number, field: K, value: Room[K]) => {
@@ -52,6 +70,7 @@ export default function SchoolCruise() {
     setSubmitted(false);
     await cabinRequest.mutateAsync({
       groupKey: "grimsley-hs-graduation-cruise-2027",
+      privateToken,
       contactFirstName: contact.firstName,
       contactLastName: contact.lastName,
       email: contact.email,
@@ -67,27 +86,27 @@ export default function SchoolCruise() {
 
   return <SiteShell>
     <section className="school-hero">
-      <img src="/manus-storage/mardi-gras-approved_10fa6e55.png" alt="Carnival Mardi Gras at sea near Port Canaveral" />
+      <img src={shipImage} alt={shipImageAlt} />
       <div className="school-hero__veil" />
       <div className="page-wrap school-hero__content">
-        <p className="eyebrow">The Class of 2027</p>
-        <h1 className="display">Grimsley High School <em>Graduation Cruise.</em></h1>
-        <p>June 24 to 28, 2027 · Port Canaveral, Florida</p>
+        <p className="eyebrow">{privateToken ? "Private family proposal" : groupName}</p>
+        <h1 className="display">{groupTitle.replace(" 2027", "")} <em>2027.</em></h1>
+        <p>{sailingSummary} · {embarkPort}</p>
         <div className="hero-actions"><a className="button-link button-link--ghost" href="#journey">See the journey <span aria-hidden="true">↓</span></a><a className="button-link" href="#request">Request your cabin <span aria-hidden="true">↗</span></a></div>
       </div>
     </section>
 
     <section className="school-facts" aria-label="Cruise overview"><div className="page-wrap school-facts__grid">
-      <div><span>Cruise line</span><strong>Carnival Cruise Line</strong></div><div><span>Ship</span><strong>Mardi Gras</strong></div><div><span>Length</span><strong>Four nights</strong></div><div><span>Two island days</span><strong>RelaxAway and Celebration Key</strong></div>
+      <div><span>Cruise line</span><strong>{experience?.cruiseLine || "Carnival Cruise Line"}</strong></div><div><span>Ship</span><strong>{shipName}</strong></div><div><span>Length</span><strong>Four nights</strong></div><div><span>Two island days</span><strong>RelaxAway and Celebration Key</strong></div>
     </div></section>
 
-    <section className="page-section" id="journey"><div className="page-wrap"><div className="section-heading"><div><p className="eyebrow">The journey</p><h2 className="display display--medium">Five days made for <em>celebrating.</em></h2></div><p className="body-copy">A graduation getaway with room for friends, family time, ocean air, and the kind of memories that last long after the final bell.</p></div><div className="school-itinerary">{itinerary.map(([date, place, detail], index) => <article key={date}><span>Day {index + 1}</span><h3>{date}</h3><strong>{place}</strong><p>{detail}</p></article>)}</div></div></section>
+    <section className="page-section" id="journey"><div className="page-wrap"><div className="section-heading"><div><p className="eyebrow">The journey</p><h2 className="display display--medium">Five days made for <em>celebrating.</em></h2></div><p className="body-copy">A graduation getaway with room for friends, family time, ocean air, and the kind of memories that last long after the final bell.</p></div><div className="school-itinerary">{displayItinerary.map(([date, place, detail], index) => <article key={date}><span>Day {index + 1}</span><h3>{date}</h3><strong>{place}</strong><p>{detail}</p></article>)}</div></div></section>
 
     <section className="page-section page-section--ink"><div className="page-wrap school-experience"><div><p className="eyebrow">Aboard Mardi Gras</p><h2 className="display display--medium">Something for every kind of <em>celebration.</em></h2></div><div className="school-experience__list"><article><span>01</span><div><h3>Big ship energy</h3><p>WaterWorks, pools, SportSquare, mini golf, ropes course, live shows, comedy, music, and wide open deck time.</p></div></article><article><span>02</span><div><h3>Space for graduates and parents</h3><p>Teen programming is age specific, while adults can enjoy Serenity, dining, live entertainment, lounges, and time to unwind.</p></div></article><article><span>03</span><div><h3>Two days ashore</h3><p>Spend time at RelaxAway, Half Moon Cay and Celebration Key, with Wendy available to help your household plan the details.</p></div></article></div></div></section>
 
     <section className="page-section"><div className="page-wrap"><div className="section-heading"><div><p className="eyebrow">Cabin starting points</p><h2 className="display display--medium">The right room begins with the right <em>conversation.</em></h2></div><p className="body-copy">The approved starting interior rates below help your household begin planning. Wendy will confirm the live category, deck, exact ship placement, taxes, gratuities, and final total before a reservation is made.</p></div><div className="school-rate-grid"><article><span>Two travelers</span><strong>$689</strong><p>Starting interior rate per traveler</p></article><article><span>Three travelers</span><strong>$599</strong><p>Starting interior rate per traveler</p></article><article><span>Four travelers</span><strong>$519</strong><p>Starting interior rate per traveler</p></article></div><div className="school-cabin-note"><div><span>Cabin styles</span><p>Interior, Ocean View, Balcony, and Suite options are reviewed with Wendy based on your household and current availability.</p></div><div><span>Cabin placement</span><p>Share whether you prefer forward, mid ship, aft, or no preference. Wendy will confirm the specific deck and location with your live quote.</p></div><div><span>Booking guidance</span><p>A fifty dollar per traveler deposit applies to this group request. A cabin is not held until Wendy confirms availability and you approve the live quote.</p></div></div></div></section>
 
-    <section className="page-section page-section--warm"><div className="page-wrap school-ready"><div><p className="eyebrow">How this works</p><h2 className="display display--medium">A clear request. A personal <em>follow up.</em></h2><p className="body-copy">Choose the rooms your household needs and share the traveler details Wendy needs to begin. Wendy will personally confirm the current cabin category, ship location, pricing, deposit, and availability before anything is booked.</p></div><div className="school-ready__steps"><div><span>01</span><h3>Request your rooms</h3><p>Tell Wendy how many travelers are in each cabin and your preferred cabin style.</p></div><div><span>02</span><h3>Wendy verifies options</h3><p>She checks live availability, including whether a cabin is forward, mid ship, or aft.</p></div><div><span>03</span><h3>Book with confidence</h3><p>Wendy reviews the live quote with you and completes the reservation only after your approval.</p></div></div></div></section>
+    <section className="page-section page-section--warm"><div className="page-wrap school-ready"><div><p className="eyebrow">How this works</p><h2 className="display display--medium">A clear request. A personal <em>follow up.</em></h2><p className="body-copy">{profile?.groupTerms || "Choose the rooms your household needs and share the traveler details Wendy needs to begin. Wendy will personally confirm the current cabin category, ship location, pricing, deposit, and availability before anything is booked."}</p></div><div className="school-ready__steps"><div><span>01</span><h3>Request your rooms</h3><p>{profile?.roomStrategy || "Tell Wendy how many travelers are in each cabin and your preferred cabin style."}</p></div><div><span>02</span><h3>Wendy verifies options</h3><p>She checks live availability, including whether a cabin is forward, mid ship, or aft.</p></div><div><span>03</span><h3>Book with confidence</h3><p>{profile?.bookingWindow || "Wendy reviews the live quote with you and completes the reservation only after your approval."}</p></div></div></div></section>
 
     <section className="page-section" id="request"><div className="page-wrap school-request-layout"><aside className="school-request-aside"><p className="eyebrow">Cabin request</p><h2 className="display display--small">Your household, thoughtfully <em>organized.</em></h2><p className="body-copy">This is a request for Wendy to review. It does not hold a cabin or create a reservation.</p><div className="school-request-aside__summary"><span>{rooms.length} {rooms.length === 1 ? "room" : "rooms"}</span><span>{travelerCount} {travelerCount === 1 ? "traveler" : "travelers"}</span></div><a href="https://www.carnival.com/cruise-ships/mardi-gras" target="_blank" rel="noreferrer" className="button-link button-link--ink">Explore Mardi Gras <span aria-hidden="true">↗</span></a></aside>
       <form className="school-request-form" onSubmit={submit}>
@@ -107,4 +126,8 @@ export default function SchoolCruise() {
       </form>
     </div></section>
   </SiteShell>;
+}
+
+export default function SchoolCruise() {
+  return <SchoolCruiseContent />;
 }

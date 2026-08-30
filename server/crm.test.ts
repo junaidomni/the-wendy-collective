@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
-const mocks = vi.hoisted(() => ({ createAdvisorDeal: vi.fn(), createClientProposal: vi.fn(), createProposalResponse: vi.fn(), ensureGrimsleyCruiseExperience: vi.fn(), getPrivateClientProposal: vi.fn(), listAdvisorDeals: vi.fn(), listClientProposals: vi.fn(), listCruiseExperiences: vi.fn(), listProposalResponses: vi.fn(), markClientProposalShared: vi.fn(), syncExistingRequestsToAdvisorDeals: vi.fn(), updateAdvisorDeal: vi.fn(), updateProposalResponseStatus: vi.fn(), createCruiseExperience: vi.fn(), notifyOwner: vi.fn() }));
+const mocks = vi.hoisted(() => ({ createAdvisorDeal: vi.fn(), createClientProposal: vi.fn(), createProposalResponse: vi.fn(), ensureGrimsleyCruiseExperience: vi.fn(), ensureGrimsleyGroupProfile: vi.fn(), getGroupTravelProfile: vi.fn(), getPrivateClientProposal: vi.fn(), getPrivateGroupTravelProfile: vi.fn(), listAdvisorDeals: vi.fn(), listClientProposals: vi.fn(), listCruiseExperiences: vi.fn(), listProposalResponses: vi.fn(), markClientProposalShared: vi.fn(), shareGroupTravelProfile: vi.fn(), syncExistingRequestsToAdvisorDeals: vi.fn(), updateAdvisorDeal: vi.fn(), updateGroupTravelProfile: vi.fn(), updateProposalResponseStatus: vi.fn(), createCruiseExperience: vi.fn(), notifyOwner: vi.fn() }));
 vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), ...mocks }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
 
@@ -20,6 +20,8 @@ describe("advisor CRM and private proposal workflow", () => {
     mocks.createAdvisorDeal.mockResolvedValue({ id: 51 });
     mocks.createClientProposal.mockResolvedValue({ id: 73 });
     mocks.ensureGrimsleyCruiseExperience.mockResolvedValue({ id: 3, shipName: "Mardi Gras" });
+    mocks.ensureGrimsleyGroupProfile.mockResolvedValue({ id: 9 });
+    mocks.getGroupTravelProfile.mockResolvedValue({ profile: { id: 9, groupKey: "grimsley-hs-graduation-cruise-2027", stage: "proposal_build", shareStatus: "draft" }, experience: { shipName: "Mardi Gras" }, cabinRequests: [] });
     mocks.listAdvisorDeals.mockResolvedValue([]); mocks.listClientProposals.mockResolvedValue([]); mocks.listCruiseExperiences.mockResolvedValue([]); mocks.listProposalResponses.mockResolvedValue([]);
     mocks.notifyOwner.mockResolvedValue(true);
   });
@@ -35,6 +37,25 @@ describe("advisor CRM and private proposal workflow", () => {
     const dashboard = await appRouter.createCaller(context(owner)).crm.dashboard();
     expect(mocks.syncExistingRequestsToAdvisorDeals).toHaveBeenCalledTimes(1);
     expect(dashboard.grimsleyExperience).toMatchObject({ shipName: "Mardi Gras" });
+    expect(dashboard.grimsleyProfile).toMatchObject({ profile: { groupKey: "grimsley-hs-graduation-cruise-2027" } });
+  });
+
+  it("keeps Grimsley stage controls and family-link sharing private to Wendy", async () => {
+    const caller = appRouter.createCaller(context(owner));
+    await caller.crm.updateGroupProfile({ id: 9, stage: "ready_to_share", shareStatus: "draft", groupTerms: "Wendy confirms every live quote." });
+    expect(mocks.updateGroupTravelProfile).toHaveBeenCalledWith(9, expect.objectContaining({ stage: "ready_to_share", shareStatus: "draft" }));
+    mocks.shareGroupTravelProfile.mockResolvedValue({ privateToken: token, expiresAt: new Date("2026-09-30") });
+    const shared = await caller.crm.shareGroupProfile({ id: 9, validForDays: 30 });
+    expect(shared.privateToken).toBe(token);
+    expect(mocks.shareGroupTravelProfile).toHaveBeenCalledWith(9, 30);
+    await expect(appRouter.createCaller(context()).crm.shareGroupProfile({ id: 9, validForDays: 30 })).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("returns a private Grimsley profile only through a valid active link", async () => {
+    const privateProfile = { profile: { groupKey: "grimsley-hs-graduation-cruise-2027", shareStatus: "shared" }, experience: { shipName: "Mardi Gras" } };
+    mocks.getPrivateGroupTravelProfile.mockResolvedValue(privateProfile);
+    await expect(appRouter.createCaller(context()).crm.getPrivateGroupProfile({ token })).resolves.toEqual(privateProfile);
+    expect(mocks.getPrivateGroupTravelProfile).toHaveBeenCalledWith(token);
   });
 
   it("creates an advisor deal and produces a high-entropy private proposal token", async () => {

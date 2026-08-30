@@ -13,7 +13,8 @@ import NotFound from "./pages/NotFound";
 import PrivateExperience from "./pages/PrivateExperience";
 import Privacy from "./pages/Privacy";
 import ProposalView from "./pages/ProposalView";
-import SchoolCruise from "./pages/SchoolCruise";
+import SchoolCruise from "@/pages/SchoolCruise";
+import GroupProposalView from "@/pages/GroupProposalView";
 import { usePageMetadata } from "./hooks/usePageMetadata";
 import ClientOnly from "./components/ClientOnly";
 
@@ -28,7 +29,8 @@ function Router() {
     <Route path="/faq" component={Faq} />
     <Route path="/contact" component={Contact} />
     <Route path="/privacy" component={Privacy} />
-    <Route path="/experiences/grimsley-hs-graduation-cruise-2027" component={SchoolCruise} />
+      <Route path="/experiences/grimsley-hs-graduation-cruise-2027" component={SchoolCruise} />
+      <Route path="/group/:token" component={GroupProposalView} />
     <Route path="/proposal/:token" component={ProposalView} />
     <Route path="/wendy"><ClientOnly><PrivateExperience /></ClientOnly></Route>
     <Route path="/404" component={NotFound} />

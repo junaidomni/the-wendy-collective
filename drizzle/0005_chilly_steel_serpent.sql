@@ -1,0 +1,23 @@
+CREATE TABLE `group_travel_profiles` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`groupKey` varchar(120) NOT NULL,
+	`title` varchar(180) NOT NULL,
+	`organizationName` varchar(180) NOT NULL,
+	`coordinatorName` varchar(160),
+	`coordinatorEmail` varchar(320),
+	`coordinatorPhone` varchar(40),
+	`experienceId` int NOT NULL,
+	`stage` enum('group_setup','proposal_build','ready_to_share','family_details','live_quote','booking','booked','closed') NOT NULL DEFAULT 'group_setup',
+	`shareStatus` enum('draft','shared','paused','closed') NOT NULL DEFAULT 'draft',
+	`privateToken` varchar(96) NOT NULL,
+	`expiresAt` timestamp,
+	`groupTerms` text,
+	`roomStrategy` text,
+	`bookingWindow` text,
+	`advisorNotes` text,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `group_travel_profiles_id` PRIMARY KEY(`id`),
+	CONSTRAINT `group_travel_profiles_groupKey_unique` UNIQUE(`groupKey`),
+	CONSTRAINT `group_travel_profiles_privateToken_unique` UNIQUE(`privateToken`)
+);

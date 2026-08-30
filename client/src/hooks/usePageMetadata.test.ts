@@ -9,6 +9,7 @@ describe("page metadata", () => {
 
   it("protects Wendy’s workspace and unknown routes from indexing", () => {
     expect(metadataForPath("/wendy").indexable).toBe(false);
+    expect(metadataForPath("/group/secure-token").indexable).toBe(false);
     expect(metadataForPath("/not-found").indexable).toBe(false);
   });
 });

@@ -69,7 +69,7 @@ describe("public site content", () => {
   it("renders the branded school cruise and keeps the request advisor-led", () => {
     const schoolCruise = readFileSync(new URL("./SchoolCruise.tsx", import.meta.url), "utf8");
     expect(schoolCruise).toContain("Grimsley High School");
-    expect(schoolCruise).toContain("Graduation Cruise.");
+    expect(schoolCruise).toContain("Grimsley High School Graduation Cruise 2027");
     expect(schoolCruise).toContain("Request your cabin");
     expect(schoolCruise).toContain("Forward");
     expect(schoolCruise).toContain("Mid ship");

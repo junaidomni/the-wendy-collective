@@ -1,11 +1,13 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, ensureGrimsleyCruiseExperience, getPrivateClientProposal, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, markClientProposalShared, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateProposalResponseStatus } from "../db";
+import { createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, markClientProposalShared, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { storagePut } from "../storage";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 
 const dealStages = ["new_inquiry", "discovery_call", "building_proposal", "proposal_shared", "ready_to_book", "booked", "closed"] as const;
+const groupProfileStages = ["group_setup", "proposal_build", "ready_to_share", "family_details", "live_quote", "booking", "booked", "closed"] as const;
+const groupShareStatuses = ["draft", "shared", "paused", "closed"] as const;
 const roomInput = z.object({ occupancy: z.number().int().min(1).max(8), roomType: z.string().trim().min(2).max(80), locationPreference: z.string().trim().min(2).max(80), travelerDetails: z.array(z.object({ fullName: z.string().trim().min(2).max(160), dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) })).min(1).max(8) });
 
 async function notifyWendy(title: string, content: string) {
@@ -18,9 +20,10 @@ async function notifyWendy(title: string, content: string) {
 export const crmRouter = router({
   dashboard: adminProcedure.query(async () => {
     const grimsleyExperience = await ensureGrimsleyCruiseExperience();
+    await ensureGrimsleyGroupProfile();
     await syncExistingRequestsToAdvisorDeals();
-    const [deals, experiences, proposals, responses] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses()]);
-    return { deals, experiences, proposals, responses, grimsleyExperience };
+    const [deals, experiences, proposals, responses, grimsleyProfile] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027")]);
+    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile };
   }),
   createDeal: adminProcedure.input(z.object({
     contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), title: z.string().trim().min(3).max(180), travelSummary: z.string().trim().max(4000).optional().default(""), nextAction: z.string().trim().max(1000).optional().default(""), experienceId: z.number().int().positive().optional(),
@@ -60,7 +63,27 @@ export const crmRouter = router({
     await updateProposalResponseStatus(input.id, input.status);
     return { success: true };
   }),
+  updateGroupProfile: adminProcedure.input(z.object({
+    id: z.number().int().positive(),
+    stage: z.enum(groupProfileStages),
+    shareStatus: z.enum(groupShareStatuses),
+    coordinatorName: z.string().trim().max(160).optional().default(""),
+    coordinatorEmail: z.string().trim().max(320).optional().default(""),
+    coordinatorPhone: z.string().trim().max(40).optional().default(""),
+    groupTerms: z.string().trim().max(5000).optional().default(""),
+    roomStrategy: z.string().trim().max(5000).optional().default(""),
+    bookingWindow: z.string().trim().max(1000).optional().default(""),
+    advisorNotes: z.string().trim().max(5000).optional().default(""),
+  })).mutation(async ({ input }) => {
+    await updateGroupTravelProfile(input.id, input);
+    return { success: true };
+  }),
+  shareGroupProfile: adminProcedure.input(z.object({ id: z.number().int().positive(), validForDays: z.number().int().min(1).max(180).default(30) })).mutation(async ({ input }) => {
+    const profile = await shareGroupTravelProfile(input.id, input.validForDays);
+    return { success: true, privateToken: profile.privateToken, expiresAt: profile.expiresAt };
+  }),
   getPrivateProposal: publicProcedure.input(z.object({ token: z.string().trim().min(32).max(96) })).query(({ input }) => getPrivateClientProposal(input.token)),
+  getPrivateGroupProfile: publicProcedure.input(z.object({ token: z.string().trim().min(32).max(96) })).query(({ input }) => getPrivateGroupTravelProfile(input.token)),
   submitProposalResponse: publicProcedure.input(z.object({
     token: z.string().trim().min(32).max(96), contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), rooms: z.array(roomInput).min(1).max(12), notes: z.string().trim().max(2000).optional().default(""), consent: z.literal(true),
   })).mutation(async ({ input }) => {

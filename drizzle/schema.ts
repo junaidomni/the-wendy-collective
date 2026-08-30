@@ -93,6 +93,27 @@ export const cruiseExperiences = mysqlTable("cruise_experiences", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+export const groupTravelProfiles = mysqlTable("group_travel_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  groupKey: varchar("groupKey", { length: 120 }).notNull().unique(),
+  title: varchar("title", { length: 180 }).notNull(),
+  organizationName: varchar("organizationName", { length: 180 }).notNull(),
+  coordinatorName: varchar("coordinatorName", { length: 160 }),
+  coordinatorEmail: varchar("coordinatorEmail", { length: 320 }),
+  coordinatorPhone: varchar("coordinatorPhone", { length: 40 }),
+  experienceId: int("experienceId").notNull(),
+  stage: mysqlEnum("stage", ["group_setup", "proposal_build", "ready_to_share", "family_details", "live_quote", "booking", "booked", "closed"]).default("group_setup").notNull(),
+  shareStatus: mysqlEnum("shareStatus", ["draft", "shared", "paused", "closed"]).default("draft").notNull(),
+  privateToken: varchar("privateToken", { length: 96 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt"),
+  groupTerms: text("groupTerms"),
+  roomStrategy: text("roomStrategy"),
+  bookingWindow: text("bookingWindow"),
+  advisorNotes: text("advisorNotes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const advisorDeals = mysqlTable("advisor_deals", {
   id: int("id").autoincrement().primaryKey(),
   sourceType: mysqlEnum("sourceType", ["manual", "trip_inquiry", "group_cabin_request"]).default("manual").notNull(),

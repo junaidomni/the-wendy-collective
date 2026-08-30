@@ -1,4 +1,5 @@
 import { desc, eq, inArray } from "drizzle-orm";
+import { randomBytes } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   advisorDeals,
@@ -7,6 +8,7 @@ import {
   groupCabinRequestRooms,
   groupCabinRequestTravelers,
   groupCabinRequests,
+  groupTravelProfiles,
   InsertPrivateClientRequest,
   InsertTripInquiry,
   InsertUser,
@@ -221,6 +223,91 @@ export async function ensureGrimsleyCruiseExperience() {
   });
   const experience = await db.select().from(cruiseExperiences).where(eq(cruiseExperiences.id, created.id)).limit(1);
   return experience[0];
+}
+
+export type GroupProfileStage = "group_setup" | "proposal_build" | "ready_to_share" | "family_details" | "live_quote" | "booking" | "booked" | "closed";
+export type GroupProfileShareStatus = "draft" | "shared" | "paused" | "closed";
+
+export async function ensureGrimsleyGroupProfile() {
+  const db = await getDb();
+  if (!db) throw new Error("Group profile storage is unavailable");
+  const experience = await ensureGrimsleyCruiseExperience();
+  const existing = await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.groupKey, "grimsley-hs-graduation-cruise-2027")).limit(1);
+  if (existing[0]) return existing[0];
+  const result = await db.insert(groupTravelProfiles).values({
+    groupKey: "grimsley-hs-graduation-cruise-2027",
+    title: "Grimsley High School Graduation Cruise 2027",
+    organizationName: "Grimsley High School · The Class of 2027",
+    experienceId: experience.id,
+    stage: "proposal_build",
+    shareStatus: "draft",
+    privateToken: randomBytes(32).toString("base64url"),
+    groupTerms: "Group cabin requests are reviewed personally by Wendy. A cabin is not held until Wendy confirms the live quote and the household approves it.",
+    roomStrategy: "Collect room count, traveler names, ages, preferred cabin style, and forward, mid ship, aft, or no preference. Wendy confirms the live cabin category, deck, and placement.",
+    bookingWindow: "Link is ready to share after Wendy confirms the current group details and family request window.",
+    advisorNotes: "Review group rates and booking deadline before sharing the private family link.",
+  });
+  return (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, Number(result[0].insertId))).limit(1))[0];
+}
+
+export async function getGroupTravelProfile(groupKey: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Group profile storage is unavailable");
+  const profile = (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.groupKey, groupKey)).limit(1))[0];
+  if (!profile) return undefined;
+  const [experience, cabinRequests] = await Promise.all([
+    db.select().from(cruiseExperiences).where(eq(cruiseExperiences.id, profile.experienceId)).limit(1),
+    getGroupCabinRequests(profile.groupKey),
+  ]);
+  return { profile, experience: experience[0], cabinRequests };
+}
+
+export async function updateGroupTravelProfile(id: number, input: {
+  stage: GroupProfileStage;
+  shareStatus: GroupProfileShareStatus;
+  coordinatorName?: string;
+  coordinatorEmail?: string;
+  coordinatorPhone?: string;
+  groupTerms?: string;
+  roomStrategy?: string;
+  bookingWindow?: string;
+  advisorNotes?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Group profile storage is unavailable");
+  const current = (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, id)).limit(1))[0];
+  if (!current) throw new Error("Group profile not found");
+  const shareStatus = input.shareStatus === "shared" && current.shareStatus !== "shared" ? current.shareStatus : input.shareStatus;
+  await db.update(groupTravelProfiles).set({
+    stage: input.stage,
+    shareStatus,
+    coordinatorName: input.coordinatorName || null,
+    coordinatorEmail: input.coordinatorEmail || null,
+    coordinatorPhone: input.coordinatorPhone || null,
+    groupTerms: input.groupTerms || null,
+    roomStrategy: input.roomStrategy || null,
+    bookingWindow: input.bookingWindow || null,
+    advisorNotes: input.advisorNotes || null,
+  }).where(eq(groupTravelProfiles.id, id));
+}
+
+export async function shareGroupTravelProfile(id: number, validForDays: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Group profile storage is unavailable");
+  const current = (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, id)).limit(1))[0];
+  if (!current) throw new Error("Group profile not found");
+  if (current.stage !== "ready_to_share" && current.shareStatus !== "shared") throw new Error("Set the group stage to Ready to share before creating a family link.");
+  await db.update(groupTravelProfiles).set({ shareStatus: "shared", stage: "family_details", expiresAt: new Date(Date.now() + validForDays * 24 * 60 * 60 * 1000) }).where(eq(groupTravelProfiles.id, id));
+  return (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, id)).limit(1))[0];
+}
+
+export async function getPrivateGroupTravelProfile(privateToken: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Group profile storage is unavailable");
+  const profile = (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.privateToken, privateToken)).limit(1))[0];
+  if (!profile || profile.shareStatus !== "shared" || (profile.expiresAt && profile.expiresAt.getTime() < Date.now())) return undefined;
+  const experience = (await db.select().from(cruiseExperiences).where(eq(cruiseExperiences.id, profile.experienceId)).limit(1))[0];
+  return experience ? { profile, experience } : undefined;
 }
 
 export type CreateAdvisorDealInput = {

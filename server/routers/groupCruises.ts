@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createAdvisorDeal, createGroupCabinRequest, getGroupCabinRequests, updateGroupCabinRequestStatus } from "../db";
+import { createAdvisorDeal, createGroupCabinRequest, getGroupCabinRequests, getPrivateGroupTravelProfile, updateGroupCabinRequestStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 import { sendGroupCabinRequestEmail } from "../resendAlerts";
@@ -29,6 +29,7 @@ const cabinRequestInput = z.object({
   phone: z.string().trim().min(7).max(40),
   notes: z.string().trim().max(2000).optional().default(""),
   consent: z.literal(true),
+  privateToken: z.string().trim().min(32).max(96).optional(),
   rooms: z.array(roomInput).min(1).max(12),
 });
 
@@ -43,6 +44,10 @@ async function notifyWendy(title: string, content: string) {
 
 export const groupCruisesRouter = router({
   createCabinRequest: publicProcedure.input(cabinRequestInput).mutation(async ({ input }) => {
+    if (input.privateToken) {
+      const privateProfile = await getPrivateGroupTravelProfile(input.privateToken);
+      if (!privateProfile || privateProfile.profile.groupKey !== input.groupKey) throw new Error("This private group link is no longer available.");
+    }
     const request = await createGroupCabinRequest(input);
     const travelerCount = input.rooms.reduce((total, room) => total + room.travelers.length, 0);
     try {
