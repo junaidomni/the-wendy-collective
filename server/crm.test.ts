@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
-const mocks = vi.hoisted(() => ({ createAdvisorDeal: vi.fn(), createClientProposal: vi.fn(), createProposalResponse: vi.fn(), ensureGrimsleyCruiseExperience: vi.fn(), ensureGrimsleyGroupProfile: vi.fn(), getGroupTravelProfile: vi.fn(), getPrivateClientProposal: vi.fn(), getPrivateGroupTravelProfile: vi.fn(), listAdvisorDeals: vi.fn(), listClientProposals: vi.fn(), listCruiseExperiences: vi.fn(), listProposalResponses: vi.fn(), markClientProposalShared: vi.fn(), shareGroupTravelProfile: vi.fn(), syncExistingRequestsToAdvisorDeals: vi.fn(), updateAdvisorDeal: vi.fn(), updateGroupTravelProfile: vi.fn(), updateProposalResponseStatus: vi.fn(), createCruiseExperience: vi.fn(), notifyOwner: vi.fn() }));
+const mocks = vi.hoisted(() => ({ advanceAdvisorDealWorkflow: vi.fn(), advanceGroupWorkflow: vi.fn(), createAdvisorDeal: vi.fn(), createClientProposal: vi.fn(), createProposalResponse: vi.fn(), ensureGrimsleyCruiseExperience: vi.fn(), ensureGrimsleyGroupProfile: vi.fn(), getGroupTravelProfile: vi.fn(), getPrivateClientProposal: vi.fn(), getPrivateGroupTravelProfile: vi.fn(), listAdvisorDeals: vi.fn(), listClientProposals: vi.fn(), listCruiseExperiences: vi.fn(), listProposalResponses: vi.fn(), listWorkflowStageEvents: vi.fn(), markClientProposalShared: vi.fn(), reopenAdvisorDealWorkflow: vi.fn(), reopenGroupWorkflow: vi.fn(), saveGroupWorkflowDetails: vi.fn(), shareGroupTravelProfile: vi.fn(), syncExistingRequestsToAdvisorDeals: vi.fn(), updateAdvisorDeal: vi.fn(), updateGroupTravelProfile: vi.fn(), updateProposalResponseStatus: vi.fn(), createCruiseExperience: vi.fn(), notifyOwner: vi.fn() }));
 vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), ...mocks }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
 
@@ -22,7 +22,7 @@ describe("advisor CRM and private proposal workflow", () => {
     mocks.ensureGrimsleyCruiseExperience.mockResolvedValue({ id: 3, shipName: "Mardi Gras" });
     mocks.ensureGrimsleyGroupProfile.mockResolvedValue({ id: 9 });
     mocks.getGroupTravelProfile.mockResolvedValue({ profile: { id: 9, groupKey: "grimsley-hs-graduation-cruise-2027", stage: "proposal_build", shareStatus: "draft" }, experience: { shipName: "Mardi Gras" }, cabinRequests: [] });
-    mocks.listAdvisorDeals.mockResolvedValue([]); mocks.listClientProposals.mockResolvedValue([]); mocks.listCruiseExperiences.mockResolvedValue([]); mocks.listProposalResponses.mockResolvedValue([]);
+    mocks.listAdvisorDeals.mockResolvedValue([]); mocks.listClientProposals.mockResolvedValue([]); mocks.listCruiseExperiences.mockResolvedValue([]); mocks.listProposalResponses.mockResolvedValue([]); mocks.advanceAdvisorDealWorkflow.mockResolvedValue({ stage: "discovery_call" }); mocks.advanceGroupWorkflow.mockResolvedValue({ workflowStage: "proposal_shared" }); mocks.listWorkflowStageEvents.mockResolvedValue([]);
     mocks.notifyOwner.mockResolvedValue(true);
   });
 
@@ -47,7 +47,7 @@ describe("advisor CRM and private proposal workflow", () => {
     mocks.shareGroupTravelProfile.mockResolvedValue({ privateToken: token, expiresAt: new Date("2026-09-30") });
     const shared = await caller.crm.shareGroupProfile({ id: 9, validForDays: 30 });
     expect(shared.privateToken).toBe(token);
-    expect(mocks.shareGroupTravelProfile).toHaveBeenCalledWith(9, 30);
+    expect(mocks.shareGroupTravelProfile).toHaveBeenCalledWith(9, 30, owner.id);
     await expect(appRouter.createCaller(context()).crm.shareGroupProfile({ id: 9, validForDays: 30 })).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
@@ -71,6 +71,23 @@ describe("advisor CRM and private proposal workflow", () => {
     const caller = appRouter.createCaller(context(owner));
     await caller.crm.updateDeal({ id: 51, stage: "discovery_call", meetingAt: "2026-09-02T14:30", meetingNotes: "Review summer dates, balcony options, and budget.", nextAction: "Call client" });
     expect(mocks.updateAdvisorDeal).toHaveBeenCalledWith(51, expect.objectContaining({ stage: "discovery_call", meetingAt: expect.any(Date), meetingNotes: "Review summer dates, balcony options, and budget." }));
+  });
+
+  it("moves a client forward through Wendy’s protected stage action and uses the workflow layer", async () => {
+    const result = await appRouter.createCaller(context(owner)).crm.continueDealStage({ id: 51, nextAction: "Prepare discovery agenda", meetingAt: "2026-09-02T14:30", stageData: { firstResponse: "Client prefers a balcony." } });
+    expect(result).toEqual({ success: true, stage: "discovery_call" });
+    expect(mocks.advanceAdvisorDealWorkflow).toHaveBeenCalledWith(51, owner.id, expect.objectContaining({ nextAction: "Prepare discovery agenda", meetingAt: expect.any(Date), stageData: { firstResponse: "Client prefers a balcony." } }));
+    await expect(appRouter.createCaller(context()).crm.continueDealStage({ id: 51 })).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("keeps reopen, group stage, and group history controls inside Wendy’s protected workflow", async () => {
+    const caller = appRouter.createCaller(context(owner));
+    await caller.crm.reopenDealStage({ id: 51, stage: "discovery_call", reason: "The client changed travel dates." });
+    expect(mocks.reopenAdvisorDealWorkflow).toHaveBeenCalledWith(51, owner.id, "discovery_call", "The client changed travel dates.");
+    await caller.crm.continueGroupStage({ id: 9, experienceId: 3, stageData: { proposalTitle: "Mardi Gras group proposal" } });
+    expect(mocks.advanceGroupWorkflow).toHaveBeenCalledWith(9, owner.id, expect.objectContaining({ experienceId: 3 }));
+    await caller.crm.groupHistory({ id: 9 });
+    expect(mocks.listWorkflowStageEvents).toHaveBeenCalledWith("group", 9);
   });
 
   it("allows a client to respond only through a valid private link and alerts Wendy", async () => {

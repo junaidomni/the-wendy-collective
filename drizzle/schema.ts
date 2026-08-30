@@ -110,6 +110,7 @@ export const groupTravelProfiles = mysqlTable("group_travel_profiles", {
   coordinatorPhone: varchar("coordinatorPhone", { length: 40 }),
   experienceId: int("experienceId").notNull(),
   stage: mysqlEnum("stage", ["group_setup", "proposal_build", "ready_to_share", "family_details", "live_quote", "booking", "booked", "closed"]).default("group_setup").notNull(),
+  workflowStage: mysqlEnum("workflowStage", ["new_inquiry", "discovery_call", "building_proposal", "proposal_shared", "family_details", "ready_to_book", "booking", "booked", "closed"]).default("new_inquiry").notNull(),
   shareStatus: mysqlEnum("shareStatus", ["draft", "shared", "paused", "closed"]).default("draft").notNull(),
   privateToken: varchar("privateToken", { length: 96 }).notNull().unique(),
   expiresAt: timestamp("expiresAt"),
@@ -117,6 +118,7 @@ export const groupTravelProfiles = mysqlTable("group_travel_profiles", {
   roomStrategy: text("roomStrategy"),
   bookingWindow: text("bookingWindow"),
   advisorNotes: text("advisorNotes"),
+  stageDataJson: text("stageDataJson"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -131,13 +133,14 @@ export const advisorDeals = mysqlTable("advisor_deals", {
   phone: varchar("phone", { length: 40 }).notNull(),
   title: varchar("title", { length: 180 }).notNull(),
   travelSummary: text("travelSummary"),
-  stage: mysqlEnum("stage", ["new_inquiry", "discovery_call", "building_proposal", "proposal_shared", "ready_to_book", "booked", "closed"]).default("new_inquiry").notNull(),
+  stage: mysqlEnum("stage", ["new_inquiry", "discovery_call", "building_proposal", "proposal_shared", "family_details", "ready_to_book", "booking", "booked", "closed"]).default("new_inquiry").notNull(),
   experienceId: int("experienceId"),
   nextAction: text("nextAction"),
   meetingAt: timestamp("meetingAt"),
   meetingNotes: text("meetingNotes"),
   advisorNotes: text("advisorNotes"),
   reservationReference: varchar("reservationReference", { length: 160 }),
+  stageDataJson: text("stageDataJson"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -168,6 +171,19 @@ export const proposalResponses = mysqlTable("proposal_responses", {
   roomsJson: text("roomsJson").notNull(),
   notes: text("notes"),
   status: mysqlEnum("status", ["new", "reviewed", "quoted", "closed"]).default("new").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const workflowStageEvents = mysqlTable("workflow_stage_events", {
+  id: int("id").autoincrement().primaryKey(),
+  entityType: mysqlEnum("entityType", ["deal", "group"]).notNull(),
+  entityId: int("entityId").notNull(),
+  fromStage: varchar("fromStage", { length: 64 }),
+  toStage: varchar("toStage", { length: 64 }).notNull(),
+  action: varchar("action", { length: 96 }).notNull(),
+  reason: text("reason"),
+  snapshotJson: text("snapshotJson"),
+  actorUserId: int("actorUserId"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

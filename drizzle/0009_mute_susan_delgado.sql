@@ -1,0 +1,1 @@
+ALTER TABLE `group_travel_profiles` ADD `workflowStage` enum('new_inquiry','discovery_call','building_proposal','proposal_shared','family_details','ready_to_book','booking','booked','closed') DEFAULT 'new_inquiry' NOT NULL;

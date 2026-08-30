@@ -1,11 +1,11 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, markClientProposalShared, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
+import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { storagePut } from "../storage";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 
-const dealStages = ["new_inquiry", "discovery_call", "building_proposal", "proposal_shared", "ready_to_book", "booked", "closed"] as const;
+const dealStages = ["new_inquiry", "discovery_call", "building_proposal", "proposal_shared", "family_details", "ready_to_book", "booking", "booked", "closed"] as const;
 const groupProfileStages = ["group_setup", "proposal_build", "ready_to_share", "family_details", "live_quote", "booking", "booked", "closed"] as const;
 const groupShareStatuses = ["draft", "shared", "paused", "closed"] as const;
 const roomInput = z.object({ occupancy: z.number().int().min(1).max(8), roomType: z.string().trim().min(2).max(80), locationPreference: z.string().trim().min(2).max(80), travelerDetails: z.array(z.object({ fullName: z.string().trim().min(2).max(160), dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) })).min(1).max(8) });
@@ -50,6 +50,15 @@ export const crmRouter = router({
     await updateAdvisorDeal(input.id, { ...input, meetingAt: input.meetingAt ? new Date(input.meetingAt) : undefined });
     return { success: true };
   }),
+  continueDealStage: adminProcedure.input(z.object({ id: z.number().int().positive(), nextAction: z.string().trim().max(1000).optional().default(""), meetingAt: z.string().trim().max(32).optional().default(""), meetingNotes: z.string().trim().max(5000).optional().default(""), advisorNotes: z.string().trim().max(5000).optional().default(""), reservationReference: z.string().trim().max(160).optional().default(""), experienceId: z.number().int().positive().optional(), stageData: z.record(z.string(), z.string().trim().max(1600)).optional().default({}) })).mutation(async ({ ctx, input }) => {
+    const updated = await advanceAdvisorDealWorkflow(input.id, ctx.user.id, { ...input, meetingAt: input.meetingAt ? new Date(input.meetingAt) : undefined });
+    return { success: true, stage: updated.stage };
+  }),
+  reopenDealStage: adminProcedure.input(z.object({ id: z.number().int().positive(), stage: z.enum(dealStages), reason: z.string().trim().min(6).max(1000) })).mutation(async ({ ctx, input }) => {
+    await reopenAdvisorDealWorkflow(input.id, ctx.user.id, input.stage, input.reason);
+    return { success: true };
+  }),
+  dealHistory: adminProcedure.input(z.object({ id: z.number().int().positive() })).query(({ input }) => listWorkflowStageEvents("deal", input.id)),
   createProposal: adminProcedure.input(z.object({ dealId: z.number().int().positive(), experienceId: z.number().int().positive().optional(), title: z.string().trim().min(3).max(180), summary: z.string().trim().max(5000).optional().default(""), roomGuidance: z.string().trim().max(5000).optional().default(""), pricingSummary: z.string().trim().max(5000).optional().default(""), validForDays: z.number().int().min(1).max(180).default(30) })).mutation(async ({ input }) => {
     const privateToken = randomBytes(32).toString("base64url");
     const proposal = await createClientProposal({ ...input, privateToken, expiresAt: new Date(Date.now() + input.validForDays * 24 * 60 * 60 * 1000) });
@@ -79,8 +88,21 @@ export const crmRouter = router({
     await updateGroupTravelProfile(input.id, input);
     return { success: true };
   }),
-  shareGroupProfile: adminProcedure.input(z.object({ id: z.number().int().positive(), validForDays: z.number().int().min(1).max(180).default(30) })).mutation(async ({ input }) => {
-    const profile = await shareGroupTravelProfile(input.id, input.validForDays);
+  saveGroupWorkflow: adminProcedure.input(z.object({ id: z.number().int().positive(), experienceId: z.number().int().positive().optional(), coordinatorName: z.string().trim().max(160).optional().default(""), coordinatorEmail: z.string().trim().max(320).optional().default(""), coordinatorPhone: z.string().trim().max(40).optional().default(""), groupTerms: z.string().trim().max(5000).optional().default(""), roomStrategy: z.string().trim().max(5000).optional().default(""), bookingWindow: z.string().trim().max(1000).optional().default(""), advisorNotes: z.string().trim().max(5000).optional().default("") })).mutation(async ({ input }) => {
+    await saveGroupWorkflowDetails(input.id, input);
+    return { success: true };
+  }),
+  continueGroupStage: adminProcedure.input(z.object({ id: z.number().int().positive(), nextAction: z.string().trim().max(1000).optional().default(""), meetingAt: z.string().trim().max(32).optional().default(""), meetingNotes: z.string().trim().max(5000).optional().default(""), reservationReference: z.string().trim().max(160).optional().default(""), experienceId: z.number().int().positive().optional(), stageData: z.record(z.string(), z.string().trim().max(1600)).optional().default({}) })).mutation(async ({ ctx, input }) => {
+    const updated = await advanceGroupWorkflow(input.id, ctx.user.id, { ...input, meetingAt: input.meetingAt ? new Date(input.meetingAt) : undefined });
+    return { success: true, stage: updated.workflowStage };
+  }),
+  reopenGroupStage: adminProcedure.input(z.object({ id: z.number().int().positive(), stage: z.enum(dealStages), reason: z.string().trim().min(6).max(1000) })).mutation(async ({ ctx, input }) => {
+    await reopenGroupWorkflow(input.id, ctx.user.id, input.stage, input.reason);
+    return { success: true };
+  }),
+  groupHistory: adminProcedure.input(z.object({ id: z.number().int().positive() })).query(({ input }) => listWorkflowStageEvents("group", input.id)),
+  shareGroupProfile: adminProcedure.input(z.object({ id: z.number().int().positive(), validForDays: z.number().int().min(1).max(180).default(30) })).mutation(async ({ ctx, input }) => {
+    const profile = await shareGroupTravelProfile(input.id, input.validForDays, ctx.user.id);
     return { success: true, privateToken: profile.privateToken, expiresAt: profile.expiresAt };
   }),
   getPrivateProposal: publicProcedure.input(z.object({ token: z.string().trim().min(32).max(96) })).query(({ input }) => getPrivateClientProposal(input.token)),

@@ -162,3 +162,11 @@
 - [x] Add editable proposal-side client and family details with deliberate stage transitions from proposal preparation to family details, live quote, booking, and booked travel.
 - [x] Keep passport, payment-card, and supplier-account credentials out of the website until a specifically authorized secure integration is available.
 - [x] Research and document the supplier-data strategy for Carnival, Royal Caribbean, Norwegian, and IntelliTravel before adding any external API connection.
+- [x] Research and design a stage-gated CRM workflow in which each client or group stage has a focused profile, prerequisites, preserved history, and a deliberate next-stage action instead of a free-form stage dropdown.
+- [x] Define the specific record layout, required fields, workflow actions, and lock rules for New Inquiry, Discovery, Proposal Build, Proposal Shared, Family Details, Live Quote, Booking, Booked, and Closed.
+- [x] Rebuild the current client and group profile interactions around the approved stage-gated workflow after the full design was reviewed.
+- [x] Add a server-validated nine-stage state engine with required completion gates, forward-only transitions, controlled Wendy-only reopen actions, and immutable transition history.
+- [x] Rebuild individual client profiles so each stage has one focused workspace, a current-stage checklist, locked future stages, completed-stage history, and a specific continue action.
+- [x] Rebuild group-program profiles so Grimsley and future groups use the same stage engine while retaining coordinator, group terms, shared proposal, and household-response operations.
+- [x] Replace the free-form stage dropdown with stage-specific actions and protect private proposal links against sharing before the required proposal stage is complete.
+- [x] Add tests and responsive verification for stage gates, history, reopening, individual profiles, group profiles, and secure proposal access before publishing.

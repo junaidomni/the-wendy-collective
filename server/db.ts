@@ -16,6 +16,7 @@ import {
   proposalResponses,
   tripInquiries,
   users,
+  workflowStageEvents,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -256,19 +257,79 @@ export async function ensureGrimsleyCruiseExperience() {
 
 export type GroupProfileStage = "group_setup" | "proposal_build" | "ready_to_share" | "family_details" | "live_quote" | "booking" | "booked" | "closed";
 export type GroupProfileShareStatus = "draft" | "shared" | "paused" | "closed";
+export type WorkflowStage = "new_inquiry" | "discovery_call" | "building_proposal" | "proposal_shared" | "family_details" | "ready_to_book" | "booking" | "booked" | "closed";
+
+const workflowStages: WorkflowStage[] = ["new_inquiry", "discovery_call", "building_proposal", "proposal_shared", "family_details", "ready_to_book", "booking", "booked", "closed"];
+const groupStageForWorkflow: Record<WorkflowStage, GroupProfileStage> = { new_inquiry: "group_setup", discovery_call: "group_setup", building_proposal: "proposal_build", proposal_shared: "ready_to_share", family_details: "family_details", ready_to_book: "live_quote", booking: "booking", booked: "booked", closed: "closed" };
+
+function parseStageData(raw: string | null | undefined) {
+  try {
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Record<string, Record<string, string>> : {};
+  } catch { return {}; }
+}
+
+function mergeStageData(raw: string | null | undefined, stage: WorkflowStage, data: Record<string, string>) {
+  return JSON.stringify({ ...parseStageData(raw), [stage]: data });
+}
+
+function nextWorkflowStage(stage: WorkflowStage) {
+  const index = workflowStages.indexOf(stage);
+  return index >= 0 && index < workflowStages.length - 1 ? workflowStages[index + 1] : undefined;
+}
+
+function validateTransition(fromStage: WorkflowStage, toStage: WorkflowStage, input: { nextAction?: string; meetingAt?: Date; meetingNotes?: string; experienceId?: number; reservationReference?: string; stageData?: Record<string, string> }) {
+  if (nextWorkflowStage(fromStage) !== toStage) throw new Error("This record can only move to its next workflow stage. Reopen a completed stage before making a correction.");
+  if (fromStage === "new_inquiry" && !input.nextAction?.trim() && !input.meetingAt) throw new Error("Add a next action or discovery appointment before continuing.");
+  if (fromStage === "discovery_call" && !input.meetingNotes?.trim()) throw new Error("Record the discovery outcome and priorities before building the proposal.");
+  if (fromStage === "building_proposal" && !input.experienceId && !input.stageData?.proposalTitle?.trim()) throw new Error("Select an approved experience or save a tailored proposal title before sharing.");
+  if (fromStage === "ready_to_book" && !input.stageData?.quoteReference?.trim()) throw new Error("Record the verified live quote reference before proceeding to booking.");
+  if (fromStage === "booking" && !input.reservationReference?.trim()) throw new Error("Record the supplier confirmation before marking this trip booked.");
+}
+
+async function writeWorkflowStageEvent(input: { entityType: "deal" | "group"; entityId: number; fromStage?: WorkflowStage; toStage: WorkflowStage; action: string; reason?: string; snapshot?: Record<string, string>; actorUserId?: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Workflow history storage is unavailable");
+  await db.insert(workflowStageEvents).values({ entityType: input.entityType, entityId: input.entityId, fromStage: input.fromStage || null, toStage: input.toStage, action: input.action, reason: input.reason || null, snapshotJson: input.snapshot ? JSON.stringify(input.snapshot) : null, actorUserId: input.actorUserId || null });
+}
+
+export async function listWorkflowStageEvents(entityType: "deal" | "group", entityId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Workflow history storage is unavailable");
+  const events = await db.select().from(workflowStageEvents).where(eq(workflowStageEvents.entityType, entityType)).orderBy(desc(workflowStageEvents.createdAt)).limit(100);
+  return events.filter((event) => event.entityId === entityId);
+}
 
 export async function ensureGrimsleyGroupProfile() {
   const db = await getDb();
   if (!db) throw new Error("Group profile storage is unavailable");
   const experience = await ensureGrimsleyCruiseExperience();
   const existing = await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.groupKey, "grimsley-hs-graduation-cruise-2027")).limit(1);
-  if (existing[0]) return existing[0];
+  if (existing[0]) {
+    const legacyStageMap = {
+      group_setup: "new_inquiry",
+      proposal_build: "building_proposal",
+      ready_to_share: "proposal_shared",
+      family_details: "family_details",
+      live_quote: "ready_to_book",
+      booking: "booking",
+      booked: "booked",
+      closed: "closed",
+    } as const;
+    const mappedStage = legacyStageMap[existing[0].stage];
+    if (existing[0].workflowStage === "new_inquiry" && mappedStage !== "new_inquiry") {
+      await db.update(groupTravelProfiles).set({ workflowStage: mappedStage }).where(eq(groupTravelProfiles.id, existing[0].id));
+      return (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, existing[0].id)).limit(1))[0];
+    }
+    return existing[0];
+  }
   const result = await db.insert(groupTravelProfiles).values({
     groupKey: "grimsley-hs-graduation-cruise-2027",
     title: "Grimsley High School Graduation Cruise 2027",
     organizationName: "Grimsley High School · The Class of 2027",
     experienceId: experience.id,
     stage: "proposal_build",
+    workflowStage: "building_proposal",
     shareStatus: "draft",
     privateToken: randomBytes(32).toString("base64url"),
     groupTerms: "Group cabin requests are reviewed personally by Wendy. A cabin is not held until Wendy confirms the live quote and the household approves it.",
@@ -322,13 +383,53 @@ export async function updateGroupTravelProfile(id: number, input: {
   }).where(eq(groupTravelProfiles.id, id));
 }
 
-export async function shareGroupTravelProfile(id: number, validForDays: number) {
+export async function saveGroupWorkflowDetails(id: number, input: { experienceId?: number; coordinatorName?: string; coordinatorEmail?: string; coordinatorPhone?: string; groupTerms?: string; roomStrategy?: string; bookingWindow?: string; advisorNotes?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Group profile storage is unavailable");
   const current = (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, id)).limit(1))[0];
   if (!current) throw new Error("Group profile not found");
-  if (current.stage !== "ready_to_share" && current.shareStatus !== "shared") throw new Error("Set the group stage to Ready to share before creating a family link.");
-  await db.update(groupTravelProfiles).set({ shareStatus: "shared", stage: "family_details", expiresAt: new Date(Date.now() + validForDays * 24 * 60 * 60 * 1000) }).where(eq(groupTravelProfiles.id, id));
+  await db.update(groupTravelProfiles).set({ experienceId: input.experienceId || current.experienceId, coordinatorName: input.coordinatorName ?? current.coordinatorName, coordinatorEmail: input.coordinatorEmail ?? current.coordinatorEmail, coordinatorPhone: input.coordinatorPhone ?? current.coordinatorPhone, groupTerms: input.groupTerms ?? current.groupTerms, roomStrategy: input.roomStrategy ?? current.roomStrategy, bookingWindow: input.bookingWindow ?? current.bookingWindow, advisorNotes: input.advisorNotes ?? current.advisorNotes }).where(eq(groupTravelProfiles.id, id));
+}
+
+export async function advanceGroupWorkflow(id: number, actorUserId: number, input: { nextAction?: string; meetingAt?: Date; meetingNotes?: string; experienceId?: number; reservationReference?: string; stageData?: Record<string, string> }) {
+  const db = await getDb();
+  if (!db) throw new Error("Group profile storage is unavailable");
+  const current = (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, id)).limit(1))[0];
+  if (!current) throw new Error("Group profile not found");
+  const fromStage = current.workflowStage as WorkflowStage;
+  const toStage = nextWorkflowStage(fromStage);
+  if (!toStage) throw new Error("This group is already at its final workflow stage.");
+  validateTransition(fromStage, toStage, input);
+  if (fromStage === "building_proposal" && (!current.groupTerms || !current.roomStrategy || !current.bookingWindow)) throw new Error("Complete group terms, room strategy, and family request window before sharing.");
+  if (fromStage === "family_details") {
+    const requests = await getGroupCabinRequests(current.groupKey);
+    if (!requests.length) throw new Error("Wait for at least one family response before requesting live quotes.");
+  }
+  const stageDataJson = mergeStageData(current.stageDataJson, fromStage, input.stageData || {});
+  await db.update(groupTravelProfiles).set({ workflowStage: toStage, stage: groupStageForWorkflow[toStage], experienceId: input.experienceId || current.experienceId, advisorNotes: input.meetingNotes || current.advisorNotes, stageDataJson }).where(eq(groupTravelProfiles.id, id));
+  await writeWorkflowStageEvent({ entityType: "group", entityId: id, fromStage, toStage, action: "continue", snapshot: input.stageData, actorUserId });
+  return (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, id)).limit(1))[0];
+}
+
+export async function reopenGroupWorkflow(id: number, actorUserId: number, toStage: WorkflowStage, reason: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Group profile storage is unavailable");
+  const current = (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, id)).limit(1))[0];
+  if (!current) throw new Error("Group profile not found");
+  const fromStage = current.workflowStage as WorkflowStage;
+  if (workflowStages.indexOf(toStage) >= workflowStages.indexOf(fromStage)) throw new Error("Choose a completed prior stage to reopen.");
+  await db.update(groupTravelProfiles).set({ workflowStage: toStage, stage: groupStageForWorkflow[toStage] }).where(eq(groupTravelProfiles.id, id));
+  await writeWorkflowStageEvent({ entityType: "group", entityId: id, fromStage, toStage, action: "reopen", reason, actorUserId });
+}
+
+export async function shareGroupTravelProfile(id: number, validForDays: number, actorUserId?: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Group profile storage is unavailable");
+  const current = (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, id)).limit(1))[0];
+  if (!current) throw new Error("Group profile not found");
+  if (current.workflowStage !== "proposal_shared" && current.shareStatus !== "shared") throw new Error("Complete the Proposal shared stage before creating a family link.");
+  await db.update(groupTravelProfiles).set({ shareStatus: "shared", stage: "family_details", workflowStage: "family_details", expiresAt: new Date(Date.now() + validForDays * 24 * 60 * 60 * 1000) }).where(eq(groupTravelProfiles.id, id));
+  await writeWorkflowStageEvent({ entityType: "group", entityId: id, fromStage: current.workflowStage as WorkflowStage, toStage: "family_details", action: "family_link_activated", actorUserId });
   return (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.id, id)).limit(1))[0];
 }
 
@@ -350,7 +451,7 @@ export type CreateAdvisorDealInput = {
   phone: string;
   title: string;
   travelSummary?: string;
-  stage: "new_inquiry" | "discovery_call" | "building_proposal" | "proposal_shared" | "ready_to_book" | "booked" | "closed";
+  stage: WorkflowStage;
   experienceId?: number;
   nextAction?: string;
   meetingAt?: Date;
@@ -386,6 +487,32 @@ export async function updateAdvisorDeal(id: number, input: Pick<CreateAdvisorDea
     advisorNotes: input.advisorNotes || null,
     reservationReference: input.reservationReference || null,
   }).where(eq(advisorDeals.id, id));
+}
+
+export async function advanceAdvisorDealWorkflow(id: number, actorUserId: number, input: { nextAction?: string; meetingAt?: Date; meetingNotes?: string; advisorNotes?: string; reservationReference?: string; experienceId?: number; stageData?: Record<string, string> }) {
+  const db = await getDb();
+  if (!db) throw new Error("Advisor deal storage is unavailable");
+  const current = (await db.select().from(advisorDeals).where(eq(advisorDeals.id, id)).limit(1))[0];
+  if (!current) throw new Error("Client deal not found");
+  const fromStage = current.stage as WorkflowStage;
+  const toStage = nextWorkflowStage(fromStage);
+  if (!toStage) throw new Error("This client is already at its final workflow stage.");
+  validateTransition(fromStage, toStage, input);
+  const stageDataJson = mergeStageData(current.stageDataJson, fromStage, input.stageData || {});
+  await db.update(advisorDeals).set({ stage: toStage, experienceId: input.experienceId || current.experienceId, nextAction: input.nextAction || current.nextAction, meetingAt: input.meetingAt || current.meetingAt, meetingNotes: input.meetingNotes || current.meetingNotes, advisorNotes: input.advisorNotes || current.advisorNotes, reservationReference: input.reservationReference || current.reservationReference, stageDataJson }).where(eq(advisorDeals.id, id));
+  await writeWorkflowStageEvent({ entityType: "deal", entityId: id, fromStage, toStage, action: "continue", snapshot: input.stageData, actorUserId });
+  return (await db.select().from(advisorDeals).where(eq(advisorDeals.id, id)).limit(1))[0];
+}
+
+export async function reopenAdvisorDealWorkflow(id: number, actorUserId: number, toStage: WorkflowStage, reason: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Advisor deal storage is unavailable");
+  const current = (await db.select().from(advisorDeals).where(eq(advisorDeals.id, id)).limit(1))[0];
+  if (!current) throw new Error("Client deal not found");
+  const fromStage = current.stage as WorkflowStage;
+  if (workflowStages.indexOf(toStage) >= workflowStages.indexOf(fromStage)) throw new Error("Choose a completed prior stage to reopen.");
+  await db.update(advisorDeals).set({ stage: toStage }).where(eq(advisorDeals.id, id));
+  await writeWorkflowStageEvent({ entityType: "deal", entityId: id, fromStage, toStage, action: "reopen", reason, actorUserId });
 }
 
 export async function listAdvisorDeals() {

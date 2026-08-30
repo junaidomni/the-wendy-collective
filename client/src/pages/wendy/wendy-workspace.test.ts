@@ -9,8 +9,9 @@ describe("focused Wendy CRM workspace", () => {
   it("maps each group workflow stage into a visible CRM pipeline stage", () => {
     expect(groupPipelineStage.group_setup).toBe("new_inquiry");
     expect(groupPipelineStage.proposal_build).toBe("building_proposal");
-    expect(groupPipelineStage.family_details).toBe("proposal_shared");
+    expect(groupPipelineStage.family_details).toBe("family_details");
     expect(groupPipelineStage.live_quote).toBe("ready_to_book");
+    expect(groupPipelineStage.booking).toBe("booking");
     expect(groupPipelineStage.booked).toBe("booked");
   });
 
@@ -22,11 +23,12 @@ describe("focused Wendy CRM workspace", () => {
     expect(readSource("client/src/pages/wendy/WendyPipeline.tsx")).toContain("dealStages.map");
   });
 
-  it("keeps Grimsley in a focused profile with overview, family, proposal, and operations views", () => {
+  it("keeps Grimsley in a focused stage profile with family review, history, and private-link controls", () => {
     const source = readSource("client/src/pages/wendy/WendyGroups.tsx");
-    expect(source).toContain('"overview" | "families" | "proposal" | "operations"');
-    expect(source).toContain("Create 30 day link");
+    expect(source).toContain('"stage" | "families" | "history"');
+    expect(source).toContain("Create 30 day family link");
     expect(source).toContain("Family request inbox");
+    expect(source).toContain("JourneyRail");
   });
 
   it("registers each internal workspace view behind the Wendy route namespace", () => {
