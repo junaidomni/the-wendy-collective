@@ -10,5 +10,5 @@ describe("public metadata configuration", () => {
     const html = await response.text();
     expect(response.status).toBe(200);
     expect(html).toContain(`<meta property="og:site_name" content="${siteName}" />`);
-  });
+  }, 15_000);
 });

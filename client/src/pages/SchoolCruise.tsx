@@ -54,7 +54,7 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
   const [showReturnToTop, setShowReturnToTop] = useState(false);
   const cabinRequest = trpc.groupCruises.createCabinRequest.useMutation();
   useEffect(() => {
-    const updateReturnToTopVisibility = () => setShowReturnToTop(window.scrollY > 480);
+    const updateReturnToTopVisibility = () => setShowReturnToTop(window.scrollY > 0);
     updateReturnToTopVisibility();
     window.addEventListener("scroll", updateReturnToTopVisibility, { passive: true });
     return () => window.removeEventListener("scroll", updateReturnToTopVisibility);
