@@ -41,6 +41,8 @@ export const privateClientRequests = mysqlTable("private_client_requests", {
 export const groupCabinRequests = mysqlTable("group_cabin_requests", {
   id: int("id").autoincrement().primaryKey(),
   groupKey: varchar("groupKey", { length: 120 }).notNull(),
+  familyPortalId: int("familyPortalId"),
+  revisionNumber: int("revisionNumber").default(1).notNull(),
   contactFirstName: varchar("contactFirstName", { length: 80 }).notNull(),
   contactLastName: varchar("contactLastName", { length: 80 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
@@ -52,6 +54,15 @@ export const groupCabinRequests = mysqlTable("group_cabin_requests", {
   notes: text("notes"),
   status: mysqlEnum("status", ["new", "contacted", "details_received", "quote_in_progress", "quote_shared", "booked", "closed"]).default("new").notNull(),
   advisorNotes: text("advisorNotes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const groupFamilyPortals = mysqlTable("group_family_portals", {
+  id: int("id").autoincrement().primaryKey(),
+  groupKey: varchar("groupKey", { length: 120 }).notNull(),
+  portalToken: varchar("portalToken", { length: 96 }).notNull().unique(),
+  currentRequestId: int("currentRequestId"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -201,6 +212,8 @@ export type PrivateClientRequest = typeof privateClientRequests.$inferSelect;
 export type InsertPrivateClientRequest = typeof privateClientRequests.$inferInsert;
 export type GroupCabinRequest = typeof groupCabinRequests.$inferSelect;
 export type InsertGroupCabinRequest = typeof groupCabinRequests.$inferInsert;
+export type GroupFamilyPortal = typeof groupFamilyPortals.$inferSelect;
+export type InsertGroupFamilyPortal = typeof groupFamilyPortals.$inferInsert;
 export type GroupCabinRequestRoom = typeof groupCabinRequestRooms.$inferSelect;
 export type InsertGroupCabinRequestRoom = typeof groupCabinRequestRooms.$inferInsert;
 export type GroupCabinRequestTraveler = typeof groupCabinRequestTravelers.$inferSelect;

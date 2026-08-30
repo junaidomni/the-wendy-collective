@@ -8,6 +8,7 @@ import {
   groupCabinRequestRooms,
   groupCabinRequestTravelers,
   groupCabinRequests,
+  groupFamilyPortals,
   groupTravelProfiles,
   InsertPrivateClientRequest,
   InsertTripInquiry,
@@ -83,6 +84,8 @@ export async function getPrivateClientRequests(userId: number) {
 
 export type CreateGroupCabinRequestInput = {
   groupKey: string;
+  familyPortalId?: number;
+  revisionNumber?: number;
   contactFirstName: string;
   contactLastName: string;
   email: string;
@@ -115,6 +118,8 @@ export async function createGroupCabinRequest(input: CreateGroupCabinRequestInpu
   if (!db) throw new Error("Group cabin request storage is unavailable");
   const result = await db.insert(groupCabinRequests).values({
     groupKey: input.groupKey,
+    familyPortalId: input.familyPortalId ?? null,
+    revisionNumber: input.revisionNumber ?? 1,
     contactFirstName: input.contactFirstName,
     contactLastName: input.contactLastName,
     email: input.email,
@@ -153,20 +158,72 @@ export async function createGroupCabinRequest(input: CreateGroupCabinRequestInpu
   return { id: cabinRequestId };
 }
 
+export async function createFamilyPortalCabinRequest(input: CreateGroupCabinRequestInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Group cabin request storage is unavailable");
+  const portalToken = randomBytes(32).toString("base64url");
+  const portalResult = await db.insert(groupFamilyPortals).values({ groupKey: input.groupKey, portalToken });
+  const familyPortalId = Number(portalResult[0].insertId);
+  const request = await createGroupCabinRequest({ ...input, familyPortalId, revisionNumber: 1 });
+  await db.update(groupFamilyPortals).set({ currentRequestId: request.id }).where(eq(groupFamilyPortals.id, familyPortalId));
+  return { ...request, familyPortalToken: portalToken, revisionNumber: 1 };
+}
+
+export async function createFamilyPortalRevision(portalToken: string, input: CreateGroupCabinRequestInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Group cabin request storage is unavailable");
+  const portal = (await db.select().from(groupFamilyPortals).where(eq(groupFamilyPortals.portalToken, portalToken)).limit(1))[0];
+  if (!portal || portal.groupKey !== input.groupKey) throw new Error("This private family update link is no longer available.");
+  const revisions = await db.select({ revisionNumber: groupCabinRequests.revisionNumber }).from(groupCabinRequests).where(eq(groupCabinRequests.familyPortalId, portal.id));
+  const revisionNumber = Math.max(0, ...revisions.map((revision) => revision.revisionNumber || 0)) + 1;
+  const request = await createGroupCabinRequest({ ...input, familyPortalId: portal.id, revisionNumber });
+  await db.update(groupFamilyPortals).set({ currentRequestId: request.id }).where(eq(groupFamilyPortals.id, portal.id));
+  return { ...request, familyPortalToken: portalToken, revisionNumber };
+}
+
 export async function getGroupCabinRequests(groupKey = "grimsley-hs-graduation-cruise-2027") {
   const db = await getDb();
   if (!db) throw new Error("Group cabin request storage is unavailable");
   const requests = await db.select().from(groupCabinRequests).where(eq(groupCabinRequests.groupKey, groupKey)).orderBy(desc(groupCabinRequests.createdAt)).limit(100);
   if (!requests.length) return [];
+  const portals = await db.select().from(groupFamilyPortals).where(eq(groupFamilyPortals.groupKey, groupKey));
+  const currentRequestByPortal = new Map(portals.map((portal) => [portal.id, portal.currentRequestId]));
   const rooms = await db.select().from(groupCabinRequestRooms).where(inArray(groupCabinRequestRooms.cabinRequestId, requests.map((request) => request.id)));
   const travelers = rooms.length ? await db.select().from(groupCabinRequestTravelers).where(inArray(groupCabinRequestTravelers.roomId, rooms.map((room) => room.id))) : [];
-  return requests.map((request) => ({
+  const hydrate = (request: typeof requests[number]) => ({
     ...request,
     rooms: rooms.filter((room) => room.cabinRequestId === request.id).map((room) => ({
       ...room,
       travelers: travelers.filter((traveler) => traveler.roomId === room.id),
     })),
+  });
+  return requests
+    .filter((request) => !request.familyPortalId || currentRequestByPortal.get(request.familyPortalId) === request.id)
+    .map((request) => ({
+      ...hydrate(request),
+      revisions: request.familyPortalId ? requests.filter((item) => item.familyPortalId === request.familyPortalId && item.id !== request.id).sort((a, b) => b.revisionNumber - a.revisionNumber).map(hydrate) : [],
+    }));
+}
+
+export async function getPrivateFamilyPortal(portalToken: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Group cabin request storage is unavailable");
+  const portal = (await db.select().from(groupFamilyPortals).where(eq(groupFamilyPortals.portalToken, portalToken)).limit(1))[0];
+  if (!portal) return undefined;
+  const profile = (await db.select().from(groupTravelProfiles).where(eq(groupTravelProfiles.groupKey, portal.groupKey)).limit(1))[0];
+  if (!profile || profile.shareStatus !== "shared" || (profile.expiresAt && profile.expiresAt.getTime() < Date.now())) return undefined;
+  const experience = (await db.select().from(cruiseExperiences).where(eq(cruiseExperiences.id, profile.experienceId)).limit(1))[0];
+  if (!experience) return undefined;
+  const requests = await db.select().from(groupCabinRequests).where(eq(groupCabinRequests.familyPortalId, portal.id)).orderBy(desc(groupCabinRequests.revisionNumber)).limit(100);
+  const rooms = requests.length ? await db.select().from(groupCabinRequestRooms).where(inArray(groupCabinRequestRooms.cabinRequestId, requests.map((request) => request.id))) : [];
+  const travelers = rooms.length ? await db.select().from(groupCabinRequestTravelers).where(inArray(groupCabinRequestTravelers.roomId, rooms.map((room) => room.id))) : [];
+  const revisions = requests.map((request) => ({
+    ...request,
+    rooms: rooms.filter((room) => room.cabinRequestId === request.id).map((room) => ({ ...room, travelers: travelers.filter((traveler) => traveler.roomId === room.id) })),
   }));
+  const currentRequest = revisions.find((request) => request.id === portal.currentRequestId) || revisions[0];
+  if (!currentRequest) return undefined;
+  return { portal: { id: portal.id, createdAt: portal.createdAt, updatedAt: portal.updatedAt }, profile, experience, currentRequest, revisions };
 }
 
 export async function updateGroupCabinRequestStatus(id: number, status: "new" | "contacted" | "details_received" | "quote_in_progress" | "quote_shared" | "booked" | "closed", advisorNotes: string) {

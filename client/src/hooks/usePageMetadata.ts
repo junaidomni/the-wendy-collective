@@ -1,6 +1,6 @@
 import { useEffect } from "react";
+import { PUBLIC_SITE_ORIGIN } from "@/lib/site";
 
-const SITE_URL = "https://wendytravel-g2nn4krv.manus.space";
 const DEFAULT_TITLE = "The Wendy Collective | Thoughtfully Planned Travel";
 const DEFAULT_DESCRIPTION = "The Wendy Collective creates thoughtfully planned journeys, elevated escapes, and effortless travel moments.";
 
@@ -26,7 +26,7 @@ const guideMetadata: Record<string, PageMetadata> = {
 };
 
 export function metadataForPath(path: string): PageMetadata {
-  if (path.startsWith("/proposal/") || path.startsWith("/group/")) return { title: "Private Proposal | The Wendy Collective", description: "A private travel proposal from The Wendy Collective.", indexable: false };
+  if (path.startsWith("/proposal/") || path.startsWith("/group/") || path.startsWith("/family/")) return { title: "Private Proposal | The Wendy Collective", description: "A private travel proposal from The Wendy Collective.", indexable: false };
   return routeMetadata[path] ?? guideMetadata[path] ?? { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION, indexable: false };
 }
 
@@ -39,7 +39,7 @@ function setMeta(selector: string, attribute: "name" | "property", content: stri
 export function usePageMetadata(path: string) {
   useEffect(() => {
     const metadata = metadataForPath(path);
-    const canonical = `${SITE_URL}${path === "/" ? "/" : path}`;
+    const canonical = `${PUBLIC_SITE_ORIGIN}${path === "/" ? "/" : path}`;
     document.title = metadata.title;
     setMeta('meta[name="description"]', "name", metadata.description);
     setMeta('meta[name="robots"]', "name", metadata.indexable ? "index, follow" : "noindex, nofollow");

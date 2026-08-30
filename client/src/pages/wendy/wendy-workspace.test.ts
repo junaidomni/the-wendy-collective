@@ -30,11 +30,22 @@ describe("focused Wendy CRM workspace", () => {
     expect(source).toContain("Family request inbox");
     expect(source).toContain("JourneyRail");
     expect(source).toContain("Secure Grimsley family link. Copy this address and send it to the family.");
-    expect(source).toContain("https://thewendycollective.com");
+    expect(readSource("client/src/lib/site.ts")).toContain("https://thewendycollective.com");
     expect(source).toContain("Active family link");
     expect(source).toContain("Copy family link");
     expect(source).toContain("Completed stage review");
     expect(source).toContain("Review");
+    expect(source).toContain("Current request");
+    expect(source).toContain("family-revision-history");
+  });
+
+  it("registers a token-gated household portal with a retained update link and confirmation message", () => {
+    const app = readSource("client/src/App.tsx");
+    const cruise = readSource("client/src/pages/SchoolCruise.tsx");
+    expect(app).toContain('path="/family/:token"');
+    expect(cruise).toContain("Thank you. Wendy will be in touch.");
+    expect(cruise).toContain("Open your private family portal");
+    expect(cruise).toContain("familyPortalToken");
   });
 
   it("registers each internal workspace view behind the Wendy route namespace", () => {

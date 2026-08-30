@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createAdvisorDeal, createGroupCabinRequest, getGroupCabinRequests, getPrivateGroupTravelProfile, updateGroupCabinRequestStatus } from "../db";
+import { createAdvisorDeal, createFamilyPortalCabinRequest, createFamilyPortalRevision, getGroupCabinRequests, getPrivateFamilyPortal, getPrivateGroupTravelProfile, updateGroupCabinRequestStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 import { sendGroupCabinRequestEmail } from "../resendAlerts";
@@ -51,6 +51,7 @@ const cabinRequestInput = z.object({
   }).optional(),
   consent: z.literal(true),
   privateToken: z.string().trim().min(32).max(96).optional(),
+  familyPortalToken: z.string().trim().min(32).max(96).optional(),
   rooms: z.array(roomInput).min(1).max(12),
 });
 
@@ -69,24 +70,30 @@ export const groupCruisesRouter = router({
       const privateProfile = await getPrivateGroupTravelProfile(input.privateToken);
       if (!privateProfile || privateProfile.profile.groupKey !== input.groupKey) throw new Error("This private group link is no longer available.");
     }
-    const request = await createGroupCabinRequest(input);
+    const familyPortal = input.familyPortalToken ? await getPrivateFamilyPortal(input.familyPortalToken) : undefined;
+    if (input.familyPortalToken && (!familyPortal || familyPortal.profile.groupKey !== input.groupKey)) throw new Error("This private family update link is no longer available.");
+    const request = input.familyPortalToken
+      ? await createFamilyPortalRevision(input.familyPortalToken, input)
+      : await createFamilyPortalCabinRequest(input);
     const travelerCount = input.rooms.reduce((total, room) => total + room.travelers.length, 0);
-    try {
-      await createAdvisorDeal({
-        sourceType: "group_cabin_request",
-        sourceId: request.id,
-        contactFirstName: input.contactFirstName,
-        contactLastName: input.contactLastName,
-        email: input.email,
-        phone: input.phone,
-        title: "Grimsley High School Graduation Cruise 2027",
-        travelSummary: `${input.rooms.length} requested rooms for ${travelerCount} travelers. ${input.notes || ""}`,
-        stage: "new_inquiry",
-        nextAction: "Review school cruise cabin request and prepare quote",
-      });
-    } catch (error) { console.error("[Group cruise] CRM handoff failed", { requestId: request.id, error }); }
+    if (!input.familyPortalToken) {
+      try {
+        await createAdvisorDeal({
+          sourceType: "group_cabin_request",
+          sourceId: request.id,
+          contactFirstName: input.contactFirstName,
+          contactLastName: input.contactLastName,
+          email: input.email,
+          phone: input.phone,
+          title: "Grimsley High School Graduation Cruise 2027",
+          travelSummary: `${input.rooms.length} requested rooms for ${travelerCount} travelers. ${input.notes || ""}`,
+          stage: "new_inquiry",
+          nextAction: "Review school cruise cabin request and prepare quote",
+        });
+      } catch (error) { console.error("[Group cruise] CRM handoff failed", { requestId: request.id, error }); }
+    }
     const content = [
-      `New Grimsley cabin request from ${input.contactFirstName} ${input.contactLastName}`,
+      `${input.familyPortalToken ? "Updated" : "New"} Grimsley cabin request from ${input.contactFirstName} ${input.contactLastName}`,
       `Email: ${input.email}`,
       `Phone: ${input.phone}`,
       `Rooms requested: ${input.rooms.length}`,
@@ -95,11 +102,12 @@ export const groupCruisesRouter = router({
       "Open Wendy’s workspace to review the room details and begin the quote.",
     ].join("\n");
     const [ownerNotificationSent, emailAlertStatus] = await Promise.all([
-      notifyWendy("New Grimsley cabin request · The Wendy Collective", content),
+      notifyWendy(`${input.familyPortalToken ? "Updated" : "New"} Grimsley cabin request · The Wendy Collective`, content),
       sendGroupCabinRequestEmail({ requestId: request.id, contactFirstName: input.contactFirstName, contactLastName: input.contactLastName, email: input.email, phone: input.phone, rooms: input.rooms.length, travelers: travelerCount }),
     ]);
-    return { success: true, requestId: request.id, ownerNotificationSent, emailAlertStatus };
+    return { success: true, requestId: request.id, familyPortalToken: request.familyPortalToken, revisionNumber: request.revisionNumber, ownerNotificationSent, emailAlertStatus };
   }),
+  getFamilyPortal: publicProcedure.input(z.object({ token: z.string().trim().min(32).max(96) })).query(({ input }) => getPrivateFamilyPortal(input.token)),
   listCabinRequests: adminProcedure.query(() => getGroupCabinRequests()),
   updateCabinRequestStatus: adminProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(statuses), advisorNotes: z.string().trim().max(4000).default("") })).mutation(async ({ input }) => {
     await updateGroupCabinRequestStatus(input.id, input.status, input.advisorNotes);

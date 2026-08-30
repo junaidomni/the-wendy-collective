@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
-const mocks = vi.hoisted(() => ({ createGroupCabinRequest: vi.fn(), createAdvisorDeal: vi.fn(), getGroupCabinRequests: vi.fn(), updateGroupCabinRequestStatus: vi.fn(), notifyOwner: vi.fn(), sendGroupCabinRequestEmail: vi.fn() }));
-vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createGroupCabinRequest: mocks.createGroupCabinRequest, createAdvisorDeal: mocks.createAdvisorDeal, getGroupCabinRequests: mocks.getGroupCabinRequests, updateGroupCabinRequestStatus: mocks.updateGroupCabinRequestStatus }));
+const mocks = vi.hoisted(() => ({ createFamilyPortalCabinRequest: vi.fn(), createFamilyPortalRevision: vi.fn(), createAdvisorDeal: vi.fn(), getGroupCabinRequests: vi.fn(), getPrivateFamilyPortal: vi.fn(), updateGroupCabinRequestStatus: vi.fn(), notifyOwner: vi.fn(), sendGroupCabinRequestEmail: vi.fn() }));
+vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createFamilyPortalCabinRequest: mocks.createFamilyPortalCabinRequest, createFamilyPortalRevision: mocks.createFamilyPortalRevision, createAdvisorDeal: mocks.createAdvisorDeal, getGroupCabinRequests: mocks.getGroupCabinRequests, getPrivateFamilyPortal: mocks.getPrivateFamilyPortal, updateGroupCabinRequestStatus: mocks.updateGroupCabinRequestStatus }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
 vi.mock("./resendAlerts", async (importOriginal) => ({ ...(await importOriginal<typeof import("./resendAlerts")>()), sendGroupCabinRequestEmail: mocks.sendGroupCabinRequestEmail }));
 
@@ -28,17 +28,27 @@ const request = {
 };
 
 describe("group cabin request workflow", () => {
-  beforeEach(() => { mocks.createGroupCabinRequest.mockReset(); mocks.createAdvisorDeal.mockReset(); mocks.getGroupCabinRequests.mockReset(); mocks.updateGroupCabinRequestStatus.mockReset(); mocks.notifyOwner.mockReset(); mocks.sendGroupCabinRequestEmail.mockReset(); mocks.createGroupCabinRequest.mockResolvedValue({ id: 28 }); mocks.createAdvisorDeal.mockResolvedValue({ id: 38 }); mocks.getGroupCabinRequests.mockResolvedValue([]); mocks.notifyOwner.mockResolvedValue(true); mocks.sendGroupCabinRequestEmail.mockResolvedValue("not_configured"); });
+  beforeEach(() => { mocks.createFamilyPortalCabinRequest.mockReset(); mocks.createFamilyPortalRevision.mockReset(); mocks.createAdvisorDeal.mockReset(); mocks.getGroupCabinRequests.mockReset(); mocks.getPrivateFamilyPortal.mockReset(); mocks.updateGroupCabinRequestStatus.mockReset(); mocks.notifyOwner.mockReset(); mocks.sendGroupCabinRequestEmail.mockReset(); mocks.createFamilyPortalCabinRequest.mockResolvedValue({ id: 28, familyPortalToken: "f".repeat(43), revisionNumber: 1 }); mocks.createAdvisorDeal.mockResolvedValue({ id: 38 }); mocks.getGroupCabinRequests.mockResolvedValue([]); mocks.getPrivateFamilyPortal.mockResolvedValue({ profile: { groupKey: "grimsley-hs-graduation-cruise-2027" } }); mocks.notifyOwner.mockResolvedValue(true); mocks.sendGroupCabinRequestEmail.mockResolvedValue("not_configured"); });
 
   it("stores room and traveler details then alerts Wendy without payment or passport fields", async () => {
     const result = await appRouter.createCaller(context()).groupCruises.createCabinRequest(request);
-    expect(result).toEqual({ success: true, requestId: 28, ownerNotificationSent: true, emailAlertStatus: "not_configured" });
-    expect(mocks.createGroupCabinRequest).toHaveBeenCalledWith(expect.objectContaining({ groupKey: request.groupKey, amenities: ["wifi", "travel_protection"], extras: expect.objectContaining({ wifiPlan: "Premium", diningExperience: "Fahrenheit 555 Steakhouse" }), estimate: expect.objectContaining({ tripTotalCents: 252194 }), rooms: expect.arrayContaining([expect.objectContaining({ locationPreference: "midship", selectedCabinCategory: "Standard Balcony, Deck 9 location", estimatedFareCents: 185800, travelers: expect.arrayContaining([expect.objectContaining({ firstName: "Morgan", age: 18, dateOfBirth: "2008-06-24" })]) })]) }));
-    expect(mocks.createGroupCabinRequest.mock.calls[0][0]).not.toHaveProperty("passportNumber");
-    expect(mocks.createGroupCabinRequest.mock.calls[0][0]).not.toHaveProperty("paymentCard");
+    expect(result).toEqual({ success: true, requestId: 28, familyPortalToken: "f".repeat(43), revisionNumber: 1, ownerNotificationSent: true, emailAlertStatus: "not_configured" });
+    expect(mocks.createFamilyPortalCabinRequest).toHaveBeenCalledWith(expect.objectContaining({ groupKey: request.groupKey, amenities: ["wifi", "travel_protection"], extras: expect.objectContaining({ wifiPlan: "Premium", diningExperience: "Fahrenheit 555 Steakhouse" }), estimate: expect.objectContaining({ tripTotalCents: 252194 }), rooms: expect.arrayContaining([expect.objectContaining({ locationPreference: "midship", selectedCabinCategory: "Standard Balcony, Deck 9 location", estimatedFareCents: 185800, travelers: expect.arrayContaining([expect.objectContaining({ firstName: "Morgan", age: 18, dateOfBirth: "2008-06-24" })]) })]) }));
+    expect(mocks.createFamilyPortalCabinRequest.mock.calls[0][0]).not.toHaveProperty("passportNumber");
+    expect(mocks.createFamilyPortalCabinRequest.mock.calls[0][0]).not.toHaveProperty("paymentCard");
     expect(mocks.createAdvisorDeal).toHaveBeenCalledWith(expect.objectContaining({ sourceType: "group_cabin_request", sourceId: 28, title: "Grimsley High School Graduation Cruise 2027", stage: "new_inquiry" }));
     expect(mocks.notifyOwner).toHaveBeenCalledWith(expect.objectContaining({ title: "New Grimsley cabin request · The Wendy Collective", content: expect.stringContaining("Rooms requested: 1") }));
     expect(mocks.sendGroupCabinRequestEmail).toHaveBeenCalledWith(expect.objectContaining({ requestId: 28, rooms: 1, travelers: 2 }));
+  });
+
+  it("adds a numbered current revision to the authenticated household portal without creating a second CRM deal", async () => {
+    const familyPortalToken = "u".repeat(43);
+    mocks.createFamilyPortalRevision.mockResolvedValue({ id: 29, familyPortalToken, revisionNumber: 2 });
+    const result = await appRouter.createCaller(context()).groupCruises.createCabinRequest({ ...request, familyPortalToken });
+    expect(result).toMatchObject({ success: true, requestId: 29, familyPortalToken, revisionNumber: 2 });
+    expect(mocks.createFamilyPortalRevision).toHaveBeenCalledWith(familyPortalToken, expect.objectContaining({ groupKey: request.groupKey, contactFirstName: "Morgan" }));
+    expect(mocks.createAdvisorDeal).not.toHaveBeenCalled();
+    expect(mocks.notifyOwner).toHaveBeenCalledWith(expect.objectContaining({ title: "Updated Grimsley cabin request · The Wendy Collective" }));
   });
 
   it("rejects a room whose traveler count does not match its selected occupancy", async () => {

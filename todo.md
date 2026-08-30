@@ -181,3 +181,12 @@
 - [x] Make completed journey stages openable as read-only reviews of their saved snapshot and history without moving the current workflow backward.
 - [x] Verify the repaired Grimsley sharing and completed-stage review workflow on desktop and mobile, then publish the correction.
 - [x] Ensure every generated and displayed Grimsley family link uses the public HTTPS Wendy Collective domain, never a local or development-preview origin.
+- [x] Investigate why thewendycollective.com and its private group routes return a maintenance page instead of this Wendy Collective application.
+- [x] Establish one production HTTPS origin that demonstrably serves the current deployment, then use it consistently for every copied private family link.
+- [x] Align private-link origin handling with SSR canonical and metadata configuration without exposing preview or local hosts.
+- [x] Verify an active Grimsley token route returns the intended noindex private proposal on the selected production host before release.
+- [x] Create a household-specific private update link after a family submits the Grimsley form, allowing secure repeat submissions without exposing another household’s information.
+- [x] Preserve every household update as a dated, immutable revision while marking the newest submitted response as the current request in Wendy’s Grimsley Families workspace.
+- [x] Add a private family status view and a polished post-submission confirmation screen that explains Wendy will follow up and makes the update link easy to retain.
+- [x] Refine the private Grimsley proposal header with the approved high-quality Mardi Gras ship photography while retaining the existing restrained Wendy branding.
+- [x] Add automated regression coverage and responsive validation for new family submission, repeat updates, status visibility, CRM revision history, and noindex privacy behavior.

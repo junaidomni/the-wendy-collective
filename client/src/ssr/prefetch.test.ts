@@ -24,6 +24,7 @@ describe("server-rendered page metadata", () => {
     expect(metadata.title).toContain("Private Proposal");
     expect(metadata.noindex).toBe(true);
     expect(prefetchForPath("/group/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk").noindex).toBe(true);
+    expect(prefetchForPath("/family/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk").noindex).toBe(true);
   });
 
   it("does not index Wendy’s protected workspace and returns a genuine 404 for unknown paths", () => {

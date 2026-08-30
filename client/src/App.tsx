@@ -15,6 +15,7 @@ import Privacy from "./pages/Privacy";
 import ProposalView from "./pages/ProposalView";
 import SchoolCruise from "@/pages/SchoolCruise";
 import GroupProposalView from "@/pages/GroupProposalView";
+import FamilyPortalView from "@/pages/FamilyPortalView";
 import WendyPipeline from "@/pages/wendy/WendyPipeline";
 import WendyClients from "@/pages/wendy/WendyClients";
 import WendyGroups from "@/pages/wendy/WendyGroups";
@@ -36,7 +37,8 @@ function Router() {
     <Route path="/privacy" component={Privacy} />
       <Route path="/experiences/grimsley-hs-graduation-cruise-2027" component={SchoolCruise} />
       <Route path="/group/:token" component={GroupProposalView} />
-    <Route path="/proposal/:token" component={ProposalView} />
+      <Route path="/family/:token" component={FamilyPortalView} />
+      <Route path="/proposal/:token" component={ProposalView} />
     <Route path="/wendy/pipeline/:stage"><ClientOnly><WendyPipeline /></ClientOnly></Route>
     <Route path="/wendy/pipeline"><ClientOnly><WendyPipeline /></ClientOnly></Route>
     <Route path="/wendy/clients/new"><ClientOnly><WendyClients /></ClientOnly></Route>

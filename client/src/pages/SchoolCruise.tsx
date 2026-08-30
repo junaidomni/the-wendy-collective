@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import SiteShell from "@/components/SiteShell";
 import { trpc } from "@/lib/trpc";
 import GrimsleyCabinEstimator, { GrimsleyPlanningSnapshot } from "@/components/GrimsleyCabinEstimator";
@@ -9,6 +9,9 @@ type Contact = { firstName: string; lastName: string; email: string; phone: stri
 type AmenityValue = "wifi" | "beverage_package" | "soda_package" | "specialty_dining" | "travel_protection" | "transfers";
 type GroupProfile = { title: string; organizationName: string; groupKey: string; groupTerms: string | null; roomStrategy: string | null; bookingWindow: string | null };
 type CruiseExperience = { cruiseLine: string; shipName: string; embarkPort: string; sailingSummary: string; heroImageUrl: string | null; heroImageAlt: string | null; itineraryJson: string | null; roomGuidance: string | null; shipFactsJson?: string | null; amenitiesJson?: string | null };
+type StoredTraveler = { firstName: string; middleName: string | null; lastName: string; age: number; dateOfBirth: string | null; loyaltyNumber: string | null };
+export type FamilyCabinRequest = { id: number; revisionNumber: number; status: string; createdAt: Date; contactFirstName: string; contactLastName: string; email: string; phone: string; amenitiesJson: string | null; extrasJson: string | null; estimateJson: string | null; notes: string | null; rooms: Array<{ occupancy: number; roomType: Room["roomType"]; locationPreference: Room["locationPreference"]; travelers: StoredTraveler[] }> };
+type FamilySubmission = { familyPortalToken: string; revisionNumber: number };
 
 const blankTraveler = (): Traveler => ({ firstName: "", middleName: "", lastName: "", age: "", dateOfBirth: "", loyaltyNumber: "" });
 const blankRoom = (occupancy = 2): Room => ({ occupancy, roomType: "interior", locationPreference: "no_preference", travelers: Array.from({ length: occupancy }, blankTraveler) });
@@ -34,16 +37,25 @@ function parseItinerary(raw?: string | null) {
 }
 function parseList(raw?: string | null, fallback: string[] = []) { try { const parsed = raw ? JSON.parse(raw) : undefined; return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : fallback; } catch { return fallback; } }
 function parseFacts(raw?: string | null) { try { const parsed = raw ? JSON.parse(raw) : undefined; return Array.isArray(parsed) ? parsed.filter((item): item is { label: string; value: string } => typeof item?.label === "string" && typeof item?.value === "string") : []; } catch { return []; } }
+function parseAmenities(raw?: string | null): AmenityValue[] { return parseList(raw).filter((item): item is AmenityValue => ["wifi", "beverage_package", "soda_package", "specialty_dining", "travel_protection", "transfers"].includes(item)); }
+function cloneRequestRooms(request?: FamilyCabinRequest): Room[] { return request?.rooms.length ? request.rooms.map((room) => ({ occupancy: room.occupancy, roomType: room.roomType, locationPreference: room.locationPreference, travelers: room.travelers.map((traveler) => ({ firstName: traveler.firstName, middleName: traveler.middleName || "", lastName: traveler.lastName, age: String(traveler.age || ""), dateOfBirth: traveler.dateOfBirth || "", loyaltyNumber: traveler.loyaltyNumber || "" })) })) : [blankRoom()]; }
 
-export function SchoolCruiseContent({ privateToken, profile, experience }: { privateToken?: string; profile?: GroupProfile; experience?: CruiseExperience }) {
-  const [contact, setContact] = useState<Contact>(blankContact);
-  const [rooms, setRooms] = useState<Room[]>([blankRoom()]);
-  const [amenities, setAmenities] = useState<AmenityValue[]>([]);
+const familyStatusLabels: Record<string, string> = { new: "Request received", contacted: "Wendy will follow up", details_received: "Details received", quote_in_progress: "Live quote in progress", quote_shared: "Quote shared", booked: "Booked with Wendy", closed: "Request complete" };
+
+export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, experience, initialRequest, revisionCount = 0 }: { privateToken?: string; familyPortalToken?: string; profile?: GroupProfile; experience?: CruiseExperience; initialRequest?: FamilyCabinRequest; revisionCount?: number }) {
+  const [contact, setContact] = useState<Contact>(() => initialRequest ? { firstName: initialRequest.contactFirstName, lastName: initialRequest.contactLastName, email: initialRequest.email, phone: initialRequest.phone, notes: initialRequest.notes || "", consent: false } : blankContact());
+  const [rooms, setRooms] = useState<Room[]>(() => cloneRequestRooms(initialRequest));
+  const [amenities, setAmenities] = useState<AmenityValue[]>(() => parseAmenities(initialRequest?.amenitiesJson));
   const [planning, setPlanning] = useState<GrimsleyPlanningSnapshot | null>(null);
-  const [submitted, setSubmitted] = useState(false);
-  const cabinRequest = trpc.groupCruises.createCabinRequest.useMutation({
-    onSuccess: () => { setSubmitted(true); setContact(blankContact()); setRooms([blankRoom()]); setAmenities([]); },
-  });
+  const [submitted, setSubmitted] = useState<FamilySubmission | null>(null);
+  const cabinRequest = trpc.groupCruises.createCabinRequest.useMutation();
+  useEffect(() => {
+    if (!initialRequest) return;
+    setContact({ firstName: initialRequest.contactFirstName, lastName: initialRequest.contactLastName, email: initialRequest.email, phone: initialRequest.phone, notes: initialRequest.notes || "", consent: false });
+    setRooms(cloneRequestRooms(initialRequest));
+    setAmenities(parseAmenities(initialRequest.amenitiesJson));
+    setSubmitted(null);
+  }, [initialRequest]);
   const travelerCount = useMemo(() => rooms.reduce((total, room) => total + room.occupancy, 0), [rooms]);
   const displayItinerary = useMemo(() => parseItinerary(experience?.itineraryJson), [experience?.itineraryJson]);
   const shipFacts = useMemo(() => parseFacts(experience?.shipFactsJson), [experience?.shipFactsJson]);
@@ -76,10 +88,11 @@ export function SchoolCruiseContent({ privateToken, profile, experience }: { pri
   };
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitted(false);
-    await cabinRequest.mutateAsync({
+    setSubmitted(null);
+    const result = await cabinRequest.mutateAsync({
       groupKey: "grimsley-hs-graduation-cruise-2027",
       privateToken,
+      familyPortalToken,
       contactFirstName: contact.firstName,
       contactLastName: contact.lastName,
       email: contact.email,
@@ -98,6 +111,7 @@ export function SchoolCruiseContent({ privateToken, profile, experience }: { pri
         travelers: room.travelers.map((traveler) => ({ ...traveler, age: Number(traveler.age) })),
       })),
     });
+    if (result.familyPortalToken) setSubmitted({ familyPortalToken: result.familyPortalToken, revisionNumber: result.revisionNumber });
   };
 
   return <SiteShell>
@@ -105,10 +119,11 @@ export function SchoolCruiseContent({ privateToken, profile, experience }: { pri
       <img src={shipImage} alt={shipImageAlt} />
       <div className="school-hero__veil" />
       <div className="page-wrap school-hero__content">
-        <p className="eyebrow">{privateToken ? "Private family proposal" : groupName}</p>
+        <p className="eyebrow">{privateToken || familyPortalToken ? "Private family proposal" : groupName}</p>
         <h1 className="display">{groupTitle.replace(" 2027", "")} <em>2027.</em></h1>
         <p>{sailingSummary} · {embarkPort}</p>
         <div className="hero-actions"><a className="button-link button-link--ghost" href="#journey">See the journey <span aria-hidden="true">↓</span></a><a className="button-link" href="#request">Request your cabin <span aria-hidden="true">↗</span></a></div>
+        {familyPortalToken && initialRequest ? <aside className="family-status-card"><p className="eyebrow">Your private family portal</p><strong>{familyStatusLabels[initialRequest.status] || "Request received"}</strong><span>Latest update submitted {new Date(initialRequest.createdAt).toLocaleDateString()}</span><small>{revisionCount > 1 ? `${revisionCount} saved versions. The latest is current.` : "Your first saved request is current."}</small></aside> : null}
       </div>
     </section>
 
@@ -131,7 +146,7 @@ export function SchoolCruiseContent({ privateToken, profile, experience }: { pri
 
     <section className="page-section" id="request"><div className="page-wrap school-request-layout"><aside className="school-request-aside"><p className="eyebrow">Cabin request</p><h2 className="display display--small">Your household, thoughtfully <em>organized.</em></h2><p className="body-copy">This is a request for Wendy to review. It does not hold a cabin or create a reservation.</p><div className="school-request-aside__summary"><span>{rooms.length} {rooms.length === 1 ? "room" : "rooms"}</span><span>{travelerCount} {travelerCount === 1 ? "traveler" : "travelers"}</span></div><a href="https://www.carnival.com/cruise-ships/mardi-gras" target="_blank" rel="noreferrer" className="button-link button-link--ink">Explore Mardi Gras <span aria-hidden="true">↗</span></a></aside>
       <form className="school-request-form" onSubmit={submit}>
-        <div className="form-intro"><h2>Request your cabin</h2><p>Fields marked with an asterisk are required. Please enter traveler names exactly as they appear on travel documents.</p>{planning && <div className="request-planning-reference"><span>Your planning reference</span><strong>{planning.selectedCabinCategory} for {planning.occupancy} travelers</strong><p>Estimated vacation total: {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(planning.estimate.tripTotalCents / 100)}. Wendy will confirm the live quote.</p></div>}</div>
+        <div className="form-intro"><p className="eyebrow">{familyPortalToken ? "Update your request" : "Cabin request"}</p><h2>{familyPortalToken ? "Keep your household plans current" : "Request your cabin"}</h2><p>{familyPortalToken ? "Your current details are shown below. Send a new update whenever plans change. Wendy keeps each version for careful review." : "Fields marked with an asterisk are required. Please enter traveler names exactly as they appear on travel documents."}</p>{planning && <div className="request-planning-reference"><span>Your planning reference</span><strong>{planning.selectedCabinCategory} for {planning.occupancy} travelers</strong><p>Estimated vacation total: {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(planning.estimate.tripTotalCents / 100)}. Wendy will confirm the live quote.</p></div>}</div>
         <div className="form-grid"><div className="form-field"><label htmlFor="schoolFirstName">Primary contact first name *</label><input id="schoolFirstName" required value={contact.firstName} onChange={(event) => updateContact("firstName", event.target.value)} /></div><div className="form-field"><label htmlFor="schoolLastName">Primary contact last name *</label><input id="schoolLastName" required value={contact.lastName} onChange={(event) => updateContact("lastName", event.target.value)} /></div><div className="form-field"><label htmlFor="schoolEmail">Email *</label><input id="schoolEmail" type="email" required value={contact.email} onChange={(event) => updateContact("email", event.target.value)} /></div><div className="form-field"><label htmlFor="schoolPhone">Phone *</label><input id="schoolPhone" type="tel" required value={contact.phone} onChange={(event) => updateContact("phone", event.target.value)} /></div></div>
         <div className="school-rooms">{rooms.map((room, roomIndex) => <fieldset className="school-room" key={roomIndex}><legend>Room {roomIndex + 1}</legend><div className="form-grid"><div className="form-field"><label htmlFor={`room-${roomIndex}-occupancy`}>Travelers in this room *</label><select id={`room-${roomIndex}-occupancy`} value={room.occupancy} onChange={(event) => updateRoom(roomIndex, "occupancy", Number(event.target.value))}><option value={2}>2 travelers</option><option value={3}>3 travelers</option><option value={4}>4 travelers</option></select></div><div className="form-field"><label htmlFor={`room-${roomIndex}-type`}>Cabin style *</label><select id={`room-${roomIndex}-type`} value={room.roomType} onChange={(event) => updateRoom(roomIndex, "roomType", event.target.value as Room["roomType"])}>{Object.entries(roomLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div><div className="form-field form-field--wide"><label htmlFor={`room-${roomIndex}-location`}>Preferred ship location *</label><select id={`room-${roomIndex}-location`} value={room.locationPreference} onChange={(event) => updateRoom(roomIndex, "locationPreference", event.target.value as Room["locationPreference"])}>{Object.entries(locationLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><span className="form-help">Wendy will confirm the exact deck and forward, mid ship, or aft placement with the live quote.</span></div></div>
           <div className="school-travelers">{room.travelers.map((traveler, travelerIndex) => <div className="school-traveler" key={travelerIndex}><p>Traveler {travelerIndex + 1}</p><div className="form-grid"><div className="form-field"><label htmlFor={`room-${roomIndex}-traveler-${travelerIndex}-first`}>Legal first name *</label><input id={`room-${roomIndex}-traveler-${travelerIndex}-first`} required value={traveler.firstName} onChange={(event) => updateTraveler(roomIndex, travelerIndex, "firstName", event.target.value)} /></div><div className="form-field"><label htmlFor={`room-${roomIndex}-traveler-${travelerIndex}-middle`}>Middle name</label><input id={`room-${roomIndex}-traveler-${travelerIndex}-middle`} value={traveler.middleName} onChange={(event) => updateTraveler(roomIndex, travelerIndex, "middleName", event.target.value)} /></div><div className="form-field"><label htmlFor={`room-${roomIndex}-traveler-${travelerIndex}-last`}>Legal last name *</label><input id={`room-${roomIndex}-traveler-${travelerIndex}-last`} required value={traveler.lastName} onChange={(event) => updateTraveler(roomIndex, travelerIndex, "lastName", event.target.value)} /></div><div className="form-field"><label htmlFor={`room-${roomIndex}-traveler-${travelerIndex}-age`}>Age at sailing *</label><input id={`room-${roomIndex}-traveler-${travelerIndex}-age`} type="number" min="0" max="120" required value={traveler.age} onChange={(event) => updateTraveler(roomIndex, travelerIndex, "age", event.target.value)} /></div><div className="form-field"><label htmlFor={`room-${roomIndex}-traveler-${travelerIndex}-birth`}>Date of birth</label><input id={`room-${roomIndex}-traveler-${travelerIndex}-birth`} type="date" value={traveler.dateOfBirth} onChange={(event) => updateTraveler(roomIndex, travelerIndex, "dateOfBirth", event.target.value)} /></div><div className="form-field form-field--wide"><label htmlFor={`room-${roomIndex}-traveler-${travelerIndex}-loyalty`}>Carnival VIFP number</label><input id={`room-${roomIndex}-traveler-${travelerIndex}-loyalty`} value={traveler.loyaltyNumber} onChange={(event) => updateTraveler(roomIndex, travelerIndex, "loyaltyNumber", event.target.value)} /></div></div></div>)}</div>
@@ -142,8 +157,7 @@ export function SchoolCruiseContent({ privateToken, profile, experience }: { pri
         <div className="form-field school-notes"><label htmlFor="schoolNotes">Anything Wendy should know?</label><textarea id="schoolNotes" placeholder="Share rooming preferences, celebration notes, accessibility requests, or other non sensitive planning details." value={contact.notes} onChange={(event) => updateContact("notes", event.target.value)} /></div>
         <label className="school-consent"><input type="checkbox" checked={contact.consent} required onChange={(event) => updateContact("consent", event.target.checked)} /><span>I agree that Wendy may contact me about this cabin request. I understand that this request does not hold a cabin or create a reservation.</span></label>
         <p className="form-help">Do not enter passport numbers, payment card details, account passwords, or medical information. Read the <a href="/privacy">privacy policy</a> for details.</p>
-        <button className="button-submit" type="submit" disabled={cabinRequest.isPending}>{cabinRequest.isPending ? "Sending your request…" : "Send cabin request"} <span aria-hidden="true">↗</span></button>
-        {submitted && <p className="form-success" role="status">Your cabin request is with Wendy. She will review the room details and contact you with the next steps.</p>}
+        {submitted ? <section className="family-confirmation" role="status"><p className="eyebrow">Request received</p><h3>Thank you. Wendy will be in touch.</h3><p>{submitted.revisionNumber > 1 ? `Your update ${submitted.revisionNumber} is now the current request for Wendy to review.` : "Your household request is now with Wendy for a personal review."} This request does not hold a cabin or create a reservation.</p><a className="button-link button-link--ink" href={`/family/${submitted.familyPortalToken}`}>Open your private family portal <span aria-hidden="true">↗</span></a><small>Save this private link. You may return whenever your plans change.</small></section> : <button className="button-submit" type="submit" disabled={cabinRequest.isPending}>{cabinRequest.isPending ? "Sending your request…" : familyPortalToken ? "Send this update" : "Send cabin request"} <span aria-hidden="true">↗</span></button>}
         {cabinRequest.error && <p className="form-error" role="alert">Something interrupted your request. Please try again or email info@thewendycollective.com.</p>}
       </form>
     </div></section>
