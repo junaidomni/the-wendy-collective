@@ -86,6 +86,7 @@ export type CreateGroupCabinRequestInput = {
   contactLastName: string;
   email: string;
   phone: string;
+  amenities: string[];
   notes: string;
   rooms: Array<{
     occupancy: number;
@@ -96,6 +97,7 @@ export type CreateGroupCabinRequestInput = {
       middleName?: string;
       lastName: string;
       age: number;
+      dateOfBirth?: string;
       loyaltyNumber?: string;
     }>;
   }>;
@@ -111,6 +113,7 @@ export async function createGroupCabinRequest(input: CreateGroupCabinRequestInpu
     email: input.email,
     phone: input.phone,
     roomCount: input.rooms.length,
+    amenitiesJson: JSON.stringify(input.amenities),
     notes: input.notes || null,
   });
   const cabinRequestId = Number(result[0].insertId);
@@ -130,6 +133,7 @@ export async function createGroupCabinRequest(input: CreateGroupCabinRequestInpu
       middleName: traveler.middleName || null,
       lastName: traveler.lastName,
       age: traveler.age,
+      dateOfBirth: traveler.dateOfBirth || null,
       loyaltyNumber: traveler.loyaltyNumber || null,
     })));
   }
@@ -171,6 +175,11 @@ export type CreateExperienceInput = {
   publicSummary?: string;
   itineraryJson?: string;
   roomGuidance?: string;
+  shipFactsJson?: string;
+  cabinCategoriesJson?: string;
+  amenitiesJson?: string;
+  sourceReference?: string;
+  reviewedOn?: string;
   status: "draft" | "ready" | "archived";
 };
 
@@ -185,6 +194,11 @@ export async function createCruiseExperience(input: CreateExperienceInput) {
     publicSummary: input.publicSummary || null,
     itineraryJson: input.itineraryJson || null,
     roomGuidance: input.roomGuidance || null,
+    shipFactsJson: input.shipFactsJson || null,
+    cabinCategoriesJson: input.cabinCategoriesJson || null,
+    amenitiesJson: input.amenitiesJson || null,
+    sourceReference: input.sourceReference || null,
+    reviewedOn: input.reviewedOn || null,
   });
   return { id: Number(result[0].insertId) };
 }
@@ -199,7 +213,18 @@ export async function ensureGrimsleyCruiseExperience() {
   const db = await getDb();
   if (!db) throw new Error("Cruise experience storage is unavailable");
   const existing = await db.select().from(cruiseExperiences).where(eq(cruiseExperiences.slug, "grimsley-hs-graduation-cruise-2027")).limit(1);
-  if (existing[0]) return existing[0];
+  if (existing[0]) {
+    if (!existing[0].shipFactsJson || !existing[0].cabinCategoriesJson || !existing[0].amenitiesJson) {
+      await db.update(cruiseExperiences).set({
+        shipFactsJson: existing[0].shipFactsJson || JSON.stringify([{ label: "Cruise length", value: "Four nights" }, { label: "Embarkation", value: "Port Canaveral" }, { label: "Island days", value: "RelaxAway and Celebration Key" }]),
+        cabinCategoriesJson: existing[0].cabinCategoriesJson || JSON.stringify(["Interior", "Ocean View", "Balcony", "Suite"]),
+        amenitiesJson: existing[0].amenitiesJson || JSON.stringify(["WiFi", "Beverage package", "Soda package", "Specialty dining", "Travel protection"]),
+        reviewedOn: existing[0].reviewedOn || new Date().toISOString().slice(0, 10),
+      }).where(eq(cruiseExperiences.id, existing[0].id));
+      return (await db.select().from(cruiseExperiences).where(eq(cruiseExperiences.id, existing[0].id)).limit(1))[0];
+    }
+    return existing[0];
+  }
   const created = await createCruiseExperience({
     slug: "grimsley-hs-graduation-cruise-2027",
     title: "Grimsley High School Graduation Cruise 2027",
@@ -219,6 +244,10 @@ export async function ensureGrimsleyCruiseExperience() {
       { day: "June 28", place: "Port Canaveral", detail: "Arriving at 8:00 AM" },
     ]),
     roomGuidance: "Interior, Ocean View, Balcony, and Suite options can be reviewed after Wendy confirms the live category, deck, and forward, mid ship, or aft placement.",
+    shipFactsJson: JSON.stringify([{ label: "Cruise length", value: "Four nights" }, { label: "Embarkation", value: "Port Canaveral" }, { label: "Island days", value: "RelaxAway and Celebration Key" }]),
+    cabinCategoriesJson: JSON.stringify(["Interior", "Ocean View", "Balcony", "Suite"]),
+    amenitiesJson: JSON.stringify(["WiFi", "Beverage package", "Soda package", "Specialty dining", "Travel protection"]),
+    reviewedOn: new Date().toISOString().slice(0, 10),
     status: "ready",
   });
   const experience = await db.select().from(cruiseExperiences).where(eq(cruiseExperiences.id, created.id)).limit(1);
@@ -263,6 +292,7 @@ export async function getGroupTravelProfile(groupKey: string) {
 }
 
 export async function updateGroupTravelProfile(id: number, input: {
+  experienceId?: number;
   stage: GroupProfileStage;
   shareStatus: GroupProfileShareStatus;
   coordinatorName?: string;
@@ -280,6 +310,7 @@ export async function updateGroupTravelProfile(id: number, input: {
   const shareStatus = input.shareStatus === "shared" && current.shareStatus !== "shared" ? current.shareStatus : input.shareStatus;
   await db.update(groupTravelProfiles).set({
     stage: input.stage,
+    experienceId: input.experienceId || current.experienceId,
     shareStatus,
     coordinatorName: input.coordinatorName || null,
     coordinatorEmail: input.coordinatorEmail || null,
@@ -322,6 +353,8 @@ export type CreateAdvisorDealInput = {
   stage: "new_inquiry" | "discovery_call" | "building_proposal" | "proposal_shared" | "ready_to_book" | "booked" | "closed";
   experienceId?: number;
   nextAction?: string;
+  meetingAt?: Date;
+  meetingNotes?: string;
   advisorNotes?: string;
 };
 
@@ -334,18 +367,22 @@ export async function createAdvisorDeal(input: CreateAdvisorDealInput) {
     experienceId: input.experienceId || null,
     travelSummary: input.travelSummary || null,
     nextAction: input.nextAction || null,
+    meetingAt: input.meetingAt || null,
+    meetingNotes: input.meetingNotes || null,
     advisorNotes: input.advisorNotes || null,
   });
   return { id: Number(result[0].insertId) };
 }
 
-export async function updateAdvisorDeal(id: number, input: Pick<CreateAdvisorDealInput, "stage" | "experienceId" | "nextAction" | "advisorNotes"> & { reservationReference?: string }) {
+export async function updateAdvisorDeal(id: number, input: Pick<CreateAdvisorDealInput, "stage" | "experienceId" | "nextAction" | "meetingAt" | "meetingNotes" | "advisorNotes"> & { reservationReference?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Advisor deal storage is unavailable");
   await db.update(advisorDeals).set({
     stage: input.stage,
     experienceId: input.experienceId || null,
     nextAction: input.nextAction || null,
+    meetingAt: input.meetingAt || null,
+    meetingNotes: input.meetingNotes || null,
     advisorNotes: input.advisorNotes || null,
     reservationReference: input.reservationReference || null,
   }).where(eq(advisorDeals.id, id));

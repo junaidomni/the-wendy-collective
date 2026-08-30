@@ -67,6 +67,12 @@ describe("advisor CRM and private proposal workflow", () => {
     expect(mocks.createClientProposal).toHaveBeenCalledWith(expect.objectContaining({ dealId: 51, privateToken: proposal.privateToken, expiresAt: expect.any(Date) }));
   });
 
+  it("stores a scheduled discovery appointment and agenda inside Wendy’s CRM", async () => {
+    const caller = appRouter.createCaller(context(owner));
+    await caller.crm.updateDeal({ id: 51, stage: "discovery_call", meetingAt: "2026-09-02T14:30", meetingNotes: "Review summer dates, balcony options, and budget.", nextAction: "Call client" });
+    expect(mocks.updateAdvisorDeal).toHaveBeenCalledWith(51, expect.objectContaining({ stage: "discovery_call", meetingAt: expect.any(Date), meetingNotes: "Review summer dates, balcony options, and budget." }));
+  });
+
   it("allows a client to respond only through a valid private link and alerts Wendy", async () => {
     mocks.getPrivateClientProposal.mockResolvedValue({ proposal: { id: 73, title: "A considered sailing" } });
     mocks.createProposalResponse.mockResolvedValue({ id: 84 });

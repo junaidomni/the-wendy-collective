@@ -9,6 +9,7 @@ const travelerInput = z.object({
   middleName: z.string().trim().max(80).optional().default(""),
   lastName: z.string().trim().min(1).max(80),
   age: z.number().int().min(0).max(120),
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   loyaltyNumber: z.string().trim().max(100).optional().default(""),
 });
 
@@ -28,6 +29,7 @@ const cabinRequestInput = z.object({
   email: z.string().trim().email().max(320),
   phone: z.string().trim().min(7).max(40),
   notes: z.string().trim().max(2000).optional().default(""),
+  amenities: z.array(z.enum(["wifi", "beverage_package", "soda_package", "specialty_dining", "travel_protection", "transfers"])).max(6).default([]),
   consent: z.literal(true),
   privateToken: z.string().trim().min(32).max(96).optional(),
   rooms: z.array(roomInput).min(1).max(12),
@@ -70,6 +72,7 @@ export const groupCruisesRouter = router({
       `Phone: ${input.phone}`,
       `Rooms requested: ${input.rooms.length}`,
       `Travelers listed: ${travelerCount}`,
+      `Preferences: ${input.amenities.join(", ") || "None selected"}`,
       "Open Wendy’s workspace to review the room details and begin the quote.",
     ].join("\n");
     const [ownerNotificationSent, emailAlertStatus] = await Promise.all([

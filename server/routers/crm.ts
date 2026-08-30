@@ -26,13 +26,13 @@ export const crmRouter = router({
     return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile };
   }),
   createDeal: adminProcedure.input(z.object({
-    contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), title: z.string().trim().min(3).max(180), travelSummary: z.string().trim().max(4000).optional().default(""), nextAction: z.string().trim().max(1000).optional().default(""), experienceId: z.number().int().positive().optional(),
+    contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), title: z.string().trim().min(3).max(180), travelSummary: z.string().trim().max(4000).optional().default(""), nextAction: z.string().trim().max(1000).optional().default(""), meetingAt: z.string().trim().max(32).optional().default(""), meetingNotes: z.string().trim().max(2000).optional().default(""), experienceId: z.number().int().positive().optional(),
   })).mutation(async ({ input }) => {
-    const deal = await createAdvisorDeal({ ...input, sourceType: "manual", stage: "new_inquiry" });
+    const deal = await createAdvisorDeal({ ...input, meetingAt: input.meetingAt ? new Date(input.meetingAt) : undefined, sourceType: "manual", stage: "new_inquiry" });
     return { success: true, dealId: deal.id };
   }),
   createExperience: adminProcedure.input(z.object({
-    slug: z.string().trim().min(3).max(160).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), title: z.string().trim().min(3).max(180), groupName: z.string().trim().max(180).optional().default(""), cruiseLine: z.string().trim().min(2).max(120), shipName: z.string().trim().min(2).max(160), embarkPort: z.string().trim().min(2).max(160), sailingSummary: z.string().trim().min(2).max(180), heroImageUrl: z.string().trim().url().optional().or(z.literal("")).default(""), heroImageAlt: z.string().trim().max(240).optional().default(""), publicSummary: z.string().trim().max(4000).optional().default(""), roomGuidance: z.string().trim().max(4000).optional().default(""), status: z.enum(["draft", "ready", "archived"]).default("draft"),
+    slug: z.string().trim().min(3).max(160).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), title: z.string().trim().min(3).max(180), groupName: z.string().trim().max(180).optional().default(""), cruiseLine: z.string().trim().min(2).max(120), shipName: z.string().trim().min(2).max(160), embarkPort: z.string().trim().min(2).max(160), sailingSummary: z.string().trim().min(2).max(180), heroImageUrl: z.string().trim().url().optional().or(z.literal("")).default(""), heroImageAlt: z.string().trim().max(240).optional().default(""), publicSummary: z.string().trim().max(4000).optional().default(""), roomGuidance: z.string().trim().max(4000).optional().default(""), shipFactsJson: z.string().trim().max(6000).optional().default(""), cabinCategoriesJson: z.string().trim().max(6000).optional().default(""), amenitiesJson: z.string().trim().max(6000).optional().default(""), sourceReference: z.string().trim().url().optional().or(z.literal("")).default(""), reviewedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")).default(""), status: z.enum(["draft", "ready", "archived"]).default("draft"),
   })).mutation(async ({ input }) => {
     const experience = await createCruiseExperience(input);
     return { success: true, experienceId: experience.id };
@@ -46,8 +46,8 @@ export const crmRouter = router({
     const stored = await storagePut(`cruise-experiences/${Date.now()}.${extension}`, bytes, match[1]);
     return { url: stored.url };
   }),
-  updateDeal: adminProcedure.input(z.object({ id: z.number().int().positive(), stage: z.enum(dealStages), experienceId: z.number().int().positive().optional(), nextAction: z.string().trim().max(1000).optional().default(""), advisorNotes: z.string().trim().max(5000).optional().default(""), reservationReference: z.string().trim().max(160).optional().default("") })).mutation(async ({ input }) => {
-    await updateAdvisorDeal(input.id, input);
+  updateDeal: adminProcedure.input(z.object({ id: z.number().int().positive(), stage: z.enum(dealStages), experienceId: z.number().int().positive().optional(), nextAction: z.string().trim().max(1000).optional().default(""), meetingAt: z.string().trim().max(32).optional().default(""), meetingNotes: z.string().trim().max(2000).optional().default(""), advisorNotes: z.string().trim().max(5000).optional().default(""), reservationReference: z.string().trim().max(160).optional().default("") })).mutation(async ({ input }) => {
+    await updateAdvisorDeal(input.id, { ...input, meetingAt: input.meetingAt ? new Date(input.meetingAt) : undefined });
     return { success: true };
   }),
   createProposal: adminProcedure.input(z.object({ dealId: z.number().int().positive(), experienceId: z.number().int().positive().optional(), title: z.string().trim().min(3).max(180), summary: z.string().trim().max(5000).optional().default(""), roomGuidance: z.string().trim().max(5000).optional().default(""), pricingSummary: z.string().trim().max(5000).optional().default(""), validForDays: z.number().int().min(1).max(180).default(30) })).mutation(async ({ input }) => {
@@ -70,6 +70,7 @@ export const crmRouter = router({
     coordinatorName: z.string().trim().max(160).optional().default(""),
     coordinatorEmail: z.string().trim().max(320).optional().default(""),
     coordinatorPhone: z.string().trim().max(40).optional().default(""),
+    experienceId: z.number().int().positive().optional(),
     groupTerms: z.string().trim().max(5000).optional().default(""),
     roomStrategy: z.string().trim().max(5000).optional().default(""),
     bookingWindow: z.string().trim().max(1000).optional().default(""),

@@ -157,3 +157,8 @@
 - [x] Move Grimsley into the active Group programs pipeline view and provide a dedicated group profile with Overview, Families, Proposal, and Operations areas.
 - [x] Separate proposal creation and reusable experience management from the pipeline home, while retaining secure private-link, room, and traveler workflows.
 - [x] Verify all CRM routes, stage views, protected access, desktop and mobile layouts, then publish the portal restart.
+- [x] Build the advisor cruise-selection workflow for choosing a cruise line, ship, sailing, itinerary, approved ship facts, room categories, and optional amenities before creating a client link.
+- [x] Build the private family-response workflow for room count, traveler details, cabin placement preference, loyalty number, optional date of birth, and optional amenities, then present the returned request in a formatted Wendy review view.
+- [x] Add editable proposal-side client and family details with deliberate stage transitions from proposal preparation to family details, live quote, booking, and booked travel.
+- [x] Keep passport, payment-card, and supplier-account credentials out of the website until a specifically authorized secure integration is available.
+- [x] Research and document the supplier-data strategy for Carnival, Royal Caribbean, Norwegian, and IntelliTravel before adding any external API connection.
