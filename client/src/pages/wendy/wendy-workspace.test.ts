@@ -30,6 +30,11 @@ describe("focused Wendy CRM workspace", () => {
     expect(source).toContain("Family request inbox");
     expect(source).toContain("JourneyRail");
     expect(source).toContain("Secure Grimsley family link. Copy this address and send it to the family.");
+    expect(source).toContain("https://thewendycollective.com");
+    expect(source).toContain("Active family link");
+    expect(source).toContain("Copy family link");
+    expect(source).toContain("Completed stage review");
+    expect(source).toContain("Review");
   });
 
   it("registers each internal workspace view behind the Wendy route namespace", () => {

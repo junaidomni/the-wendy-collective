@@ -177,3 +177,7 @@
 - [x] Add noindex metadata and regression coverage for the shareable proposal, calculations, and request safeguards, then verify desktop and mobile layouts before publishing.
 - [x] Fix the Grimsley family-link generator so it visibly presents a secure URL, copies it when permitted, and always offers a manual copy fallback after a successful share action.
 - [x] Verify the generated Grimsley URL opens the intended direct-share proposal and retain clear eligible-stage and error feedback for Wendy.
+- [x] Keep each generated Grimsley family link visibly available with a copy control after the group advances into Family details or later stages.
+- [x] Make completed journey stages openable as read-only reviews of their saved snapshot and history without moving the current workflow backward.
+- [x] Verify the repaired Grimsley sharing and completed-stage review workflow on desktop and mobile, then publish the correction.
+- [x] Ensure every generated and displayed Grimsley family link uses the public HTTPS Wendy Collective domain, never a local or development-preview origin.
