@@ -2,6 +2,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import SiteShell from "@/components/SiteShell";
 import { trpc } from "@/lib/trpc";
 import GrimsleyCabinEstimator, { GrimsleyPlanningSnapshot } from "@/components/GrimsleyCabinEstimator";
+import { createPortal } from "react-dom";
 
 type Traveler = { firstName: string; middleName: string; lastName: string; age: string; dateOfBirth: string; loyaltyNumber: string };
 type Room = { occupancy: number; roomType: "interior" | "ocean_view" | "balcony" | "suite"; locationPreference: "no_preference" | "forward" | "midship" | "aft"; travelers: Traveler[] };
@@ -51,14 +52,7 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
   const [rateQualifiers, setRateQualifiers] = useState<RateQualifier[]>(() => parseRateQualifiers(initialRequest?.extrasJson));
   const [planning, setPlanning] = useState<GrimsleyPlanningSnapshot | null>(null);
   const [submitted, setSubmitted] = useState<FamilySubmission | null>(null);
-  const [showReturnToTop, setShowReturnToTop] = useState(false);
   const cabinRequest = trpc.groupCruises.createCabinRequest.useMutation();
-  useEffect(() => {
-    const updateReturnToTopVisibility = () => setShowReturnToTop(window.scrollY > 0);
-    updateReturnToTopVisibility();
-    window.addEventListener("scroll", updateReturnToTopVisibility, { passive: true });
-    return () => window.removeEventListener("scroll", updateReturnToTopVisibility);
-  }, []);
   useEffect(() => {
     if (!initialRequest) return;
     setContact({ firstName: initialRequest.contactFirstName, lastName: initialRequest.contactLastName, email: initialRequest.email, phone: initialRequest.phone, notes: initialRequest.notes || "", consent: false });
@@ -127,7 +121,8 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
     if (result.familyPortalToken) setSubmitted({ familyPortalToken: result.familyPortalToken, revisionNumber: result.revisionNumber });
   };
 
-  return <SiteShell>
+  return <>
+    <SiteShell>
     <section className="school-hero">
       <img src={shipImage} alt={shipImageAlt} />
       <div className="school-hero__veil" />
@@ -181,8 +176,9 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
         {cabinRequest.error && <p className="form-error" role="alert">Something interrupted your request. Please try again or email info@thewendycollective.com.</p>}
       </form>
     </div></section>
-    {showReturnToTop ? <button type="button" className="school-return-top" onClick={returnToTop} aria-label="Return to the top of the Grimsley proposal"><span aria-hidden="true">↑</span> Top</button> : null}
-  </SiteShell>;
+    </SiteShell>
+    {typeof document !== "undefined" ? createPortal(<button type="button" className="school-return-top" onClick={returnToTop} aria-label="Return to the top of the Grimsley proposal"><span aria-hidden="true">↑</span> Top</button>, document.body) : null}
+  </>;
 }
 
 export default function SchoolCruise() {

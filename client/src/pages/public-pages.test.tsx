@@ -79,7 +79,8 @@ describe("public site content", () => {
     expect(schoolCruise).toContain("Rate qualifiers");
     expect(schoolCruise).toContain("Vacation Protection");
     expect(schoolCruise).toContain("Return to the top of the Grimsley proposal");
-    expect(schoolCruise).toContain("window.scrollY > 0");
+    expect(schoolCruise).toContain("createPortal");
+    expect(schoolCruise).toContain("document.body");
     expect(schoolCruise).toContain("does not hold a cabin or create a reservation");
     expect(schoolCruise).not.toMatch(/[—–]/);
   });

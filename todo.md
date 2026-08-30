@@ -203,3 +203,5 @@
 - [x] Add regression coverage and responsive verification for restored Grimsley sections, controls, and estimator behavior.
 - [x] Show the Grimsley return-to-top control only after the visitor has scrolled beyond the opening proposal view, while keeping it accessible during the long mobile form flow.
 - [x] Make the Grimsley Top control appear immediately after scrolling begins and remain fixed throughout all remaining proposal sections, including the middle of the page and the form.
+- [x] Replace the unreliable scroll-dependent Grimsley Top control with a viewport-fixed action that remains visible at the lower right on the live mobile and desktop proposal from opening through the full page.
+- [x] Verify the active production Grimsley link displays the persistent Top action at the opening, middle, and form positions before release.
