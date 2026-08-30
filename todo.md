@@ -190,3 +190,5 @@
 - [x] Add a private family status view and a polished post-submission confirmation screen that explains Wendy will follow up and makes the update link easy to retain.
 - [x] Refine the private Grimsley proposal header with the approved high-quality Mardi Gras ship photography while retaining the existing restrained Wendy branding.
 - [x] Add automated regression coverage and responsive validation for new family submission, repeat updates, status visibility, CRM revision history, and noindex privacy behavior.
+- [x] Replace the family-facing “private family portal” wording with a clear invitation to review or update the request.
+- [x] Remove the Grimsley test household submission and its related generated records so the active family link is ready for a fresh client response.

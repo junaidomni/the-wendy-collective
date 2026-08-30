@@ -44,7 +44,8 @@ describe("focused Wendy CRM workspace", () => {
     const cruise = readSource("client/src/pages/SchoolCruise.tsx");
     expect(app).toContain('path="/family/:token"');
     expect(cruise).toContain("Thank you. Wendy will be in touch.");
-    expect(cruise).toContain("Open your private family portal");
+    expect(cruise).toContain("Review or update your request");
+    expect(cruise).not.toContain("Open your private family portal");
     expect(cruise).toContain("familyPortalToken");
   });
 
