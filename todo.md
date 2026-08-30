@@ -149,3 +149,11 @@
 - [x] Add a clear Grimsley stage model, proposal-readiness checklist, group itinerary and room-strategy detail, and a deliberate create-and-share private family-link action.
 - [x] Show Grimsley family responses and school-cabin requests within the dedicated client profile while retaining the existing protected CRM controls.
 - [x] Verify the complete Grimsley profile workflow on desktop and mobile, then publish the refinement.
+- [x] Research and design the Wendy portal as a focused CRM, replacing the current one-page workspace concept with separate pipeline, client-profile, proposal-builder, deal-inventory, and response-inbox views.
+- [x] Define the end-to-end normal-trip, tailored-proposal, locked-group-deal, private-link, live-quote, booking, and travel-support lifecycles before rebuilding the portal.
+- [x] Design the school-cruise pilot workflow using the same reusable portal architecture after the focused CRM redesign was approved.
+- [x] Rebuild Wendy’s workspace as a multi-view CRM with separate Today, Pipeline, Clients, Trips and Groups, Proposals, and Library routes instead of a single scrolling page.
+- [x] Make each pipeline stage openable as a focused stage view showing every matching record, its next action, and direct access to the full profile.
+- [x] Move Grimsley into the active Group programs pipeline view and provide a dedicated group profile with Overview, Families, Proposal, and Operations areas.
+- [x] Separate proposal creation and reusable experience management from the pipeline home, while retaining secure private-link, room, and traveler workflows.
+- [x] Verify all CRM routes, stage views, protected access, desktop and mobile layouts, then publish the portal restart.

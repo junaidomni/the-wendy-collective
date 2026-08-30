@@ -15,6 +15,11 @@ import Privacy from "./pages/Privacy";
 import ProposalView from "./pages/ProposalView";
 import SchoolCruise from "@/pages/SchoolCruise";
 import GroupProposalView from "@/pages/GroupProposalView";
+import WendyPipeline from "@/pages/wendy/WendyPipeline";
+import WendyClients from "@/pages/wendy/WendyClients";
+import WendyGroups from "@/pages/wendy/WendyGroups";
+import WendyProposals from "@/pages/wendy/WendyProposals";
+import WendyLibrary from "@/pages/wendy/WendyLibrary";
 import { usePageMetadata } from "./hooks/usePageMetadata";
 import ClientOnly from "./components/ClientOnly";
 
@@ -32,6 +37,16 @@ function Router() {
       <Route path="/experiences/grimsley-hs-graduation-cruise-2027" component={SchoolCruise} />
       <Route path="/group/:token" component={GroupProposalView} />
     <Route path="/proposal/:token" component={ProposalView} />
+    <Route path="/wendy/pipeline/:stage"><ClientOnly><WendyPipeline /></ClientOnly></Route>
+    <Route path="/wendy/pipeline"><ClientOnly><WendyPipeline /></ClientOnly></Route>
+    <Route path="/wendy/clients/new"><ClientOnly><WendyClients /></ClientOnly></Route>
+    <Route path="/wendy/clients/:id"><ClientOnly><WendyClients /></ClientOnly></Route>
+    <Route path="/wendy/clients"><ClientOnly><WendyClients /></ClientOnly></Route>
+    <Route path="/wendy/groups/:key"><ClientOnly><WendyGroups /></ClientOnly></Route>
+    <Route path="/wendy/groups"><ClientOnly><WendyGroups /></ClientOnly></Route>
+    <Route path="/wendy/proposals/new/:dealId"><ClientOnly><WendyProposals /></ClientOnly></Route>
+    <Route path="/wendy/proposals"><ClientOnly><WendyProposals /></ClientOnly></Route>
+    <Route path="/wendy/library"><ClientOnly><WendyLibrary /></ClientOnly></Route>
     <Route path="/wendy"><ClientOnly><PrivateExperience /></ClientOnly></Route>
     <Route path="/404" component={NotFound} />
     <Route component={NotFound} />
