@@ -2,6 +2,7 @@ export type HeadMeta = {
   title: string;
   description: string;
   canonicalPath?: string;
+  ogUrlPath?: string;
   ogImage?: string;
   ogImageAlt?: string;
   noindex?: boolean;
@@ -12,6 +13,8 @@ const SITE = "The Wendy Collective";
 const DEFAULT_DESCRIPTION = "The Wendy Collective creates thoughtfully planned journeys, elevated escapes, and effortless travel moments.";
 const SOCIAL_IMAGE = "/manus-storage/twc-social-preview_a42ef867.jpg";
 const SOCIAL_ALT = "Cinematic travel clouds at sunrise for The Wendy Collective";
+const GRIMSLEY_SOCIAL_IMAGE = "/manus-storage/mardi-gras-approved_10fa6e55.png";
+const GRIMSLEY_SOCIAL_ALT = "Carnival Mardi Gras at sea near Port Canaveral";
 
 const publicRoutes: Record<string, { title: string; description: string; noindex?: boolean }> = {
   "/": { title: "The Wendy Collective | Thoughtfully Planned Travel", description: DEFAULT_DESCRIPTION },
@@ -35,7 +38,9 @@ export function prefetchForPath(url: string): HeadMeta {
   const clean = path.replace(/\/+$/, "") || "/";
   const route = publicRoutes[clean];
   if (route) return { ...route, canonicalPath: clean, ogImage: SOCIAL_IMAGE, ogImageAlt: SOCIAL_ALT };
-  if (clean.startsWith("/proposal/") || clean.startsWith("/group/") || clean.startsWith("/family/")) return { title: `Private Proposal | ${SITE}`, description: "A private travel proposal from The Wendy Collective.", noindex: true };
+  if (clean.startsWith("/group/")) return { title: `Grimsley Graduation Cruise 2027 | ${SITE}`, description: "A private request page for the Grimsley High School Graduation Cruise aboard Carnival Mardi Gras.", ogUrlPath: clean, ogImage: GRIMSLEY_SOCIAL_IMAGE, ogImageAlt: GRIMSLEY_SOCIAL_ALT, noindex: true };
+  if (clean.startsWith("/family/")) return { title: `Your Grimsley Cruise Request | ${SITE}`, description: "Review or update your request for the Grimsley High School Graduation Cruise aboard Carnival Mardi Gras.", ogUrlPath: clean, ogImage: GRIMSLEY_SOCIAL_IMAGE, ogImageAlt: GRIMSLEY_SOCIAL_ALT, noindex: true };
+  if (clean.startsWith("/proposal/")) return { title: `Private Proposal | ${SITE}`, description: "A private travel proposal from The Wendy Collective.", ogUrlPath: clean, noindex: true };
   if (clean === "/wendy") return { title: `Wendy Workspace | ${SITE}`, description: "Protected trip brief workspace for The Wendy Collective.", noindex: true };
   return { title: `${SITE} | Page Not Found`, description: DEFAULT_DESCRIPTION, notFound: true };
 }

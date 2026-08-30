@@ -17,7 +17,9 @@ function buildHeadTags(head: HeadMeta) {
   const title = escapeHtml(head.title);
   const description = escapeHtml(head.description);
   const canonical = head.canonicalPath ? `${CANONICAL_ORIGIN}${head.canonicalPath}` : "";
-  const image = head.ogImage ? `${CANONICAL_ORIGIN}${head.ogImage}` : `${CANONICAL_ORIGIN}${DEFAULT_OG_IMAGE}`;
+  const ogUrl = head.ogUrlPath ? `${CANONICAL_ORIGIN}${head.ogUrlPath}` : canonical;
+  const image = head.ogImage ? (head.ogImage.startsWith("http") ? head.ogImage : `${CANONICAL_ORIGIN}${head.ogImage}`) : `${CANONICAL_ORIGIN}${DEFAULT_OG_IMAGE}`;
+  const imageType = image.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
   const robots = head.noindex || head.notFound ? "noindex, follow" : "index, follow";
   return [
     `<title>${title}</title>`,
@@ -28,6 +30,8 @@ function buildHeadTags(head: HeadMeta) {
     `<meta property="og:title" content="${title}" />`,
     `<meta property="og:description" content="${description}" />`,
     `<meta property="og:image" content="${escapeHtml(image)}" />`,
+    `<meta property="og:image:secure_url" content="${escapeHtml(image)}" />`,
+    `<meta property="og:image:type" content="${imageType}" />`,
     `<meta property="og:image:width" content="1200" />`,
     `<meta property="og:image:height" content="630" />`,
     `<meta property="og:image:alt" content="${escapeHtml(head.ogImageAlt ?? "Cinematic travel for The Wendy Collective")}" />`,
@@ -35,7 +39,7 @@ function buildHeadTags(head: HeadMeta) {
     `<meta name="twitter:title" content="${title}" />`,
     `<meta name="twitter:description" content="${description}" />`,
     `<meta name="twitter:image" content="${escapeHtml(image)}" />`,
-    canonical ? `<meta property="og:url" content="${escapeHtml(canonical)}" />` : "",
+    ogUrl ? `<meta property="og:url" content="${escapeHtml(ogUrl)}" />` : "",
     canonical ? `<link rel="canonical" href="${escapeHtml(canonical)}" />` : "",
     `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "TravelAgency", name: SITE_NAME, url: CANONICAL_ORIGIN, description: head.description, image })}</script>`,
   ].filter(Boolean).join("\n");

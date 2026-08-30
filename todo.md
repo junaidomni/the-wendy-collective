@@ -192,3 +192,6 @@
 - [x] Add automated regression coverage and responsive validation for new family submission, repeat updates, status visibility, CRM revision history, and noindex privacy behavior.
 - [x] Replace the family-facing “private family portal” wording with a clear invitation to review or update the request.
 - [x] Remove the Grimsley test household submission and its related generated records so the active family link is ready for a fresh client response.
+- [x] Diagnose why the Grimsley private link uses a page snapshot in iMessage instead of the intended branded social preview card.
+- [x] Serve a dedicated Mardi Gras share image and clear proposal title for private group links while retaining noindex protection and secure token access.
+- [ ] Verify crawler-compatible iMessage and WhatsApp metadata, response status, and social-image availability before release.
