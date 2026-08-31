@@ -53,6 +53,18 @@ describe("focused Wendy CRM workspace", () => {
     expect(source).toContain("Group response");
   });
 
+  it("offers a Wendy-only typed confirmation to delete only original website inquiries", () => {
+    const clients = readSource("client/src/pages/wendy/WendyClients.tsx");
+    const pipeline = readSource("client/src/pages/wendy/WendyPipeline.tsx");
+    const control = readSource("client/src/pages/wendy/PublicInquiryDeletionControl.tsx");
+    expect(clients).toContain("PublicInquiryDeletionControl");
+    expect(pipeline).toContain('selectedStage === "new_inquiry"');
+    expect(control).toContain("Manage website inquiries");
+    expect(control).toContain("Type DELETE to confirm");
+    expect(control).toContain("deletePublicInquiry");
+    expect(control).toContain('deal.sourceType === "trip_inquiry"');
+  });
+
   it("registers a token-gated household portal with a retained update link and confirmation message", () => {
     const app = readSource("client/src/App.tsx");
     const cruise = readSource("client/src/pages/SchoolCruise.tsx");

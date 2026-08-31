@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, listAdvisorAlerts, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
+import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, deletePublicWebsiteInquiry, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, listAdvisorAlerts, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { storagePut } from "../storage";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
@@ -28,6 +28,10 @@ export const crmRouter = router({
   markAlertRead: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
     await markAdvisorAlertRead(input.id);
     return { success: true };
+  }),
+  deletePublicInquiry: adminProcedure.input(z.object({ id: z.number().int().positive(), confirmation: z.literal("DELETE") })).mutation(async ({ input }) => {
+    const deleted = await deletePublicWebsiteInquiry(input.id);
+    return { success: true, inquiryId: deleted.inquiryId, deletedDealCount: deleted.deletedDealIds.length };
   }),
   createDeal: adminProcedure.input(z.object({
     contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), title: z.string().trim().min(3).max(180), travelSummary: z.string().trim().max(4000).optional().default(""), nextAction: z.string().trim().max(1000).optional().default(""), meetingAt: z.string().trim().max(32).optional().default(""), meetingNotes: z.string().trim().max(2000).optional().default(""), experienceId: z.number().int().positive().optional(),

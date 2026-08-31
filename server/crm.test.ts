@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
-const mocks = vi.hoisted(() => ({ advanceAdvisorDealWorkflow: vi.fn(), advanceGroupWorkflow: vi.fn(), createAdvisorAlert: vi.fn(), createAdvisorDeal: vi.fn(), createClientProposal: vi.fn(), createProposalResponse: vi.fn(), ensureGrimsleyCruiseExperience: vi.fn(), ensureGrimsleyGroupProfile: vi.fn(), getGroupTravelProfile: vi.fn(), getPrivateClientProposal: vi.fn(), getPrivateGroupTravelProfile: vi.fn(), listAdvisorAlerts: vi.fn(), listAdvisorDeals: vi.fn(), listClientProposals: vi.fn(), listCruiseExperiences: vi.fn(), listProposalResponses: vi.fn(), listWorkflowStageEvents: vi.fn(), markAdvisorAlertRead: vi.fn(), markClientProposalShared: vi.fn(), reopenAdvisorDealWorkflow: vi.fn(), reopenGroupWorkflow: vi.fn(), saveGroupWorkflowDetails: vi.fn(), shareGroupTravelProfile: vi.fn(), syncExistingRequestsToAdvisorDeals: vi.fn(), updateAdvisorDeal: vi.fn(), updateGroupTravelProfile: vi.fn(), updateProposalResponseStatus: vi.fn(), createCruiseExperience: vi.fn(), notifyOwner: vi.fn() }));
+const mocks = vi.hoisted(() => ({ advanceAdvisorDealWorkflow: vi.fn(), advanceGroupWorkflow: vi.fn(), createAdvisorAlert: vi.fn(), createAdvisorDeal: vi.fn(), createClientProposal: vi.fn(), createProposalResponse: vi.fn(), deletePublicWebsiteInquiry: vi.fn(), ensureGrimsleyCruiseExperience: vi.fn(), ensureGrimsleyGroupProfile: vi.fn(), getGroupTravelProfile: vi.fn(), getPrivateClientProposal: vi.fn(), getPrivateGroupTravelProfile: vi.fn(), listAdvisorAlerts: vi.fn(), listAdvisorDeals: vi.fn(), listClientProposals: vi.fn(), listCruiseExperiences: vi.fn(), listProposalResponses: vi.fn(), listWorkflowStageEvents: vi.fn(), markAdvisorAlertRead: vi.fn(), markClientProposalShared: vi.fn(), reopenAdvisorDealWorkflow: vi.fn(), reopenGroupWorkflow: vi.fn(), saveGroupWorkflowDetails: vi.fn(), shareGroupTravelProfile: vi.fn(), syncExistingRequestsToAdvisorDeals: vi.fn(), updateAdvisorDeal: vi.fn(), updateGroupTravelProfile: vi.fn(), updateProposalResponseStatus: vi.fn(), createCruiseExperience: vi.fn(), notifyOwner: vi.fn() }));
 vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), ...mocks }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
 
@@ -24,12 +24,20 @@ describe("advisor CRM and private proposal workflow", () => {
     mocks.getGroupTravelProfile.mockResolvedValue({ profile: { id: 9, groupKey: "grimsley-hs-graduation-cruise-2027", stage: "proposal_build", shareStatus: "draft" }, experience: { shipName: "Mardi Gras" }, cabinRequests: [] });
     mocks.listAdvisorAlerts.mockResolvedValue([]); mocks.listAdvisorDeals.mockResolvedValue([]); mocks.listClientProposals.mockResolvedValue([]); mocks.listCruiseExperiences.mockResolvedValue([]); mocks.listProposalResponses.mockResolvedValue([]); mocks.advanceAdvisorDealWorkflow.mockResolvedValue({ stage: "discovery_call" }); mocks.advanceGroupWorkflow.mockResolvedValue({ workflowStage: "proposal_shared" }); mocks.listWorkflowStageEvents.mockResolvedValue([]); mocks.createAdvisorAlert.mockResolvedValue({ id: 92 }); mocks.markAdvisorAlertRead.mockResolvedValue(undefined);
     mocks.notifyOwner.mockResolvedValue(true);
+    mocks.deletePublicWebsiteInquiry.mockResolvedValue({ inquiryId: 41, deletedDealIds: [51] });
   });
 
   it("keeps CRM management private to Wendy", async () => {
     await expect(appRouter.createCaller(context()).crm.dashboard()).rejects.toMatchObject({ code: "FORBIDDEN" });
     const visitor = { ...owner, id: 7, openId: "visitor-7", role: "user" as const };
     await expect(appRouter.createCaller(context(visitor)).crm.createDeal({ contactFirstName: "Alex", contactLastName: "Morgan", email: "alex@example.com", phone: "555-010-1020", title: "Anniversary sailing" })).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("lets only Wendy permanently remove a confirmed public website inquiry", async () => {
+    const visitor = { ...owner, id: 7, openId: "visitor-7", role: "user" as const };
+    await expect(appRouter.createCaller(context(visitor)).crm.deletePublicInquiry({ id: 41, confirmation: "DELETE" })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(appRouter.createCaller(context(owner)).crm.deletePublicInquiry({ id: 41, confirmation: "DELETE" })).resolves.toMatchObject({ success: true, inquiryId: 41, deletedDealCount: 1 });
+    expect(mocks.deletePublicWebsiteInquiry).toHaveBeenCalledWith(41);
   });
 
   it("prepares prior public requests for Wendy’s unified pipeline", async () => {

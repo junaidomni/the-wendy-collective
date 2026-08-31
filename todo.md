@@ -248,3 +248,6 @@
 - [x] Add a Wendy-only Delete submission control to each private group or proposal household record with a clear permanent-deletion confirmation step.
 - [x] Remove only the selected household’s request revisions, room and traveler records, associated portal record, and scoped alerts while preserving the originating group, proposal, and active share link.
 - [x] Add regression coverage and desktop/mobile verification proving deletion is protected, confirmed, and isolated to the selected submission.
+- [x] Add a Wendy-only typed-confirmation deletion control for public website inquiries in the Clients and New Inquiry pipeline views.
+- [x] Permanently remove only the selected public inquiry, its derived client pipeline record, and its scoped public alert while preserving group and private proposal submissions.
+- [x] Add regression coverage and responsive validation proving public-inquiry deletion is protected, confirmed, and isolated from every other CRM source.

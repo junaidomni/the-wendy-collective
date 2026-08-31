@@ -68,6 +68,24 @@ export async function getTripInquiries(limit = 75) {
   return db.select().from(tripInquiries).orderBy(desc(tripInquiries.createdAt)).limit(limit);
 }
 
+export async function deletePublicWebsiteInquiry(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Trip inquiry storage is unavailable");
+  const inquiry = (await db.select().from(tripInquiries).where(eq(tripInquiries.id, id)).limit(1))[0];
+  if (!inquiry) throw new Error("Website inquiry not found.");
+  const deals = await db.select({ id: advisorDeals.id }).from(advisorDeals).where(and(eq(advisorDeals.sourceType, "trip_inquiry"), eq(advisorDeals.sourceId, id)));
+  const dealIds = deals.map((deal) => deal.id);
+  if (dealIds.length) {
+    const linkedProposals = await db.select({ id: clientProposals.id }).from(clientProposals).where(inArray(clientProposals.dealId, dealIds));
+    if (linkedProposals.length) throw new Error("This inquiry has an active private proposal. Keep the client record or close the proposal before deleting the website inquiry.");
+    await db.delete(workflowStageEvents).where(and(eq(workflowStageEvents.entityType, "deal"), inArray(workflowStageEvents.entityId, dealIds)));
+    await db.delete(advisorDeals).where(inArray(advisorDeals.id, dealIds));
+  }
+  await db.delete(advisorAlerts).where(and(eq(advisorAlerts.sourceType, "public_inquiry"), eq(advisorAlerts.sourceId, id)));
+  await db.delete(tripInquiries).where(eq(tripInquiries.id, id));
+  return { deletedDealIds: dealIds, inquiryId: id };
+}
+
 export type CreatePrivateClientRequestInput = Pick<InsertPrivateClientRequest, "userId" | "requestType" | "message">;
 
 export async function createPrivateClientRequest(input: CreatePrivateClientRequestInput) {
