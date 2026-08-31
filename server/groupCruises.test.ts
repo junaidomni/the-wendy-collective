@@ -38,7 +38,7 @@ describe("group cabin request workflow", () => {
     expect(mocks.createFamilyPortalCabinRequest.mock.calls[0][0]).not.toHaveProperty("paymentCard");
     expect(mocks.createAdvisorAlert).toHaveBeenCalledWith(expect.objectContaining({ sourceType: "group_request", sourceId: 28, groupKey: request.groupKey, href: "/wendy/groups/grimsley" }));
     expect(mocks.notifyOwner).toHaveBeenCalledWith(expect.objectContaining({ title: "New Grimsley cabin request · The Wendy Collective", content: expect.stringContaining("Rooms requested: 1") }));
-    expect(mocks.sendGroupCabinRequestEmail).toHaveBeenCalledWith(expect.objectContaining({ requestId: 28, rooms: 1, travelers: 2 }));
+    expect(mocks.sendGroupCabinRequestEmail).toHaveBeenCalledWith(expect.objectContaining({ requestId: 28, revisionNumber: 1, notes: request.notes, amenities: request.amenities, extras: expect.objectContaining({ diningExperience: "Fahrenheit 555 Steakhouse" }), estimate: expect.objectContaining({ tripTotalCents: 252194 }), rooms: expect.arrayContaining([expect.objectContaining({ occupancy: 2, travelers: expect.arrayContaining([expect.objectContaining({ dateOfBirth: "2008-06-24" })]) })]) }));
   });
 
   it("adds a numbered current revision to the authenticated household portal without creating a pipeline record", async () => {

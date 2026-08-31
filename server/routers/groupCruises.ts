@@ -90,7 +90,7 @@ export const groupCruisesRouter = router({
     ].join("\n");
     const [ownerNotificationSent, emailAlertStatus, portalAlertStored] = await Promise.all([
       notifyWendy(`${isUpdate ? "Updated" : "New"} Grimsley cabin request · The Wendy Collective`, content),
-      sendGroupCabinRequestEmail({ requestId: request.id, contactFirstName: input.contactFirstName, contactLastName: input.contactLastName, email: input.email, phone: input.phone, rooms: input.rooms.length, travelers: travelerCount }),
+      sendGroupCabinRequestEmail({ requestId: request.id, revisionNumber: request.revisionNumber, contactFirstName: input.contactFirstName, contactLastName: input.contactLastName, email: input.email, phone: input.phone, notes: input.notes, amenities: input.amenities, extras: input.extras, estimate: input.estimate, rooms: input.rooms }),
       createAdvisorAlert({
         sourceType: "group_request",
         sourceId: request.id,
