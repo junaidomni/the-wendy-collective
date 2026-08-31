@@ -224,3 +224,6 @@
 - [x] Add a concise near-hero Experience Mardi Gras section with supplied recreation, pool, BOLT, entertainment, youth, and adult highlights.
 - [x] Include a clear Experience Mardi Gras call to action that opens Carnival’s official Mardi Gras ship page in a new tab.
 - [x] Verify the new proposal-opening section and official external link across desktop and mobile without disrupting the private request flow.
+- [x] Audit the completed Grimsley proposal for redundant sections, uneven visual pacing, and mobile scanability while preserving approved rates and advisor safeguards.
+- [x] Refine the section order, visual hierarchy, and client-facing transitions into a cohesive final Grimsley proposal draft.
+- [x] Verify final desktop and mobile proposal presentation, clean sharing behavior, official Carnival links, cabin-planner calculations, and private request submission safeguards before release.
