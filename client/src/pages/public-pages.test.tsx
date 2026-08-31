@@ -82,6 +82,8 @@ describe("public site content", () => {
     expect(schoolCruise).toContain("Return to the top of the Grimsley proposal");
     expect(schoolCruise).toContain("createPortal");
     expect(schoolCruise).toContain("document.body");
+    const estimator = readFileSync(new URL("../components/GrimsleyCabinEstimator.tsx", import.meta.url), "utf8");
+    expect(estimator).toContain("{formatCurrency(category.fare * 100)} per traveler · {category.title}");
     expect(schoolCruise).toContain("does not hold a cabin or create a reservation");
     expect(schoolCruise).not.toMatch(/[—–]/);
   });

@@ -12,6 +12,7 @@ try {
   const token = rows[0]?.privateToken;
   if (!token) throw new Error("No active Grimsley link was found.");
   const url = new URL(`https://thewendycollective.com/group/${encodeURIComponent(token)}`);
+  if (process.env.CARD_VERSION) url.searchParams.set("card", process.env.CARD_VERSION);
   if (process.env.CACHE_BUST === "1") url.searchParams.set("preview", "refresh");
   const response = await fetch(url, { redirect: "follow", headers: { "Cache-Control": "no-cache", Pragma: "no-cache" } });
   const html = await response.text();
@@ -26,6 +27,7 @@ try {
     ogImageWidth: match(/<meta property="og:image:width" content="([^"]+)"/),
     ogImageHeight: match(/<meta property="og:image:height" content="([^"]+)"/),
     ogUrlPresent: /<meta property="og:url"/.test(html),
+    ogUrlIncludesCardVersion: /<meta property="og:url" content="[^"]+\?card=2"/.test(html),
     cacheControl: response.headers.get("cache-control"),
   }));
 } finally {

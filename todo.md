@@ -215,6 +215,7 @@
 - [x] Add the confirmed $646 three-traveler Havana Interior option with its age eligibility note, while excluding unconfirmed four-traveler Havana and three-traveler Ocean Suite options.
 - [x] Verify the live Grimsley social-card metadata and ship image response after the reported intermittent WhatsApp image omission.
 - [x] Harden the private-link social-card response where needed so a fresh WhatsApp or iMessage share can reliably retrieve the Mardi Gras preview image.
-- [ ] Confirm the final live private-link response preserves the proposal title, description, image, and noindex protection.
+- [x] Confirm the final live private-link response preserves the proposal title, description, image, and noindex protection.
 - [x] Correct the active WhatsApp failure in which a newly sent Grimsley private link shows its title and description but omits the approved ship image.
 - [x] Change the Grimsley hero Explore the Ship action to open Carnival’s official Mardi Gras ship page in a new tab and retain a separate on-page ship-details path.
+- [x] Make every Grimsley cabin selector option lead with the per-traveler reference price and remove redundant cabin-category wording from the option description.
