@@ -31,6 +31,8 @@ describe("focused Wendy CRM workspace", () => {
     expect(source).toContain("JourneyRail");
     expect(source).toContain("Secure Grimsley family link. Copy this address and send it to the family.");
     expect(readSource("client/src/lib/site.ts")).toContain("https://thewendycollective.com");
+    expect(readSource("client/src/lib/site.ts")).toContain('GRIMSLEY_SHARE_CARD_VERSION = "2"');
+    expect(source).toContain("buildGrimsleyFamilyLink");
     expect(source).toContain("Active family link");
     expect(source).toContain("Copy family link");
     expect(source).toContain("Completed stage review");

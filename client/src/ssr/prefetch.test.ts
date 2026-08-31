@@ -26,6 +26,7 @@ describe("server-rendered page metadata", () => {
     const group = prefetchForPath("/group/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk");
     expect(group).toMatchObject({ noindex: true, title: "Grimsley Graduation Cruise 2027 | The Wendy Collective", ogImage: "/social/grimsley-mardi-gras.png", ogImageWidth: 695, ogImageHeight: 422 });
     expect(group.ogUrlPath).toBe("/group/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk");
+    expect(prefetchForPath("/group/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk?card=2").ogUrlPath).toBe("/group/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk?card=2");
     expect(prefetchForPath("/family/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk").noindex).toBe(true);
   });
 

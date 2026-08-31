@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useRoute } from "wouter";
 import WendyShell from "./WendyShell";
 import { trpc } from "@/lib/trpc";
-import { PUBLIC_SITE_ORIGIN } from "@/lib/site";
+import { buildGrimsleyFamilyLink } from "@/lib/site";
 import { dealStageLabels, dealStages, parseItinerary, type DealStage } from "./types";
 
 type Experience = { id: number; title: string; shipName: string; cruiseLine: string; embarkPort: string; sailingSummary: string; heroImageUrl: string | null; itineraryJson: string | null; shipFactsJson: string | null; cabinCategoriesJson: string | null; amenitiesJson: string | null; roomGuidance: string | null; reviewedOn: string | null; status: "draft" | "ready" | "archived" };
@@ -44,8 +44,8 @@ function GroupProfile({ group, experiences, onRefresh }: { group: GroupData; exp
   const facts = parseFacts(group.experience?.shipFactsJson);
   const cabins = parseList(group.experience?.cabinCategoriesJson);
   const amenities = parseList(group.experience?.amenitiesJson);
-  const familyLink = group.profile.shareStatus === "shared" && group.profile.privateToken ? `${PUBLIC_SITE_ORIGIN}/group/${group.profile.privateToken}` : "";
-  const copyFamilyLink = async (days: number) => { const result = await share.mutateAsync({ id: group.profile.id, validForDays: days }); const link = `${PUBLIC_SITE_ORIGIN}/group/${result.privateToken}`; try { await navigator.clipboard.writeText(link); } catch { /* The dialog below remains a reliable manual copy path. */ } window.prompt("Secure Grimsley family link. Copy this address and send it to the family.", link); };
+  const familyLink = group.profile.shareStatus === "shared" && group.profile.privateToken ? buildGrimsleyFamilyLink(group.profile.privateToken) : "";
+  const copyFamilyLink = async (days: number) => { const result = await share.mutateAsync({ id: group.profile.id, validForDays: days }); const link = buildGrimsleyFamilyLink(result.privateToken); try { await navigator.clipboard.writeText(link); } catch { /* The dialog below remains a reliable manual copy path. */ } window.prompt("Secure Grimsley family link. Copy this address and send it to the family.", link); };
   const copyExistingFamilyLink = async () => { if (!familyLink) return; try { await navigator.clipboard.writeText(familyLink); } catch { /* The dialog below remains a reliable manual copy path. */ } window.prompt("Secure Grimsley family link. Copy this address and send it to the family.", familyLink); };
   const submitStage = (form: HTMLFormElement) => { const values = new FormData(form); const data = Object.fromEntries(Array.from(values.entries()).filter(([key]) => key.startsWith("stage_")).map(([key, value]) => [key.replace("stage_", ""), String(value)])); continueStage.mutate({ id: group.profile.id, experienceId: values.get("experience") ? Number(values.get("experience")) : undefined, nextAction: String(values.get("nextAction") || ""), meetingNotes: String(values.get("meetingNotes") || ""), reservationReference: String(values.get("reservationReference") || ""), stageData: data }); };
   const saveDetails = (form: HTMLFormElement) => { const values = new FormData(form); save.mutate({ id: group.profile.id, experienceId: values.get("experience") ? Number(values.get("experience")) : undefined, coordinatorName: String(values.get("coordinatorName") || ""), coordinatorEmail: String(values.get("coordinatorEmail") || ""), coordinatorPhone: String(values.get("coordinatorPhone") || ""), groupTerms: String(values.get("groupTerms") || ""), roomStrategy: String(values.get("roomStrategy") || ""), bookingWindow: String(values.get("bookingWindow") || ""), advisorNotes: String(values.get("advisorNotes") || "") }); };
