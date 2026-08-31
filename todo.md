@@ -205,3 +205,11 @@
 - [x] Make the Grimsley Top control appear immediately after scrolling begins and remain fixed throughout all remaining proposal sections, including the middle of the page and the form.
 - [x] Replace the unreliable scroll-dependent Grimsley Top control with a viewport-fixed action that remains visible at the lower right on the live mobile and desktop proposal from opening through the full page.
 - [x] Verify the active production Grimsley link displays the persistent Top action at the opening, middle, and form positions before release.
+- [x] Reconcile the supplied Grimsley cabin-category removals, reordered pricing, deck locations, capacity notes, and newly added suite options against the current selector and estimator.
+- [x] Update the private Grimsley proposal and estimator with approved per-traveler rates, concise cabin descriptions, occupancy-specific prices, and accurate deck-placement guidance.
+- [x] Preserve advisor-led live-quote confirmation and clearly distinguish occupancy-specific reference rates from final availability, taxes, gratuities, and booking terms.
+- [x] Add regression coverage and responsive verification for the revised Grimsley category order, pricing, capacity behavior, and calculation outputs.
+- [x] Restrict the two-traveler Ocean View selection to the clarified $995 Cloud 9 Spa Ocean View on Deck 5, mid ship, and remove unconfirmed two-traveler Ocean View options.
+- [x] Correct the $642 rate mapping so it represents the four-traveler Cove Balcony option rather than an interior cabin.
+- [x] Update the Grimsley deposit and change terms to state the $50 per-traveler nonrefundable deposit, applicable cancellation or ship and sailing change fees, and possible fare recalculation when cabin headcount changes.
+- [x] Add the confirmed $646 three-traveler Havana Interior option with its age eligibility note, while excluding unconfirmed four-traveler Havana and three-traveler Ocean Suite options.
