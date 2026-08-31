@@ -37,6 +37,13 @@ const mardiGrasHighlights = [
   { eyebrow: "Graduates and younger travelers", title: "Age appropriate spaces", body: "Circle C serves ages 12 to 14 and Club O2 serves ages 15 to 17. Camp Ocean serves children through age 11. Guests 18 and older are young adults and follow each venue’s age rules." },
   { eyebrow: "Parents and adults", title: "Room to relax and have fun", body: "Serenity Adult Only Retreat is an included open air escape. Parents can also enjoy comedy, live music, lounges, dining, nightlife, Cloud 9 Spa treatments, casino play, and purchased beverages." },
 ];
+const mardiGrasHeroSlides = [
+  "/manus-storage/ship_3df3c21e.png",
+  "/manus-storage/waterworks_14b8fa60.jpg",
+  "/manus-storage/dining_aece338f.jpg",
+  "/manus-storage/entertainment_a310e8d3.jpg",
+  "/manus-storage/bolt_ca8c688b.jpg",
+];
 
 function parseItinerary(raw?: string | null) {
   try {
@@ -142,6 +149,7 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
     <SiteShell>
     <section className="school-hero">
       <img src={shipImage} alt={shipImageAlt} />
+      <div className="school-hero__film" aria-hidden="true">{mardiGrasHeroSlides.map((src, index) => <img key={src} src={src} alt="" className="school-hero__slide" style={{ animationDelay: `${index * 6}s` }} />)}</div>
       <div className="school-hero__veil" />
       <div className="page-wrap school-hero__content">
         <p className="eyebrow">{privateToken || familyPortalToken ? "Private family proposal" : groupName}</p>

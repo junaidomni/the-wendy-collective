@@ -86,6 +86,11 @@ describe("public site content", () => {
     expect(schoolCruise).toContain("Sailing at a glance");
     expect(schoolCruise).toContain("Day by day");
     expect(schoolCruise).not.toContain("A ship worth getting to");
+    expect(schoolCruise).toContain("mardiGrasHeroSlides");
+    expect(schoolCruise).toContain("/manus-storage/waterworks_14b8fa60.jpg");
+    expect(schoolCruise).toContain("/manus-storage/dining_aece338f.jpg");
+    expect(schoolCruise).toContain("/manus-storage/entertainment_a310e8d3.jpg");
+    expect(schoolCruise).toContain("/manus-storage/bolt_ca8c688b.jpg");
     expect(schoolCruise).toContain("Travel documents made");
     expect(schoolCruise).toContain("Frequently asked questions");
     expect(schoolCruise).toContain("Rate qualifiers");

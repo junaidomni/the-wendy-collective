@@ -230,3 +230,7 @@
 - [x] Combine the Grimsley ship-at-a-glance facts and day-by-day itinerary into one coherent Sailing at a glance section with a shared heading and reduced whitespace.
 - [x] Preserve all sailing facts and day content while improving the desktop and mobile visual sequence between Mardi Gras highlights and cabin guidance.
 - [x] Verify the consolidated Grimsley sailing section on desktop and mobile before release.
+- [x] Source and document rights-safe, high-resolution Mardi Gras ship, recreation, dining, and entertainment visual media for the private proposal hero.
+- [x] Replace the static Grimsley hero image with a muted, full-bleed, forward-only visual loop that preserves readable proposal actions and a static fallback.
+- [x] Respect reduced-motion preferences and ensure the hero loop introduces no controls, advertisements, watermarks, or unsafe third-party embeds.
+- [x] Verify the final hero loop across desktop and mobile for composition, performance, content sequence, and private-proposal accessibility before release.
