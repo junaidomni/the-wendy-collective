@@ -39,6 +39,15 @@ describe("focused Wendy CRM workspace", () => {
     expect(source).toContain("Review");
     expect(source).toContain("Current request");
     expect(source).toContain("family-revision-history");
+    expect(source).toContain("New family response");
+    expect(source).toContain("Review families");
+  });
+
+  it("keeps public inquiries and linked package responses distinct in Wendy Today", () => {
+    const source = readSource("client/src/pages/wendy/WendyToday.tsx");
+    expect(source).toContain("Submission alerts");
+    expect(source).toContain("Website inquiries enter the pipeline");
+    expect(source).toContain("Group response");
   });
 
   it("registers a token-gated household portal with a retained update link and confirmation message", () => {

@@ -93,6 +93,19 @@ export const groupCabinRequestTravelers = mysqlTable("group_cabin_request_travel
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+export const advisorAlerts = mysqlTable("advisor_alerts", {
+  id: int("id").autoincrement().primaryKey(),
+  sourceType: mysqlEnum("sourceType", ["public_inquiry", "group_request", "proposal_response"]).notNull(),
+  sourceId: int("sourceId").notNull(),
+  groupKey: varchar("groupKey", { length: 120 }),
+  title: varchar("title", { length: 180 }).notNull(),
+  detail: text("detail").notNull(),
+  href: varchar("href", { length: 320 }).notNull(),
+  isRead: int("isRead").default(0).notNull(),
+  readAt: timestamp("readAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 export const cruiseExperiences = mysqlTable("cruise_experiences", {
   id: int("id").autoincrement().primaryKey(),
   slug: varchar("slug", { length: 160 }).notNull().unique(),
@@ -218,6 +231,8 @@ export type GroupCabinRequestRoom = typeof groupCabinRequestRooms.$inferSelect;
 export type InsertGroupCabinRequestRoom = typeof groupCabinRequestRooms.$inferInsert;
 export type GroupCabinRequestTraveler = typeof groupCabinRequestTravelers.$inferSelect;
 export type InsertGroupCabinRequestTraveler = typeof groupCabinRequestTravelers.$inferInsert;
+export type AdvisorAlert = typeof advisorAlerts.$inferSelect;
+export type InsertAdvisorAlert = typeof advisorAlerts.$inferInsert;
 export type CruiseExperience = typeof cruiseExperiences.$inferSelect;
 export type InsertCruiseExperience = typeof cruiseExperiences.$inferInsert;
 export type AdvisorDeal = typeof advisorDeals.$inferSelect;

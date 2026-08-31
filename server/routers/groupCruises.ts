@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createAdvisorDeal, createFamilyPortalCabinRequest, createFamilyPortalRevision, getGroupCabinRequests, getPrivateFamilyPortal, getPrivateGroupTravelProfile, updateGroupCabinRequestStatus } from "../db";
+import { createAdvisorAlert, createFamilyPortalCabinRequest, createFamilyPortalRevision, getGroupCabinRequests, getPrivateFamilyPortal, getPrivateGroupTravelProfile, updateGroupCabinRequestStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 import { sendGroupCabinRequestEmail } from "../resendAlerts";
@@ -78,24 +78,9 @@ export const groupCruisesRouter = router({
       ? await createFamilyPortalRevision(input.familyPortalToken, input)
       : await createFamilyPortalCabinRequest(input);
     const travelerCount = input.rooms.reduce((total, room) => total + room.travelers.length, 0);
-    if (!input.familyPortalToken) {
-      try {
-        await createAdvisorDeal({
-          sourceType: "group_cabin_request",
-          sourceId: request.id,
-          contactFirstName: input.contactFirstName,
-          contactLastName: input.contactLastName,
-          email: input.email,
-          phone: input.phone,
-          title: "Grimsley High School Graduation Cruise 2027",
-          travelSummary: `${input.rooms.length} requested rooms for ${travelerCount} travelers. ${input.notes || ""}`,
-          stage: "new_inquiry",
-          nextAction: "Review school cruise cabin request and prepare quote",
-        });
-      } catch (error) { console.error("[Group cruise] CRM handoff failed", { requestId: request.id, error }); }
-    }
+    const isUpdate = Boolean(input.familyPortalToken);
     const content = [
-      `${input.familyPortalToken ? "Updated" : "New"} Grimsley cabin request from ${input.contactFirstName} ${input.contactLastName}`,
+      `${isUpdate ? "Updated" : "New"} Grimsley cabin request from ${input.contactFirstName} ${input.contactLastName}`,
       `Email: ${input.email}`,
       `Phone: ${input.phone}`,
       `Rooms requested: ${input.rooms.length}`,
@@ -103,11 +88,19 @@ export const groupCruisesRouter = router({
       `Preferences: ${input.amenities.join(", ") || "None selected"}`,
       "Open Wendy’s workspace to review the room details and begin the quote.",
     ].join("\n");
-    const [ownerNotificationSent, emailAlertStatus] = await Promise.all([
-      notifyWendy(`${input.familyPortalToken ? "Updated" : "New"} Grimsley cabin request · The Wendy Collective`, content),
+    const [ownerNotificationSent, emailAlertStatus, portalAlertStored] = await Promise.all([
+      notifyWendy(`${isUpdate ? "Updated" : "New"} Grimsley cabin request · The Wendy Collective`, content),
       sendGroupCabinRequestEmail({ requestId: request.id, contactFirstName: input.contactFirstName, contactLastName: input.contactLastName, email: input.email, phone: input.phone, rooms: input.rooms.length, travelers: travelerCount }),
+      createAdvisorAlert({
+        sourceType: "group_request",
+        sourceId: request.id,
+        groupKey: input.groupKey,
+        title: `${isUpdate ? "Updated" : "New"} Grimsley family request`,
+        detail: `${input.contactFirstName} ${input.contactLastName} submitted ${input.rooms.length} room${input.rooms.length === 1 ? "" : "s"} for ${travelerCount} traveler${travelerCount === 1 ? "" : "s"}.`,
+        href: "/wendy/groups/grimsley",
+      }).then(() => true).catch((error) => { console.error("[Group cruise] Portal alert failed", { requestId: request.id, error }); return false; }),
     ]);
-    return { success: true, requestId: request.id, familyPortalToken: request.familyPortalToken, revisionNumber: request.revisionNumber, ownerNotificationSent, emailAlertStatus };
+    return { success: true, requestId: request.id, familyPortalToken: request.familyPortalToken, revisionNumber: request.revisionNumber, ownerNotificationSent, emailAlertStatus, portalAlertStored };
   }),
   getFamilyPortal: publicProcedure.input(z.object({ token: z.string().trim().min(32).max(96) })).query(({ input }) => getPrivateFamilyPortal(input.token)),
   listCabinRequests: adminProcedure.query(() => getGroupCabinRequests()),

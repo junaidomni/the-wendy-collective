@@ -2,6 +2,7 @@ import { desc, eq, inArray } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
+  advisorAlerts,
   advisorDeals,
   clientProposals,
   cruiseExperiences,
@@ -544,6 +545,34 @@ export async function createAdvisorDeal(input: CreateAdvisorDealInput) {
   return { id: Number(result[0].insertId) };
 }
 
+export type CreateAdvisorAlertInput = {
+  sourceType: "public_inquiry" | "group_request" | "proposal_response";
+  sourceId: number;
+  groupKey?: string;
+  title: string;
+  detail: string;
+  href: string;
+};
+
+export async function createAdvisorAlert(input: CreateAdvisorAlertInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Advisor alert storage is unavailable");
+  const result = await db.insert(advisorAlerts).values({ ...input, groupKey: input.groupKey || null });
+  return { id: Number(result[0].insertId) };
+}
+
+export async function listAdvisorAlerts(limit = 50) {
+  const db = await getDb();
+  if (!db) throw new Error("Advisor alert storage is unavailable");
+  return db.select().from(advisorAlerts).orderBy(desc(advisorAlerts.createdAt)).limit(limit);
+}
+
+export async function markAdvisorAlertRead(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Advisor alert storage is unavailable");
+  await db.update(advisorAlerts).set({ isRead: 1, readAt: new Date() }).where(eq(advisorAlerts.id, id));
+}
+
 export async function updateAdvisorDeal(id: number, input: Pick<CreateAdvisorDealInput, "stage" | "experienceId" | "nextAction" | "meetingAt" | "meetingNotes" | "advisorNotes"> & { reservationReference?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Advisor deal storage is unavailable");
@@ -593,18 +622,14 @@ export async function listAdvisorDeals() {
 export async function syncExistingRequestsToAdvisorDeals() {
   const db = await getDb();
   if (!db) throw new Error("Advisor deal storage is unavailable");
-  const [existingDeals, legacyInquiries, legacyGroupRequests] = await Promise.all([
+  const [existingDeals, legacyInquiries] = await Promise.all([
     db.select({ sourceType: advisorDeals.sourceType, sourceId: advisorDeals.sourceId }).from(advisorDeals),
     db.select().from(tripInquiries).orderBy(desc(tripInquiries.createdAt)).limit(150),
-    db.select().from(groupCabinRequests).orderBy(desc(groupCabinRequests.createdAt)).limit(150),
   ]);
   const existingSources = new Set(existingDeals.filter((deal) => deal.sourceId !== null).map((deal) => `${deal.sourceType}:${deal.sourceId}`));
   const values = [
     ...legacyInquiries.filter((inquiry) => !existingSources.has(`trip_inquiry:${inquiry.id}`)).map((inquiry) => ({
       sourceType: "trip_inquiry" as const, sourceId: inquiry.id, contactFirstName: inquiry.firstName, contactLastName: inquiry.lastName, email: inquiry.email, phone: inquiry.phone, title: `${inquiry.travelType} travel inquiry`, travelSummary: `Destinations: ${inquiry.destinations}. Timing: ${inquiry.travelTiming}. Travelers: ${inquiry.groupSize}. ${inquiry.priorities || ""}`, stage: "new_inquiry" as const, nextAction: "Review inquiry and schedule discovery call",
-    })),
-    ...legacyGroupRequests.filter((request) => !existingSources.has(`group_cabin_request:${request.id}`)).map((request) => ({
-      sourceType: "group_cabin_request" as const, sourceId: request.id, contactFirstName: request.contactFirstName, contactLastName: request.contactLastName, email: request.email, phone: request.phone, title: "Grimsley High School Graduation Cruise 2027", travelSummary: `${request.roomCount} requested rooms. ${request.notes || ""}`, stage: "new_inquiry" as const, nextAction: "Review school cruise cabin request and prepare quote",
     })),
   ];
   if (values.length) await db.insert(advisorDeals).values(values);

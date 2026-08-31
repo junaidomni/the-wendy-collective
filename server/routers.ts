@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
-import { createAdvisorDeal, createTripInquiry, getTripInquiries } from "./db";
+import { createAdvisorAlert, createAdvisorDeal, createTripInquiry, getTripInquiries } from "./db";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
@@ -48,8 +48,9 @@ export const appRouter = router({
   inquiries: router({
     create: publicProcedure.input(tripInquiryInput).mutation(async ({ input }) => {
       const inquiry = await createTripInquiry({ ...input, destinations: JSON.stringify(input.destinations) });
+      let dealId: number | undefined;
       try {
-        await createAdvisorDeal({
+        const deal = await createAdvisorDeal({
           sourceType: "trip_inquiry",
           sourceId: inquiry.id,
           contactFirstName: input.firstName,
@@ -61,6 +62,7 @@ export const appRouter = router({
           stage: "new_inquiry",
           nextAction: "Review inquiry and schedule discovery call",
         });
+        dealId = deal.id;
       } catch (error) { console.error("[Inquiries] CRM handoff failed", { inquiryId: inquiry.id, error }); }
       const content = [
         `New trip inquiry from ${input.firstName} ${input.lastName}`,
@@ -73,14 +75,21 @@ export const appRouter = router({
         `Travelers: ${input.groupSize}`,
         `Priorities: ${input.priorities || "Not provided"}`,
       ].join("\n");
-      const [ownerNotificationSent, emailAlertStatus] = await Promise.all([
+      const [ownerNotificationSent, emailAlertStatus, portalAlertStored] = await Promise.all([
         notifyOwnerWithRetry("New trip inquiry · The Wendy Collective", content),
         sendTripBriefEmail({ inquiryId: inquiry.id, ...input }),
+        createAdvisorAlert({
+          sourceType: "public_inquiry",
+          sourceId: inquiry.id,
+          title: "New website inquiry needs Wendy’s response",
+          detail: `${input.firstName} ${input.lastName} is interested in ${input.travelType.replace(/([A-Z])/g, " $1").toLowerCase()}.`,
+          href: dealId ? `/wendy/clients/${dealId}` : "/wendy/pipeline/new_inquiry",
+        }).then(() => true).catch((error) => { console.error("[Inquiries] Portal alert failed", { inquiryId: inquiry.id, error }); return false; }),
       ]);
       if (!ownerNotificationSent && emailAlertStatus !== "sent") {
         console.error("[Inquiries] All owner alert channels failed", { inquiryId: inquiry.id });
       }
-      return { success: true, inquiryId: inquiry.id, ownerNotificationSent, emailAlertStatus };
+      return { success: true, inquiryId: inquiry.id, ownerNotificationSent, emailAlertStatus, portalAlertStored };
     }),
   }),
   privateExperience: router({

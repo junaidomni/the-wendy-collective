@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
+import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, listAdvisorAlerts, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { storagePut } from "../storage";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
@@ -22,8 +22,12 @@ export const crmRouter = router({
     const grimsleyExperience = await ensureGrimsleyCruiseExperience();
     await ensureGrimsleyGroupProfile();
     await syncExistingRequestsToAdvisorDeals();
-    const [deals, experiences, proposals, responses, grimsleyProfile] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027")]);
-    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile };
+    const [deals, experiences, proposals, responses, grimsleyProfile, alerts] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027"), listAdvisorAlerts()]);
+    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile, alerts };
+  }),
+  markAlertRead: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
+    await markAdvisorAlertRead(input.id);
+    return { success: true };
   }),
   createDeal: adminProcedure.input(z.object({
     contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), title: z.string().trim().min(3).max(180), travelSummary: z.string().trim().max(4000).optional().default(""), nextAction: z.string().trim().max(1000).optional().default(""), meetingAt: z.string().trim().max(32).optional().default(""), meetingNotes: z.string().trim().max(2000).optional().default(""), experienceId: z.number().int().positive().optional(),
@@ -114,7 +118,10 @@ export const crmRouter = router({
     if (!privateProposal) return { success: false, unavailable: true };
     const response = await createProposalResponse({ proposalId: privateProposal.proposal.id, contactFirstName: input.contactFirstName, contactLastName: input.contactLastName, email: input.email, phone: input.phone, roomsJson: JSON.stringify(input.rooms), notes: input.notes });
     const travelerCount = input.rooms.reduce((total, room) => total + room.travelerDetails.length, 0);
-    const ownerNotificationSent = await notifyWendy("New proposal response · The Wendy Collective", [`${input.contactFirstName} ${input.contactLastName} responded to ${privateProposal.proposal.title}.`, `Email: ${input.email}`, `Rooms: ${input.rooms.length}`, `Travelers: ${travelerCount}`, "Open Wendy’s workspace to review the request and prepare the live quote."].join("\n"));
-    return { success: true, responseId: response.id, ownerNotificationSent, unavailable: false };
+    const [ownerNotificationSent, portalAlertStored] = await Promise.all([
+      notifyWendy("New proposal response · The Wendy Collective", [`${input.contactFirstName} ${input.contactLastName} responded to ${privateProposal.proposal.title}.`, `Email: ${input.email}`, `Rooms: ${input.rooms.length}`, `Travelers: ${travelerCount}`, "Open Wendy’s workspace to review the request and prepare the live quote."].join("\n")),
+      createAdvisorAlert({ sourceType: "proposal_response", sourceId: response.id, title: `New response to ${privateProposal.proposal.title}`, detail: `${input.contactFirstName} ${input.contactLastName} submitted ${input.rooms.length} room${input.rooms.length === 1 ? "" : "s"} for ${travelerCount} traveler${travelerCount === 1 ? "" : "s"}.`, href: "/wendy/proposals" }).then(() => true).catch((error) => { console.error("[CRM] Proposal response alert failed", { responseId: response.id, error }); return false; }),
+    ]);
+    return { success: true, responseId: response.id, ownerNotificationSent, portalAlertStored, unavailable: false };
   }),
 });

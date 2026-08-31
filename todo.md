@@ -234,3 +234,14 @@
 - [x] Replace the static Grimsley hero image with a muted, full-bleed, forward-only visual loop that preserves readable proposal actions and a static fallback.
 - [x] Respect reduced-motion preferences and ensure the hero loop introduces no controls, advertisements, watermarks, or unsafe third-party embeds.
 - [x] Verify the final hero loop across desktop and mobile for composition, performance, content sequence, and private-proposal accessibility before release.
+- [ ] Configure a submission alert recipient at info@thewendycollective.com while retaining every request and revision in Wendy’s protected CRM.
+- [ ] Include the complete approved family request and household-update record in each email, including contacts, rooms, travelers, selections, qualifiers, estimates, notes, and timestamps.
+- [ ] Exclude payment cards, passport details, passwords, supplier credentials, and any travel-document data from all email notifications.
+- [ ] Activate and test the prepared email delivery only after a verified Resend sender and API key are available, with a transparent CRM fallback if delivery is unavailable.
+- [x] Inspect whether a connected email account can temporarily deliver complete Grimsley submission alerts to info@thewendycollective.com without activating the permanent Resend sender.
+- [x] Retain the protected CRM submission and revision record as the source of truth regardless of temporary email-delivery availability.
+- [x] Stop private Grimsley and future package-link submissions from creating new client records or New Inquiry pipeline entries.
+- [x] Keep each private-link response and update attached to its originating group program or individual proposal, with review available within that record.
+- [x] Reserve the New Inquiry pipeline for forms submitted from the public Wendy Collective website.
+- [x] Add Wendy portal alerts that distinguish a new public inquiry requiring contact from a new or updated response within a specific cruise or vacation proposal.
+- [x] Test source-specific routing, in-portal alert visibility, CRM preservation, and private request safeguards before release.
