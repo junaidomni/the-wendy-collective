@@ -270,3 +270,14 @@
 - [x] Design a generic private comparison link that shows a Wendy-curated set of cruise options without public prices and collects one selected option, rooms, travelers, and preferences.
 - [x] Define how Wendy’s internal cruise library, live availability lookup, proposal comparison, traveler intake, quote verification, and booking stages exchange data without automated booking or unsupported supplier access.
 - [x] Document the proposed implementation, privacy safeguards, provider activation gates, and phased rollout for Wendy’s approval before any supplier-search or comparison-link feature is built.
+- [x] Provide a research-only recommendation for reusable cruise metadata, sailing-date availability, and authorized API or partner options without changing the live CRM, Mardi Gras page, or client links.
+- [x] Define the future architecture for ship metadata, sailing inventory, Wendy-curated proposal options, client traveler-intake forms, and advisor-led quote or booking handoff.
+- [x] Provide a research-only condensed normal-client pipeline recommendation covering discovery, private traveler intake, advisor package research, live review, booking, and post-booking itinerary access.
+- [x] Define the intake fields, internal records, private-link boundaries, stage gates, and client communications for the proposed normal-trip flow without supplier API access.
+- [x] Preserve the active Grimsley Graduation Cruise link, its existing submission behavior, and its scoped CRM alerts without any code or workflow changes.
+- [ ] Add a separate normal-client traveler-profile workflow created from Discovery, without changing the active Grimsley group page, family intake, shared link, or alerts.
+- [ ] Create a secure reusable private traveler-profile link that collects approved travel-party, room, timing, preference, accessibility, loyalty, and planning details without payment or passport data.
+- [ ] Add a Wendy-only Research and Recommendations workspace for manually verified cruise, resort, or trip options, each with source, date checked, private notes, and client suitability rationale.
+- [ ] Add a controlled Review and Decision workspace that records recommendations discussed, client preference, meeting outcome, and the booking or further-research next step.
+- [ ] Prepare the normal-client Booking and Confirmed Trip workspaces for Wendy to record verified booking references and share a future itinerary link, without automated booking or supplier API access.
+- [ ] Add protected routing, regression coverage, desktop/mobile verification, and explicit checks that Grimsley records and current private-link behavior are unchanged.
