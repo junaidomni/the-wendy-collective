@@ -72,7 +72,8 @@ describe("public site content", () => {
     expect(schoolCruise).toContain("Grimsley High School Graduation Cruise 2027");
     expect(schoolCruise).toContain("Request your cabin");
     expect(schoolCruise).toContain("Forward");
-    expect(schoolCruise).toContain("Mid ship");
+    expect(schoolCruise).toContain('href="https://www.carnival.com/cruise-ships/mardi-gras"');
+    expect(schoolCruise).toContain('href="#ship"');
     expect(schoolCruise).toContain("Explore the ship");
     expect(schoolCruise).toContain("Travel documents made");
     expect(schoolCruise).toContain("Frequently asked questions");

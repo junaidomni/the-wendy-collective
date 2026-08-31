@@ -11,7 +11,26 @@ import type { HeadMeta } from "../../client/src/ssr/prefetch";
 const CANONICAL_ORIGIN = (process.env.CANONICAL_ORIGIN ?? "https://wendytravel-g2nn4krv.manus.space").replace(/\/$/, "");
 const SITE_NAME = process.env.SITE_NAME ?? "The Wendy Collective";
 const DEFAULT_OG_IMAGE = "/manus-storage/twc-social-preview_a42ef867.jpg";
+const GRIMSLEY_SHARE_IMAGE_SOURCE = "/manus-storage/mardi-gras-approved_10fa6e55.png";
 const escapeHtml = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
+
+function serveGrimsleyShareImage(app: Express) {
+  app.get("/social/grimsley-mardi-gras.png", async (_req, res, next) => {
+    try {
+      const upstream = await fetch(`${CANONICAL_ORIGIN}${GRIMSLEY_SHARE_IMAGE_SOURCE}`, { redirect: "follow" });
+      if (!upstream.ok) throw new Error(`Grimsley social image upstream returned ${upstream.status}`);
+      const image = Buffer.from(await upstream.arrayBuffer());
+      res.status(200).set({
+        "Content-Type": "image/png",
+        "Content-Length": String(image.length),
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+        "X-Content-Type-Options": "nosniff",
+      }).end(image);
+    } catch (error) {
+      next(error);
+    }
+  });
+}
 
 function buildHeadTags(head: HeadMeta) {
   const title = escapeHtml(head.title);
@@ -51,6 +70,7 @@ function composeHtml(template: string, appHtml: string, head: HeadMeta, dehydrat
 }
 
 export async function setupVite(app: Express, server: Server) {
+  serveGrimsleyShareImage(app);
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -101,6 +121,7 @@ export function serveStatic(app: Express) {
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
   }
+  serveGrimsleyShareImage(app);
 
   app.use((req, res, next) => {
     if (req.path === "/index.html") return res.redirect(301, "/");

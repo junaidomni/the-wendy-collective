@@ -130,7 +130,7 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
         <p className="eyebrow">{privateToken || familyPortalToken ? "Private family proposal" : groupName}</p>
         <h1 className="display">{groupTitle.replace(" 2027", "")} <em>2027.</em></h1>
         <p>{sailingSummary} · {embarkPort}</p>
-        <div className="hero-actions"><a className="button-link button-link--ghost" href="#ship">Explore the ship <span aria-hidden="true">↓</span></a><a className="button-link" href="#estimate">Pick your cabin <span aria-hidden="true">↗</span></a></div>
+        <div className="hero-actions"><a className="button-link button-link--ghost" href="https://www.carnival.com/cruise-ships/mardi-gras" target="_blank" rel="noreferrer">Explore the ship <span aria-hidden="true">↗</span></a><a className="button-link button-link--ghost" href="#ship">See ship details <span aria-hidden="true">↓</span></a><a className="button-link" href="#estimate">Pick your cabin <span aria-hidden="true">↗</span></a></div>
         {familyPortalToken && initialRequest ? <aside className="family-status-card"><p className="eyebrow">Your request status</p><strong>{familyStatusLabels[initialRequest.status] || "Request received"}</strong><span>Latest update submitted {new Date(initialRequest.createdAt).toLocaleDateString()}</span><small>{revisionCount > 1 ? `${revisionCount} saved versions. The latest is current.` : "Your first saved request is current."}</small></aside> : null}
       </div>
     </section>

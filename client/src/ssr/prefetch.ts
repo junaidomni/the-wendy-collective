@@ -15,7 +15,7 @@ const SITE = "The Wendy Collective";
 const DEFAULT_DESCRIPTION = "The Wendy Collective creates thoughtfully planned journeys, elevated escapes, and effortless travel moments.";
 const SOCIAL_IMAGE = "/manus-storage/twc-social-preview_a42ef867.jpg";
 const SOCIAL_ALT = "Cinematic travel clouds at sunrise for The Wendy Collective";
-const GRIMSLEY_SOCIAL_IMAGE = "/manus-storage/mardi-gras-approved_10fa6e55.png";
+const GRIMSLEY_SOCIAL_IMAGE = "/social/grimsley-mardi-gras.png";
 const GRIMSLEY_SOCIAL_ALT = "Carnival Mardi Gras at sea near Port Canaveral";
 
 const publicRoutes: Record<string, { title: string; description: string; noindex?: boolean }> = {

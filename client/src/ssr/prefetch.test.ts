@@ -24,7 +24,7 @@ describe("server-rendered page metadata", () => {
     expect(metadata.title).toContain("Private Proposal");
     expect(metadata.noindex).toBe(true);
     const group = prefetchForPath("/group/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk");
-    expect(group).toMatchObject({ noindex: true, title: "Grimsley Graduation Cruise 2027 | The Wendy Collective", ogImage: "/manus-storage/mardi-gras-approved_10fa6e55.png", ogImageWidth: 695, ogImageHeight: 422 });
+    expect(group).toMatchObject({ noindex: true, title: "Grimsley Graduation Cruise 2027 | The Wendy Collective", ogImage: "/social/grimsley-mardi-gras.png", ogImageWidth: 695, ogImageHeight: 422 });
     expect(group.ogUrlPath).toBe("/group/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk");
     expect(prefetchForPath("/family/nO2cJ2DLexS4dd7zxjgTLRwODnP0CZ5oOQgZkpt4pWk").noindex).toBe(true);
   });
