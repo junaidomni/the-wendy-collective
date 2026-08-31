@@ -3,6 +3,8 @@ import { randomBytes } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   advisorAlerts,
+  advisorAppointments,
+  advisorAvailabilityBlocks,
   advisorDeals,
   clientProposals,
   cruiseExperiences,
@@ -612,6 +614,63 @@ export async function markAdvisorAlertRead(id: number) {
   await db.update(advisorAlerts).set({ isRead: 1, readAt: new Date() }).where(eq(advisorAlerts.id, id));
 }
 
+export type CreateAdvisorAppointmentInput = {
+  dealId: number;
+  title: string;
+  startsAt: Date;
+  durationMinutes: number;
+  attendeeName: string;
+  attendeeEmail: string;
+  attendeePhone?: string;
+  clientMessage?: string;
+  advisorNotes?: string;
+};
+
+export async function createAdvisorAppointment(input: CreateAdvisorAppointmentInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Appointment storage is unavailable");
+  const result = await db.insert(advisorAppointments).values({
+    ...input,
+    attendeePhone: input.attendeePhone || null,
+    clientMessage: input.clientMessage || null,
+    advisorNotes: input.advisorNotes || null,
+  });
+  return { id: Number(result[0].insertId) };
+}
+
+export async function listAdvisorAppointments() {
+  const db = await getDb();
+  if (!db) throw new Error("Appointment storage is unavailable");
+  return db.select().from(advisorAppointments).orderBy(advisorAppointments.startsAt).limit(250);
+}
+
+export type CreateAdvisorAvailabilityBlockInput = {
+  title: string;
+  startsAt: Date;
+  endsAt: Date;
+  status: "available" | "unavailable";
+  notes?: string;
+};
+
+export async function createAdvisorAvailabilityBlock(input: CreateAdvisorAvailabilityBlockInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Availability storage is unavailable");
+  const result = await db.insert(advisorAvailabilityBlocks).values({ ...input, notes: input.notes || null });
+  return { id: Number(result[0].insertId) };
+}
+
+export async function listAdvisorAvailabilityBlocks() {
+  const db = await getDb();
+  if (!db) throw new Error("Availability storage is unavailable");
+  return db.select().from(advisorAvailabilityBlocks).orderBy(advisorAvailabilityBlocks.startsAt).limit(250);
+}
+
+export async function deleteAdvisorAvailabilityBlock(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Availability storage is unavailable");
+  await db.delete(advisorAvailabilityBlocks).where(eq(advisorAvailabilityBlocks.id, id));
+}
+
 export async function updateAdvisorDeal(id: number, input: Pick<CreateAdvisorDealInput, "stage" | "experienceId" | "nextAction" | "meetingAt" | "meetingNotes" | "advisorNotes"> & { reservationReference?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Advisor deal storage is unavailable");
@@ -639,6 +698,31 @@ export async function advanceAdvisorDealWorkflow(id: number, actorUserId: number
   await db.update(advisorDeals).set({ stage: toStage, experienceId: input.experienceId || current.experienceId, nextAction: input.nextAction || current.nextAction, meetingAt: input.meetingAt || current.meetingAt, meetingNotes: input.meetingNotes || current.meetingNotes, advisorNotes: input.advisorNotes || current.advisorNotes, reservationReference: input.reservationReference || current.reservationReference, stageDataJson }).where(eq(advisorDeals.id, id));
   await writeWorkflowStageEvent({ entityType: "deal", entityId: id, fromStage, toStage, action: "continue", snapshot: input.stageData, actorUserId });
   return (await db.select().from(advisorDeals).where(eq(advisorDeals.id, id)).limit(1))[0];
+}
+
+export async function scheduleLocalDiscoveryAppointment(input: CreateAdvisorAppointmentInput & { actorUserId: number; nextAction?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Appointment storage is unavailable");
+  const deal = (await db.select().from(advisorDeals).where(eq(advisorDeals.id, input.dealId)).limit(1))[0];
+  if (!deal) throw new Error("Client record not found.");
+  if (deal.stage !== "new_inquiry") throw new Error("Discovery scheduling is available only from New Inquiry.");
+  validateTransition("new_inquiry", "discovery_call", { meetingAt: input.startsAt, nextAction: input.nextAction });
+  const appointment = await createAdvisorAppointment(input);
+  const stageDataJson = mergeStageData(deal.stageDataJson, "new_inquiry", {
+    appointmentId: String(appointment.id),
+    calendarSync: "not_connected",
+    appointmentTitle: input.title,
+    durationMinutes: String(input.durationMinutes),
+  });
+  await db.update(advisorDeals).set({
+    stage: "discovery_call",
+    meetingAt: input.startsAt,
+    meetingNotes: input.advisorNotes || deal.meetingNotes,
+    nextAction: input.nextAction || `Prepare for ${input.title}`,
+    stageDataJson,
+  }).where(eq(advisorDeals.id, input.dealId));
+  await writeWorkflowStageEvent({ entityType: "deal", entityId: input.dealId, fromStage: "new_inquiry", toStage: "discovery_call", action: "discovery_scheduled_locally", snapshot: { appointmentId: String(appointment.id), calendarSync: "not_connected" }, actorUserId: input.actorUserId });
+  return appointment;
 }
 
 export async function reopenAdvisorDealWorkflow(id: number, actorUserId: number, toStage: WorkflowStage, reason: string) {

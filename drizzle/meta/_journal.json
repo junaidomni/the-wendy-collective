@@ -92,6 +92,13 @@
       "when": 1788142141148,
       "tag": "0012_short_microchip",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1788189422823,
+      "tag": "0013_true_shocker",
+      "breakpoints": true
     }
   ]
 }

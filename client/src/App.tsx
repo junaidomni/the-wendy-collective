@@ -18,6 +18,7 @@ import GroupProposalView from "@/pages/GroupProposalView";
 import FamilyPortalView from "@/pages/FamilyPortalView";
 import WendyPipeline from "@/pages/wendy/WendyPipeline";
 import WendyClients from "@/pages/wendy/WendyClients";
+import WendyCalendar from "@/pages/wendy/WendyCalendar";
 import WendyGroups from "@/pages/wendy/WendyGroups";
 import WendyProposals from "@/pages/wendy/WendyProposals";
 import WendyLibrary from "@/pages/wendy/WendyLibrary";
@@ -44,6 +45,7 @@ function Router() {
     <Route path="/wendy/clients/new"><ClientOnly><WendyClients /></ClientOnly></Route>
     <Route path="/wendy/clients/:id"><ClientOnly><WendyClients /></ClientOnly></Route>
     <Route path="/wendy/clients"><ClientOnly><WendyClients /></ClientOnly></Route>
+    <Route path="/wendy/calendar"><ClientOnly><WendyCalendar /></ClientOnly></Route>
     <Route path="/wendy/groups/:key"><ClientOnly><WendyGroups /></ClientOnly></Route>
     <Route path="/wendy/groups"><ClientOnly><WendyGroups /></ClientOnly></Route>
     <Route path="/wendy/proposals/new/:dealId"><ClientOnly><WendyProposals /></ClientOnly></Route>

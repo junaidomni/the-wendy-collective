@@ -85,6 +85,17 @@ describe("focused Wendy CRM workspace", () => {
     expect(intakePosition).toBeGreaterThan(profilePosition);
   });
 
+  it("prepares local discovery scheduling and a Calendar workspace without activating Google", () => {
+    const clients = readSource("client/src/pages/wendy/WendyClients.tsx");
+    const calendar = readSource("client/src/pages/wendy/WendyCalendar.tsx");
+    const shell = readSource("client/src/pages/wendy/WendyShell.tsx");
+    expect(clients).toContain("Schedule the conversation locally.");
+    expect(clients).toContain("Google Calendar, Google Meet, and the client invitation will be created only after Wendy connects");
+    expect(calendar).toContain("Google sync inactive");
+    expect(calendar).toContain("Block time or mark an opening.");
+    expect(shell).toContain('{ href: "/wendy/calendar", label: "Calendar" }');
+  });
+
   it("registers a token-gated household portal with a retained update link and confirmation message", () => {
     const app = readSource("client/src/App.tsx");
     const cruise = readSource("client/src/pages/SchoolCruise.tsx");

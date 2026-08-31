@@ -7,6 +7,7 @@ const navigation = [
   { href: "/wendy", label: "Today" },
   { href: "/wendy/pipeline", label: "Pipeline" },
   { href: "/wendy/clients", label: "Clients" },
+  { href: "/wendy/calendar", label: "Calendar" },
   { href: "/wendy/groups", label: "Trips and groups" },
   { href: "/wendy/proposals", label: "Proposals" },
   { href: "/wendy/library", label: "Library" },

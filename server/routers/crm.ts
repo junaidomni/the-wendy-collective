@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, deletePublicWebsiteInquiry, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, getTripInquiries, listAdvisorAlerts, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
+import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorAvailabilityBlock, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, deleteAdvisorAvailabilityBlock, deletePublicWebsiteInquiry, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, getTripInquiries, listAdvisorAlerts, listAdvisorAppointments, listAdvisorAvailabilityBlocks, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, scheduleLocalDiscoveryAppointment, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { storagePut } from "../storage";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
@@ -22,8 +22,8 @@ export const crmRouter = router({
     const grimsleyExperience = await ensureGrimsleyCruiseExperience();
     await ensureGrimsleyGroupProfile();
     await syncExistingRequestsToAdvisorDeals();
-    const [deals, experiences, proposals, responses, grimsleyProfile, alerts, websiteInquiries] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027"), listAdvisorAlerts(), getTripInquiries()]);
-    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile, alerts, websiteInquiries };
+    const [deals, experiences, proposals, responses, grimsleyProfile, alerts, websiteInquiries, appointments, availabilityBlocks] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027"), listAdvisorAlerts(), getTripInquiries(), listAdvisorAppointments(), listAdvisorAvailabilityBlocks()]);
+    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile, alerts, websiteInquiries, appointments, availabilityBlocks };
   }),
   markAlertRead: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
     await markAdvisorAlertRead(input.id);
@@ -32,6 +32,26 @@ export const crmRouter = router({
   deletePublicInquiry: adminProcedure.input(z.object({ id: z.number().int().positive(), confirmation: z.literal("DELETE") })).mutation(async ({ input }) => {
     const deleted = await deletePublicWebsiteInquiry(input.id);
     return { success: true, inquiryId: deleted.inquiryId, deletedDealCount: deleted.deletedDealIds.length };
+  }),
+  scheduleDiscoveryAppointment: adminProcedure.input(z.object({
+    dealId: z.number().int().positive(), title: z.string().trim().min(3).max(180), startsAt: z.string().trim().min(16).max(40), durationMinutes: z.number().int().min(15).max(240), attendeeName: z.string().trim().min(2).max(180), attendeeEmail: z.string().trim().email().max(320), attendeePhone: z.string().trim().max(40).optional().default(""), clientMessage: z.string().trim().max(2500).optional().default(""), advisorNotes: z.string().trim().max(2500).optional().default(""), nextAction: z.string().trim().max(1000).optional().default(""),
+  })).mutation(async ({ ctx, input }) => {
+    const startsAt = new Date(input.startsAt);
+    if (Number.isNaN(startsAt.getTime())) throw new Error("Please choose a valid appointment date and time.");
+    const appointment = await scheduleLocalDiscoveryAppointment({ ...input, startsAt, actorUserId: ctx.user.id });
+    return { success: true, appointmentId: appointment.id, calendarSyncStatus: "not_connected" as const };
+  }),
+  createAvailabilityBlock: adminProcedure.input(z.object({
+    title: z.string().trim().min(2).max(180), startsAt: z.string().trim().min(16).max(40), endsAt: z.string().trim().min(16).max(40), status: z.enum(["available", "unavailable"]), notes: z.string().trim().max(1200).optional().default(""),
+  })).mutation(async ({ input }) => {
+    const startsAt = new Date(input.startsAt); const endsAt = new Date(input.endsAt);
+    if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) throw new Error("Availability end time must be later than the start time.");
+    const block = await createAdvisorAvailabilityBlock({ ...input, startsAt, endsAt });
+    return { success: true, availabilityBlockId: block.id };
+  }),
+  deleteAvailabilityBlock: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
+    await deleteAdvisorAvailabilityBlock(input.id);
+    return { success: true };
   }),
   createDeal: adminProcedure.input(z.object({
     contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), title: z.string().trim().min(3).max(180), travelSummary: z.string().trim().max(4000).optional().default(""), nextAction: z.string().trim().max(1000).optional().default(""), meetingAt: z.string().trim().max(32).optional().default(""), meetingNotes: z.string().trim().max(2000).optional().default(""), experienceId: z.number().int().positive().optional(),

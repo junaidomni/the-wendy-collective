@@ -106,6 +106,36 @@ export const advisorAlerts = mysqlTable("advisor_alerts", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+export const advisorAppointments = mysqlTable("advisor_appointments", {
+  id: int("id").autoincrement().primaryKey(),
+  dealId: int("dealId").notNull(),
+  title: varchar("title", { length: 180 }).notNull(),
+  startsAt: timestamp("startsAt").notNull(),
+  durationMinutes: int("durationMinutes").notNull(),
+  attendeeName: varchar("attendeeName", { length: 180 }).notNull(),
+  attendeeEmail: varchar("attendeeEmail", { length: 320 }).notNull(),
+  attendeePhone: varchar("attendeePhone", { length: 40 }),
+  clientMessage: text("clientMessage"),
+  advisorNotes: text("advisorNotes"),
+  status: mysqlEnum("status", ["scheduled", "completed", "cancelled"]).default("scheduled").notNull(),
+  calendarSyncStatus: mysqlEnum("calendarSyncStatus", ["not_connected", "ready_to_sync", "synced", "sync_failed"]).default("not_connected").notNull(),
+  externalCalendarEventId: varchar("externalCalendarEventId", { length: 240 }),
+  meetingUrl: text("meetingUrl"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const advisorAvailabilityBlocks = mysqlTable("advisor_availability_blocks", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 180 }).notNull(),
+  startsAt: timestamp("startsAt").notNull(),
+  endsAt: timestamp("endsAt").notNull(),
+  status: mysqlEnum("status", ["available", "unavailable"]).default("unavailable").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const cruiseExperiences = mysqlTable("cruise_experiences", {
   id: int("id").autoincrement().primaryKey(),
   slug: varchar("slug", { length: 160 }).notNull().unique(),
@@ -233,6 +263,10 @@ export type GroupCabinRequestTraveler = typeof groupCabinRequestTravelers.$infer
 export type InsertGroupCabinRequestTraveler = typeof groupCabinRequestTravelers.$inferInsert;
 export type AdvisorAlert = typeof advisorAlerts.$inferSelect;
 export type InsertAdvisorAlert = typeof advisorAlerts.$inferInsert;
+export type AdvisorAppointment = typeof advisorAppointments.$inferSelect;
+export type InsertAdvisorAppointment = typeof advisorAppointments.$inferInsert;
+export type AdvisorAvailabilityBlock = typeof advisorAvailabilityBlocks.$inferSelect;
+export type InsertAdvisorAvailabilityBlock = typeof advisorAvailabilityBlocks.$inferInsert;
 export type CruiseExperience = typeof cruiseExperiences.$inferSelect;
 export type InsertCruiseExperience = typeof cruiseExperiences.$inferInsert;
 export type AdvisorDeal = typeof advisorDeals.$inferSelect;

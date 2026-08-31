@@ -140,6 +140,7 @@ function ClientProfile({ deal, experiences, inquiry, onRefresh }: { deal: Client
   const history = trpc.crm.dealHistory.useQuery({ id: deal.id });
   const continueStage = trpc.crm.continueDealStage.useMutation({ onSuccess: () => { onRefresh(); history.refetch(); } });
   const reopenStage = trpc.crm.reopenDealStage.useMutation({ onSuccess: () => { onRefresh(); history.refetch(); } });
+  const scheduleDiscovery = trpc.crm.scheduleDiscoveryAppointment.useMutation({ onSuccess: () => { onRefresh(); history.refetch(); } });
   const data = useMemo(() => parseStageData(deal.stageDataJson), [deal.stageDataJson]);
   const [showReopen, setShowReopen] = useState(false);
   const [reopenReason, setReopenReason] = useState("");
@@ -167,7 +168,11 @@ function ClientProfile({ deal, experiences, inquiry, onRefresh }: { deal: Client
         <p className="eyebrow">{isNewInquiry ? "First response" : "Current stage"}</p>
         <h3>{isNewInquiry ? "Call first, then schedule the next conversation." : dealStageLabels[deal.stage]}</h3>
         <p className="stage-workspace__intro">{isNewInquiry ? "Contact the client promptly. Record the call outcome, then set a discovery appointment only when it is useful." : stageDirections[deal.stage]}</p>
-        {deal.stage === "closed" ? <div className="crm-empty-clean">This relationship is archived. Use the controlled reopen action only when work restarts.</div> : <form onSubmit={(event) => { event.preventDefault(); handleContinue(event.currentTarget); }}>
+        {deal.stage === "new_inquiry" ? <DiscoveryAppointmentComposer deal={deal} isPending={scheduleDiscovery.isPending} error={scheduleDiscovery.error?.message} onSchedule={(form) => {
+          const values = new FormData(form); const startsAt = new Date(String(values.get("startsAt") || ""));
+          if (Number.isNaN(startsAt.getTime())) return;
+          scheduleDiscovery.mutate({ dealId: deal.id, title: String(values.get("title") || ""), startsAt: startsAt.toISOString(), durationMinutes: Number(values.get("durationMinutes") || 30), attendeeName: `${deal.contactFirstName} ${deal.contactLastName}`, attendeeEmail: deal.email, attendeePhone: deal.phone, clientMessage: String(values.get("clientMessage") || ""), advisorNotes: String(values.get("advisorNotes") || ""), nextAction: String(values.get("nextAction") || "") });
+        }} /> : deal.stage === "closed" ? <div className="crm-empty-clean">This relationship is archived. Use the controlled reopen action only when work restarts.</div> : <form onSubmit={(event) => { event.preventDefault(); handleContinue(event.currentTarget); }}>
           <StageFields stage={deal.stage} data={currentData} meetingValue={meetingValue} deal={deal} experiences={experiences} />
           <div className="stage-action-bar"><button className="crm-primary-action" type="submit" disabled={continueStage.isPending}>{isNewInquiry ? "Save call outcome and schedule discovery" : stageActions[deal.stage]} <span aria-hidden="true">→</span></button>{continueStage.error ? <p className="stage-error">{continueStage.error.message}</p> : null}</div>
         </form>}
@@ -179,6 +184,24 @@ function ClientProfile({ deal, experiences, inquiry, onRefresh }: { deal: Client
       </aside>
     </section>
   </WendyShell>;
+}
+
+function DiscoveryAppointmentComposer({ deal, isPending, error, onSchedule }: { deal: ClientDeal; isPending: boolean; error?: string; onSchedule: (form: HTMLFormElement) => void }) {
+  const title = `Discovery call with ${deal.contactFirstName} ${deal.contactLastName}`;
+  return <form className="appointment-composer" onSubmit={(event) => { event.preventDefault(); onSchedule(event.currentTarget); }}>
+    <div className="appointment-composer__notice"><div><p className="eyebrow">Discovery appointment</p><h4>Schedule the conversation locally.</h4></div><span>Google connection pending</span></div>
+    <p>Save the agreed call here first. Google Calendar, Google Meet, and the client invitation will be created only after Wendy connects and authorizes Google.</p>
+    <div className="form-grid">
+      <Field id="appointment-title" label="Call title" name="title" defaultValue={title} required wide />
+      <Field id="appointment-start" label="Date and time" type="datetime-local" name="startsAt" required />
+      <div className="form-field"><label htmlFor="appointment-duration">Duration</label><select id="appointment-duration" name="durationMinutes" defaultValue="30"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">1 hour</option><option value="90">90 minutes</option></select></div>
+      <div className="appointment-attendee form-field--wide"><span>Client</span><strong>{deal.contactFirstName} {deal.contactLastName}</strong><small>{deal.email}{deal.phone ? ` · ${deal.phone}` : ""}</small></div>
+      <Field id="appointment-message" label="Message to include when invitations are enabled" name="clientMessage" defaultValue="" text wide />
+      <Field id="appointment-notes" label="Call outcome or advisor notes" name="advisorNotes" defaultValue="" text wide />
+      <Field id="appointment-next" label="Next action after the discovery call" name="nextAction" defaultValue="Prepare tailored recommendations after discovery" required wide />
+    </div>
+    <div className="stage-action-bar"><button className="crm-primary-action" type="submit" disabled={isPending}>Schedule discovery locally <span aria-hidden="true">→</span></button>{error ? <p className="stage-error">{error}</p> : null}</div>
+  </form>;
 }
 
 function PublicInquiryIntake({ inquiry }: { inquiry: WebsiteInquiry }) {

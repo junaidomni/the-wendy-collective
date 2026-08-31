@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
-const mocks = vi.hoisted(() => ({ advanceAdvisorDealWorkflow: vi.fn(), advanceGroupWorkflow: vi.fn(), createAdvisorAlert: vi.fn(), createAdvisorDeal: vi.fn(), createClientProposal: vi.fn(), createProposalResponse: vi.fn(), deletePublicWebsiteInquiry: vi.fn(), ensureGrimsleyCruiseExperience: vi.fn(), ensureGrimsleyGroupProfile: vi.fn(), getGroupTravelProfile: vi.fn(), getPrivateClientProposal: vi.fn(), getPrivateGroupTravelProfile: vi.fn(), listAdvisorAlerts: vi.fn(), listAdvisorDeals: vi.fn(), listClientProposals: vi.fn(), listCruiseExperiences: vi.fn(), listProposalResponses: vi.fn(), listWorkflowStageEvents: vi.fn(), markAdvisorAlertRead: vi.fn(), markClientProposalShared: vi.fn(), reopenAdvisorDealWorkflow: vi.fn(), reopenGroupWorkflow: vi.fn(), saveGroupWorkflowDetails: vi.fn(), shareGroupTravelProfile: vi.fn(), syncExistingRequestsToAdvisorDeals: vi.fn(), updateAdvisorDeal: vi.fn(), updateGroupTravelProfile: vi.fn(), updateProposalResponseStatus: vi.fn(), createCruiseExperience: vi.fn(), notifyOwner: vi.fn() }));
+const mocks = vi.hoisted(() => ({ advanceAdvisorDealWorkflow: vi.fn(), advanceGroupWorkflow: vi.fn(), createAdvisorAlert: vi.fn(), createAdvisorAvailabilityBlock: vi.fn(), createAdvisorDeal: vi.fn(), createClientProposal: vi.fn(), createProposalResponse: vi.fn(), deleteAdvisorAvailabilityBlock: vi.fn(), deletePublicWebsiteInquiry: vi.fn(), ensureGrimsleyCruiseExperience: vi.fn(), ensureGrimsleyGroupProfile: vi.fn(), getGroupTravelProfile: vi.fn(), getPrivateClientProposal: vi.fn(), getPrivateGroupTravelProfile: vi.fn(), listAdvisorAlerts: vi.fn(), listAdvisorAppointments: vi.fn(), listAdvisorAvailabilityBlocks: vi.fn(), listAdvisorDeals: vi.fn(), listClientProposals: vi.fn(), listCruiseExperiences: vi.fn(), listProposalResponses: vi.fn(), listWorkflowStageEvents: vi.fn(), markAdvisorAlertRead: vi.fn(), markClientProposalShared: vi.fn(), reopenAdvisorDealWorkflow: vi.fn(), reopenGroupWorkflow: vi.fn(), saveGroupWorkflowDetails: vi.fn(), scheduleLocalDiscoveryAppointment: vi.fn(), shareGroupTravelProfile: vi.fn(), syncExistingRequestsToAdvisorDeals: vi.fn(), updateAdvisorDeal: vi.fn(), updateGroupTravelProfile: vi.fn(), updateProposalResponseStatus: vi.fn(), createCruiseExperience: vi.fn(), notifyOwner: vi.fn() }));
 vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), ...mocks }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
 
@@ -22,7 +22,7 @@ describe("advisor CRM and private proposal workflow", () => {
     mocks.ensureGrimsleyCruiseExperience.mockResolvedValue({ id: 3, shipName: "Mardi Gras" });
     mocks.ensureGrimsleyGroupProfile.mockResolvedValue({ id: 9 });
     mocks.getGroupTravelProfile.mockResolvedValue({ profile: { id: 9, groupKey: "grimsley-hs-graduation-cruise-2027", stage: "proposal_build", shareStatus: "draft" }, experience: { shipName: "Mardi Gras" }, cabinRequests: [] });
-    mocks.listAdvisorAlerts.mockResolvedValue([]); mocks.listAdvisorDeals.mockResolvedValue([]); mocks.listClientProposals.mockResolvedValue([]); mocks.listCruiseExperiences.mockResolvedValue([]); mocks.listProposalResponses.mockResolvedValue([]); mocks.advanceAdvisorDealWorkflow.mockResolvedValue({ stage: "discovery_call" }); mocks.advanceGroupWorkflow.mockResolvedValue({ workflowStage: "proposal_shared" }); mocks.listWorkflowStageEvents.mockResolvedValue([]); mocks.createAdvisorAlert.mockResolvedValue({ id: 92 }); mocks.markAdvisorAlertRead.mockResolvedValue(undefined);
+    mocks.listAdvisorAlerts.mockResolvedValue([]); mocks.listAdvisorAppointments.mockResolvedValue([]); mocks.listAdvisorAvailabilityBlocks.mockResolvedValue([]); mocks.listAdvisorDeals.mockResolvedValue([]); mocks.listClientProposals.mockResolvedValue([]); mocks.listCruiseExperiences.mockResolvedValue([]); mocks.listProposalResponses.mockResolvedValue([]); mocks.advanceAdvisorDealWorkflow.mockResolvedValue({ stage: "discovery_call" }); mocks.advanceGroupWorkflow.mockResolvedValue({ workflowStage: "proposal_shared" }); mocks.listWorkflowStageEvents.mockResolvedValue([]); mocks.createAdvisorAlert.mockResolvedValue({ id: 92 }); mocks.markAdvisorAlertRead.mockResolvedValue(undefined); mocks.scheduleLocalDiscoveryAppointment.mockResolvedValue({ id: 151 }); mocks.createAdvisorAvailabilityBlock.mockResolvedValue({ id: 41 }); mocks.deleteAdvisorAvailabilityBlock.mockResolvedValue(undefined);
     mocks.notifyOwner.mockResolvedValue(true);
     mocks.deletePublicWebsiteInquiry.mockResolvedValue({ inquiryId: 41, deletedDealIds: [51] });
   });
@@ -87,6 +87,21 @@ describe("advisor CRM and private proposal workflow", () => {
     const caller = appRouter.createCaller(context(owner));
     await caller.crm.updateDeal({ id: 51, stage: "discovery_call", meetingAt: "2026-09-02T14:30", meetingNotes: "Review summer dates, balcony options, and budget.", nextAction: "Call client" });
     expect(mocks.updateAdvisorDeal).toHaveBeenCalledWith(51, expect.objectContaining({ stage: "discovery_call", meetingAt: expect.any(Date), meetingNotes: "Review summer dates, balcony options, and budget." }));
+  });
+
+  it("stores discovery scheduling locally and keeps Google Calendar and Meet inactive", async () => {
+    const result = await appRouter.createCaller(context(owner)).crm.scheduleDiscoveryAppointment({ dealId: 51, title: "Discovery call with Alex Morgan", startsAt: "2026-09-02T14:30:00.000Z", durationMinutes: 30, attendeeName: "Alex Morgan", attendeeEmail: "alex@example.com", attendeePhone: "555-010-1020", clientMessage: "Looking forward to connecting.", advisorNotes: "First call completed.", nextAction: "Prepare tailored recommendations after discovery" });
+    expect(result).toEqual({ success: true, appointmentId: 151, calendarSyncStatus: "not_connected" });
+    expect(mocks.scheduleLocalDiscoveryAppointment).toHaveBeenCalledWith(expect.objectContaining({ dealId: 51, startsAt: expect.any(Date), actorUserId: owner.id }));
+    await expect(appRouter.createCaller(context()).crm.scheduleDiscoveryAppointment({ dealId: 51, title: "Discovery call", startsAt: "2026-09-02T14:30:00.000Z", durationMinutes: 30, attendeeName: "Alex Morgan", attendeeEmail: "alex@example.com" })).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("lets Wendy save and remove local availability blocks without creating external calendar events", async () => {
+    const caller = appRouter.createCaller(context(owner));
+    await expect(caller.crm.createAvailabilityBlock({ title: "Personal commitment", startsAt: "2026-09-03T14:00:00.000Z", endsAt: "2026-09-03T15:00:00.000Z", status: "unavailable", notes: "Unavailable for calls" })).resolves.toEqual({ success: true, availabilityBlockId: 41 });
+    expect(mocks.createAdvisorAvailabilityBlock).toHaveBeenCalledWith(expect.objectContaining({ status: "unavailable", startsAt: expect.any(Date), endsAt: expect.any(Date) }));
+    await caller.crm.deleteAvailabilityBlock({ id: 41 });
+    expect(mocks.deleteAdvisorAvailabilityBlock).toHaveBeenCalledWith(41);
   });
 
   it("moves a client forward through Wendy’s protected stage action and uses the workflow layer", async () => {

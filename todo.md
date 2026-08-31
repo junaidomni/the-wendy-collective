@@ -259,3 +259,9 @@
 - [x] Move the individual-client stage rail directly below the client name on every profile, before the trip summary and original inquiry content.
 - [x] Preserve the complete, current, and locked stage states and existing client-profile actions after repositioning the workflow rail.
 - [x] Verify the revised client-profile hierarchy on desktop and mobile across New Inquiry and later-stage records.
+- [x] Define an additive appointment and availability model for Wendy’s CRM that is ready to sync with Google Calendar and Meet later without connecting Google now.
+- [x] Replace the New Inquiry date field with a clear appointment composer for call title, date, time, duration, attendees, client message, and optional availability notes.
+- [x] Add a Calendar workspace to Wendy’s navigation with a calendar view, appointment list, and availability blocks that Wendy can manage before Google sync is activated.
+- [x] Preserve New Inquiry stage gates and CRM history while recording appointment details locally and explicitly marking client invitation, calendar creation, and Google Meet generation as pending Google connection.
+- [x] Add a documented, guarded future Google Calendar and Google Meet integration boundary with no live API calls, external event creation, or client email before Wendy authorizes the connection.
+- [x] Add regression coverage and responsive validation for the local appointment flow, availability management, navigation, and inactive Google safeguards.
