@@ -221,3 +221,6 @@
 - [x] Make every Grimsley cabin selector option lead with the per-traveler reference price and remove redundant cabin-category wording from the option description.
 - [x] Ensure copied Grimsley family links are always clean canonical share URLs with no page fragment, including when copied after navigating within the proposal.
 - [x] Validate the clean Grimsley share URL and direct social image response against the active production domain for WhatsApp-compatible delivery.
+- [x] Add a concise near-hero Experience Mardi Gras section with supplied recreation, pool, BOLT, entertainment, youth, and adult highlights.
+- [x] Include a clear Experience Mardi Gras call to action that opens Carnival’s official Mardi Gras ship page in a new tab.
+- [x] Verify the new proposal-opening section and official external link across desktop and mobile without disrupting the private request flow.

@@ -355,6 +355,18 @@ img { display: block; max-width: 100%; }
 .school-facts__grid strong { font-family: var(--font-serif); font-size: 1.35rem; font-weight: 500; line-height: 1.15; }
 .school-facts__grid--light { margin-top: 30px; border-top: 1px solid var(--line); }
 .school-facts__grid--light div { min-height: 112px; background: rgba(246,242,233,.42); }
+.school-mardi-gras { background: #f4f2ea; }
+.school-mardi-gras__intro { display: grid; grid-template-columns: 1.12fr .88fr; gap: clamp(42px, 8vw, 120px); align-items: end; }
+.school-mardi-gras__intro .display { max-width: 660px; margin: 17px 0 0; }
+.school-mardi-gras__intro > div:last-child > p { max-width: 530px; margin: 0 0 25px; color: rgba(13,28,34,.73); line-height: 1.68; }
+.school-mardi-gras__intro .button-link { width: fit-content; }
+.school-mardi-gras__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 50px; }
+.school-mardi-gras__card { min-height: 305px; padding: 30px 28px; border: 1px solid rgba(13,28,34,.17); border-radius: 17px; background: rgba(255,255,255,.42); }
+.school-mardi-gras__card--featured { border-color: rgba(181,139,55,.6); background: #fbf4d9; }
+.school-mardi-gras__card .eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 17px; color: var(--sea); }
+.school-mardi-gras__card .eyebrow span { padding: 5px 10px; border-radius: 999px; background: #c79f28; color: #152126; font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.school-mardi-gras__card h3 { max-width: 330px; margin: 0; color: var(--ink); font-family: var(--font-serif); font-size: clamp(1.65rem, 2.2vw, 2.25rem); font-weight: 500; letter-spacing: -.04em; line-height: 1.08; }
+.school-mardi-gras__card > p:last-child { margin: 22px 0 0; color: rgba(13,28,34,.73); font-size: .9rem; line-height: 1.7; }
 .school-itinerary { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); }
 .school-itinerary article { min-height: 238px; padding: 28px 24px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .school-itinerary article:first-child { border-left: 1px solid var(--line); }
@@ -719,6 +731,8 @@ img { display: block; max-width: 100%; }
   .private-layout { grid-template-columns: 1fr; }
   .school-facts__grid { grid-template-columns: repeat(2, 1fr); }
   .school-facts__grid div:nth-child(3) { border-left: 1px solid var(--line); }
+  .school-mardi-gras__intro { grid-template-columns: 1fr; gap: 28px; }
+  .school-mardi-gras__grid { grid-template-columns: repeat(2, 1fr); }
   .school-itinerary { grid-template-columns: repeat(2, 1fr); }
   .school-itinerary article:nth-child(3), .school-itinerary article:nth-child(5) { border-left: 1px solid var(--line); }
   .school-experience, .school-ready, .school-request-layout { grid-template-columns: 1fr; gap: 42px; }
@@ -759,6 +773,8 @@ img { display: block; max-width: 100%; }
   .school-facts__grid div { min-height: 120px; padding: 22px 18px; }
   .school-facts__grid strong { font-size: 1.12rem; }
   .school-itinerary { grid-template-columns: 1fr; }
+  .school-mardi-gras__grid { grid-template-columns: 1fr; gap: 14px; margin-top: 36px; }
+  .school-mardi-gras__card { min-height: 0; padding: 25px 20px; border-radius: 14px; }
   .school-itinerary article, .school-itinerary article:nth-child(3), .school-itinerary article:nth-child(5) { display: grid; min-height: 0; grid-template-columns: 60px 90px 1fr; gap: 10px; align-items: start; padding: 19px 17px; border-left: 1px solid var(--line); }
   .school-itinerary h3 { margin: 0; font-size: 1.18rem; }
   .school-itinerary strong { padding-top: 2px; font-size: .84rem; }
