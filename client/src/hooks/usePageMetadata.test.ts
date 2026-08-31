@@ -11,6 +11,7 @@ describe("page metadata", () => {
     expect(metadataForPath("/wendy").indexable).toBe(false);
     expect(metadataForPath("/group/secure-token").indexable).toBe(false);
     expect(metadataForPath("/family/secure-token").indexable).toBe(false);
+    expect(metadataForPath("/traveler-profile/secure-token").indexable).toBe(false);
     expect(metadataForPath("/not-found").indexable).toBe(false);
   });
 });

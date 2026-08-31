@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorAvailabilityBlock, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, deleteAdvisorAvailabilityBlock, deletePublicWebsiteInquiry, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, getTripInquiries, listAdvisorAlerts, listAdvisorAppointments, listAdvisorAvailabilityBlocks, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, scheduleLocalDiscoveryAppointment, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
+import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorAvailabilityBlock, createAdvisorDeal, createAdvisorResearchOption, createClientProposal, createCruiseExperience, createProposalResponse, createTravelerProfileLink, createTravelerProfileResponse, deleteAdvisorAvailabilityBlock, deletePublicWebsiteInquiry, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, getPrivateTravelerProfile, getTripInquiries, listAdvisorAlerts, listAdvisorAppointments, listAdvisorAvailabilityBlocks, listAdvisorDeals, listAdvisorResearchOptions, listClientProposals, listCruiseExperiences, listProposalResponses, listTravelerProfileLinks, listTravelerProfileResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, scheduleLocalDiscoveryAppointment, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { storagePut } from "../storage";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
@@ -22,8 +22,8 @@ export const crmRouter = router({
     const grimsleyExperience = await ensureGrimsleyCruiseExperience();
     await ensureGrimsleyGroupProfile();
     await syncExistingRequestsToAdvisorDeals();
-    const [deals, experiences, proposals, responses, grimsleyProfile, alerts, websiteInquiries, appointments, availabilityBlocks] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027"), listAdvisorAlerts(), getTripInquiries(), listAdvisorAppointments(), listAdvisorAvailabilityBlocks()]);
-    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile, alerts, websiteInquiries, appointments, availabilityBlocks };
+    const [deals, experiences, proposals, responses, grimsleyProfile, alerts, websiteInquiries, appointments, availabilityBlocks, travelerProfileLinks, travelerProfileResponses, researchOptions] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027"), listAdvisorAlerts(), getTripInquiries(), listAdvisorAppointments(), listAdvisorAvailabilityBlocks(), listTravelerProfileLinks(), listTravelerProfileResponses(), listAdvisorResearchOptions()]);
+    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile, alerts, websiteInquiries, appointments, availabilityBlocks, travelerProfileLinks, travelerProfileResponses, researchOptions };
   }),
   markAlertRead: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
     await markAdvisorAlertRead(input.id);
@@ -92,6 +92,17 @@ export const crmRouter = router({
     const proposal = await createClientProposal({ ...input, privateToken, expiresAt: new Date(Date.now() + input.validForDays * 24 * 60 * 60 * 1000) });
     return { success: true, proposalId: proposal.id, privateToken };
   }),
+  createTravelerProfileLink: adminProcedure.input(z.object({ dealId: z.number().int().positive(), validForDays: z.number().int().min(1).max(180).default(60) })).mutation(async ({ input }) => {
+    const privateToken = randomBytes(32).toString("base64url");
+    const link = await createTravelerProfileLink({ dealId: input.dealId, privateToken, expiresAt: new Date(Date.now() + input.validForDays * 24 * 60 * 60 * 1000) });
+    return { success: true, travelerProfileLinkId: link.id, privateToken };
+  }),
+  createResearchOption: adminProcedure.input(z.object({
+    dealId: z.number().int().positive(), optionType: z.enum(["cruise", "resort", "tour", "custom"]), title: z.string().trim().min(3).max(180), provider: z.string().trim().max(120).optional().default(""), shipOrProperty: z.string().trim().max(180).optional().default(""), destination: z.string().trim().max(180).optional().default(""), travelDates: z.string().trim().max(180).optional().default(""), departurePort: z.string().trim().max(180).optional().default(""), itinerarySummary: z.string().trim().max(3000).optional().default(""), sourceReference: z.string().trim().url().optional().or(z.literal("")).default(""), reviewedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")).default(""), clientFit: z.string().trim().max(3000).optional().default(""), advisorNotes: z.string().trim().max(3000).optional().default(""), status: z.enum(["researching", "ready_to_review", "presented", "selected", "not_selected"]).default("researching"),
+  })).mutation(async ({ input }) => {
+    const option = await createAdvisorResearchOption(input);
+    return { success: true, researchOptionId: option.id };
+  }),
   markProposalShared: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
     await markClientProposalShared(input.id);
     return { success: true };
@@ -134,6 +145,7 @@ export const crmRouter = router({
     return { success: true, privateToken: profile.privateToken, expiresAt: profile.expiresAt };
   }),
   getPrivateProposal: publicProcedure.input(z.object({ token: z.string().trim().min(32).max(96) })).query(({ input }) => getPrivateClientProposal(input.token)),
+  getTravelerProfile: publicProcedure.input(z.object({ token: z.string().trim().min(32).max(96) })).query(({ input }) => getPrivateTravelerProfile(input.token)),
   getPrivateGroupProfile: publicProcedure.input(z.object({ token: z.string().trim().min(32).max(96) })).query(({ input }) => getPrivateGroupTravelProfile(input.token)),
   submitProposalResponse: publicProcedure.input(z.object({
     token: z.string().trim().min(32).max(96), contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), rooms: z.array(roomInput).min(1).max(12), notes: z.string().trim().max(2000).optional().default(""), consent: z.literal(true),
@@ -147,5 +159,15 @@ export const crmRouter = router({
       createAdvisorAlert({ sourceType: "proposal_response", sourceId: response.id, title: `New response to ${privateProposal.proposal.title}`, detail: `${input.contactFirstName} ${input.contactLastName} submitted ${input.rooms.length} room${input.rooms.length === 1 ? "" : "s"} for ${travelerCount} traveler${travelerCount === 1 ? "" : "s"}.`, href: "/wendy/proposals" }).then(() => true).catch((error) => { console.error("[CRM] Proposal response alert failed", { responseId: response.id, error }); return false; }),
     ]);
     return { success: true, responseId: response.id, ownerNotificationSent, portalAlertStored, unavailable: false };
+  }),
+  submitTravelerProfile: publicProcedure.input(z.object({
+    token: z.string().trim().min(32).max(96), contactFirstName: z.string().trim().min(2).max(80), contactLastName: z.string().trim().min(2).max(80), email: z.string().trim().email().max(320), phone: z.string().trim().min(7).max(40), travelerDetails: z.array(z.object({ fullName: z.string().trim().min(2).max(160), dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")), loyaltyNumber: z.string().trim().max(100).optional().default("") })).min(1).max(12), preferences: z.object({ destinationIdeas: z.string().trim().max(1000).optional().default(""), travelWindow: z.string().trim().max(240).optional().default(""), departurePort: z.string().trim().max(240).optional().default(""), budgetDirection: z.string().trim().max(240).optional().default(""), roomPreferences: z.string().trim().max(1000).optional().default(""), paceAndStyle: z.string().trim().max(1000).optional().default(""), accessibilityNeeds: z.string().trim().max(1000).optional().default(""), mustHaves: z.string().trim().max(1000).optional().default("") }), notes: z.string().trim().max(2000).optional().default(""), consent: z.literal(true),
+  })).mutation(async ({ input }) => {
+    const profile = await getPrivateTravelerProfile(input.token);
+    if (!profile) return { success: false, unavailable: true };
+    const response = await createTravelerProfileResponse({ travelerProfileLinkId: profile.link.id, contactFirstName: input.contactFirstName, contactLastName: input.contactLastName, email: input.email, phone: input.phone, travelerDetailsJson: JSON.stringify(input.travelerDetails), travelPreferencesJson: JSON.stringify(input.preferences), notes: input.notes });
+    await createAdvisorAlert({ sourceType: "traveler_profile", sourceId: response.id, title: `Traveler profile received for ${profile.deal.contactFirstName} ${profile.deal.contactLastName}`, detail: `${input.travelerDetails.length} traveler${input.travelerDetails.length === 1 ? "" : "s"} added their planning details.`, href: `/wendy/clients/${profile.deal.id}` });
+    await notifyWendy("Traveler profile received · The Wendy Collective", [`${input.contactFirstName} ${input.contactLastName} completed travel planning details.`, `Travelers: ${input.travelerDetails.length}`, "Open Wendy’s client profile to begin research."].join("\n"));
+    return { success: true, responseId: response.id, unavailable: false };
   }),
 });

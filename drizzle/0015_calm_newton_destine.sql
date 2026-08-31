@@ -1,0 +1,1 @@
+ALTER TABLE `advisor_alerts` MODIFY COLUMN `sourceType` enum('public_inquiry','group_request','proposal_response','traveler_profile') NOT NULL;

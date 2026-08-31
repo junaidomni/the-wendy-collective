@@ -6,6 +6,7 @@ import {
   advisorAppointments,
   advisorAvailabilityBlocks,
   advisorDeals,
+  advisorResearchOptions,
   clientProposals,
   cruiseExperiences,
   groupCabinRequestRooms,
@@ -19,6 +20,8 @@ import {
   privateClientRequests,
   proposalResponses,
   tripInquiries,
+  travelerProfileLinks,
+  travelerProfileResponses,
   users,
   workflowStageEvents,
 } from "../drizzle/schema";
@@ -587,7 +590,7 @@ export async function createAdvisorDeal(input: CreateAdvisorDealInput) {
 }
 
 export type CreateAdvisorAlertInput = {
-  sourceType: "public_inquiry" | "group_request" | "proposal_response";
+  sourceType: "public_inquiry" | "group_request" | "proposal_response" | "traveler_profile";
   sourceId: number;
   groupKey?: string;
   title: string;
@@ -757,6 +760,109 @@ export async function syncExistingRequestsToAdvisorDeals() {
   ];
   if (values.length) await db.insert(advisorDeals).values(values);
   return { added: values.length };
+}
+
+export type CreateTravelerProfileLinkInput = {
+  dealId: number;
+  privateToken: string;
+  expiresAt?: Date;
+};
+
+export async function createTravelerProfileLink(input: CreateTravelerProfileLinkInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Traveler profile storage is unavailable");
+  const result = await db.insert(travelerProfileLinks).values({
+    dealId: input.dealId,
+    privateToken: input.privateToken,
+    status: "shared",
+    expiresAt: input.expiresAt || null,
+  });
+  return { id: Number(result[0].insertId) };
+}
+
+export async function listTravelerProfileLinks() {
+  const db = await getDb();
+  if (!db) throw new Error("Traveler profile storage is unavailable");
+  return db.select().from(travelerProfileLinks).orderBy(desc(travelerProfileLinks.updatedAt)).limit(200);
+}
+
+export async function getPrivateTravelerProfile(token: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Traveler profile storage is unavailable");
+  const link = (await db.select().from(travelerProfileLinks).where(eq(travelerProfileLinks.privateToken, token)).limit(1))[0];
+  if (!link || !["shared", "response_received"].includes(link.status) || (link.expiresAt && link.expiresAt.getTime() < Date.now())) return undefined;
+  const deal = (await db.select().from(advisorDeals).where(eq(advisorDeals.id, link.dealId)).limit(1))[0];
+  if (!deal) return undefined;
+  const responses = await db.select().from(travelerProfileResponses).where(eq(travelerProfileResponses.travelerProfileLinkId, link.id)).orderBy(desc(travelerProfileResponses.createdAt)).limit(20);
+  return { link, deal, responses };
+}
+
+export type CreateTravelerProfileResponseInput = {
+  travelerProfileLinkId: number;
+  contactFirstName: string;
+  contactLastName: string;
+  email: string;
+  phone: string;
+  travelerDetailsJson: string;
+  travelPreferencesJson: string;
+  notes?: string;
+};
+
+export async function createTravelerProfileResponse(input: CreateTravelerProfileResponseInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Traveler profile storage is unavailable");
+  const result = await db.insert(travelerProfileResponses).values({ ...input, notes: input.notes || null });
+  await db.update(travelerProfileLinks).set({ status: "response_received" }).where(eq(travelerProfileLinks.id, input.travelerProfileLinkId));
+  return { id: Number(result[0].insertId) };
+}
+
+export async function listTravelerProfileResponses() {
+  const db = await getDb();
+  if (!db) throw new Error("Traveler profile storage is unavailable");
+  return db.select().from(travelerProfileResponses).orderBy(desc(travelerProfileResponses.createdAt)).limit(300);
+}
+
+export type CreateAdvisorResearchOptionInput = {
+  dealId: number;
+  optionType: "cruise" | "resort" | "tour" | "custom";
+  title: string;
+  provider?: string;
+  shipOrProperty?: string;
+  destination?: string;
+  travelDates?: string;
+  departurePort?: string;
+  itinerarySummary?: string;
+  sourceReference?: string;
+  reviewedOn?: string;
+  clientFit?: string;
+  advisorNotes?: string;
+  status?: "researching" | "ready_to_review" | "presented" | "selected" | "not_selected";
+};
+
+export async function createAdvisorResearchOption(input: CreateAdvisorResearchOptionInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Research option storage is unavailable");
+  const result = await db.insert(advisorResearchOptions).values({
+    ...input,
+    provider: input.provider || null,
+    shipOrProperty: input.shipOrProperty || null,
+    destination: input.destination || null,
+    travelDates: input.travelDates || null,
+    departurePort: input.departurePort || null,
+    itinerarySummary: input.itinerarySummary || null,
+    sourceReference: input.sourceReference || null,
+    reviewedOn: input.reviewedOn || null,
+    clientFit: input.clientFit || null,
+    advisorNotes: input.advisorNotes || null,
+    status: input.status || "researching",
+  });
+  return { id: Number(result[0].insertId) };
+}
+
+export async function listAdvisorResearchOptions() {
+  const db = await getDb();
+  if (!db) throw new Error("Research option storage is unavailable");
+  return db.select().from(advisorResearchOptions).orderBy(desc(advisorResearchOptions.updatedAt)).limit(300);
 }
 
 export type CreateClientProposalInput = {

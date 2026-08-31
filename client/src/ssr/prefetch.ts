@@ -44,6 +44,7 @@ export function prefetchForPath(url: string): HeadMeta {
   if (clean.startsWith("/group/")) return { title: `Grimsley Graduation Cruise 2027 | ${SITE}`, description: "A private request page for the Grimsley High School Graduation Cruise aboard Carnival Mardi Gras.", ogUrlPath: cardVersion === "2" ? `${clean}?card=2` : clean, ogImage: GRIMSLEY_SOCIAL_IMAGE, ogImageAlt: GRIMSLEY_SOCIAL_ALT, ogImageWidth: 695, ogImageHeight: 422, noindex: true };
   if (clean.startsWith("/family/")) return { title: `Your Grimsley Cruise Request | ${SITE}`, description: "Review or update your request for the Grimsley High School Graduation Cruise aboard Carnival Mardi Gras.", ogUrlPath: clean, ogImage: GRIMSLEY_SOCIAL_IMAGE, ogImageAlt: GRIMSLEY_SOCIAL_ALT, ogImageWidth: 695, ogImageHeight: 422, noindex: true };
   if (clean.startsWith("/proposal/")) return { title: `Private Proposal | ${SITE}`, description: "A private travel proposal from The Wendy Collective.", ogUrlPath: clean, noindex: true };
+  if (clean.startsWith("/traveler-profile/")) return { title: `Private Traveler Profile | ${SITE}`, description: "A private travel planning profile from The Wendy Collective.", ogUrlPath: clean, noindex: true };
   if (clean === "/wendy") return { title: `Wendy Workspace | ${SITE}`, description: "Protected trip brief workspace for The Wendy Collective.", noindex: true };
   return { title: `${SITE} | Page Not Found`, description: DEFAULT_DESCRIPTION, notFound: true };
 }

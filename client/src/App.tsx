@@ -16,6 +16,7 @@ import ProposalView from "./pages/ProposalView";
 import SchoolCruise from "@/pages/SchoolCruise";
 import GroupProposalView from "@/pages/GroupProposalView";
 import FamilyPortalView from "@/pages/FamilyPortalView";
+import TravelerProfileView from "@/pages/TravelerProfileView";
 import WendyPipeline from "@/pages/wendy/WendyPipeline";
 import WendyClients from "@/pages/wendy/WendyClients";
 import WendyCalendar from "@/pages/wendy/WendyCalendar";
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/experiences/grimsley-hs-graduation-cruise-2027" component={SchoolCruise} />
       <Route path="/group/:token" component={GroupProposalView} />
       <Route path="/family/:token" component={FamilyPortalView} />
+      <Route path="/traveler-profile/:token" component={TravelerProfileView} />
       <Route path="/proposal/:token" component={ProposalView} />
     <Route path="/wendy/pipeline/:stage"><ClientOnly><WendyPipeline /></ClientOnly></Route>
     <Route path="/wendy/pipeline"><ClientOnly><WendyPipeline /></ClientOnly></Route>

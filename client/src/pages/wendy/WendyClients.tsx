@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useRoute } from "wouter";
 import WendyShell from "./WendyShell";
 import { trpc } from "@/lib/trpc";
+import { PUBLIC_SITE_ORIGIN } from "@/lib/site";
 import PublicInquiryDeletionControl from "./PublicInquiryDeletionControl";
 import { dealStageLabels, dealStages, type DealStage } from "./types";
 
@@ -41,6 +42,9 @@ type WebsiteInquiry = {
   priorities: string | null;
   createdAt: Date;
 };
+type TravelerProfileLink = { id: number; dealId: number; privateToken: string; status: "draft" | "shared" | "response_received" | "closed"; expiresAt: Date | null; createdAt: Date };
+type TravelerProfileResponse = { id: number; travelerProfileLinkId: number; createdAt: Date };
+type ResearchOption = { id: number; dealId: number; optionType: "cruise" | "resort" | "tour" | "custom"; title: string; provider: string | null; shipOrProperty: string | null; destination: string | null; travelDates: string | null; departurePort: string | null; clientFit: string | null; status: string; reviewedOn: string | null };
 
 const stageActions: Record<DealStage, string> = {
   new_inquiry: "Schedule discovery",
@@ -91,7 +95,7 @@ export default function WendyClients() {
   }
   if (deal) {
     const inquiry = (crm.data.websiteInquiries as WebsiteInquiry[] | undefined)?.find((item) => item.id === deal.sourceId);
-    return <ClientProfile deal={deal} experiences={crm.data.experiences as Experience[]} inquiry={inquiry} onRefresh={() => crm.refetch()} />;
+    return <ClientProfile deal={deal} experiences={crm.data.experiences as Experience[]} inquiry={inquiry} travelerProfileLinks={crm.data.travelerProfileLinks as TravelerProfileLink[]} travelerProfileResponses={crm.data.travelerProfileResponses as TravelerProfileResponse[]} researchOptions={crm.data.researchOptions as ResearchOption[]} onRefresh={() => crm.refetch()} />;
   }
 
   return <WendyShell active="/wendy/clients" eyebrow="Relationships" title="Clients" action={<Link href="/wendy/clients/new" className="crm-primary-action">New client <span aria-hidden="true">+</span></Link>}>
@@ -136,7 +140,7 @@ function NewClient() {
   </WendyShell>;
 }
 
-function ClientProfile({ deal, experiences, inquiry, onRefresh }: { deal: ClientDeal; experiences: Experience[]; inquiry?: WebsiteInquiry; onRefresh: () => void }) {
+function ClientProfile({ deal, experiences, inquiry, travelerProfileLinks, travelerProfileResponses, researchOptions, onRefresh }: { deal: ClientDeal; experiences: Experience[]; inquiry?: WebsiteInquiry; travelerProfileLinks: TravelerProfileLink[]; travelerProfileResponses: TravelerProfileResponse[]; researchOptions: ResearchOption[]; onRefresh: () => void }) {
   const history = trpc.crm.dealHistory.useQuery({ id: deal.id });
   const continueStage = trpc.crm.continueDealStage.useMutation({ onSuccess: () => { onRefresh(); history.refetch(); } });
   const reopenStage = trpc.crm.reopenDealStage.useMutation({ onSuccess: () => { onRefresh(); history.refetch(); } });
@@ -149,6 +153,9 @@ function ClientProfile({ deal, experiences, inquiry, onRefresh }: { deal: Client
   const meetingValue = deal.meetingAt ? new Date(deal.meetingAt).toISOString().slice(0, 16) : "";
   const previousStages = dealStages.slice(0, stageIndex);
   const isNewInquiry = deal.stage === "new_inquiry";
+  const travelerProfileLink = travelerProfileLinks.find((item) => item.dealId === deal.id && item.status !== "closed");
+  const travelerProfileResponseCount = travelerProfileLink ? travelerProfileResponses.filter((item) => item.travelerProfileLinkId === travelerProfileLink.id).length : 0;
+  const dealResearchOptions = researchOptions.filter((item) => item.dealId === deal.id);
 
   const handleContinue = (form: HTMLFormElement) => {
     const values = new FormData(form);
@@ -163,6 +170,7 @@ function ClientProfile({ deal, experiences, inquiry, onRefresh }: { deal: Client
       <div className="profile-hero__contact"><a href={`tel:${deal.phone}`}>Call {deal.contactFirstName}</a><a href={`mailto:${deal.email}`}>{deal.email}</a></div>
     </section>
     {isNewInquiry && inquiry ? <PublicInquiryIntake inquiry={inquiry} /> : null}
+    {deal.stage !== "new_inquiry" ? <NormalClientPlanningPanel deal={deal} profileLink={travelerProfileLink} profileResponseCount={travelerProfileResponseCount} researchOptions={dealResearchOptions} onRefresh={onRefresh} /> : null}
     <section className="stage-profile-layout">
       <article className={`stage-workspace${isNewInquiry ? " stage-workspace--call-first" : ""}`}>
         <p className="eyebrow">{isNewInquiry ? "First response" : "Current stage"}</p>
@@ -202,6 +210,19 @@ function DiscoveryAppointmentComposer({ deal, isPending, error, onSchedule }: { 
     </div>
     <div className="stage-action-bar"><button className="crm-primary-action" type="submit" disabled={isPending}>Schedule discovery locally <span aria-hidden="true">→</span></button>{error ? <p className="stage-error">{error}</p> : null}</div>
   </form>;
+}
+
+function NormalClientPlanningPanel({ deal, profileLink, profileResponseCount, researchOptions, onRefresh }: { deal: ClientDeal; profileLink?: TravelerProfileLink; profileResponseCount: number; researchOptions: ResearchOption[]; onRefresh: () => void }) {
+  const createProfile = trpc.crm.createTravelerProfileLink.useMutation({ onSuccess: onRefresh });
+  const createOption = trpc.crm.createResearchOption.useMutation({ onSuccess: onRefresh });
+  const profileUrl = profileLink ? `${PUBLIC_SITE_ORIGIN}/traveler-profile/${profileLink.privateToken}` : "";
+  const canResearch = ["building_proposal", "proposal_shared", "family_details", "ready_to_book", "booking", "booked"].includes(deal.stage);
+  return <section className="normal-client-planning">
+    <div className="normal-client-planning__heading"><div><p className="eyebrow">Normal trip planning</p><h2>{deal.stage === "discovery_call" ? "Traveler profile comes first." : canResearch ? "Research and recommendations." : "Planning record"}</h2></div><p>This path is separate from group programs. Wendy verifies every recommendation and live quote personally.</p></div>
+    <div className="normal-client-planning__grid"><article className="normal-client-panel"><p className="eyebrow">Private traveler profile</p>{profileLink ? <><strong>{profileLink.status === "response_received" ? "Profile received" : "Ready to send"}</strong><p>{profileResponseCount ? `${profileResponseCount} submitted profile${profileResponseCount === 1 ? "" : "s"} saved. The latest is ready for Wendy’s review.` : "Share this private link after the discovery call so the client can add their travel party and preferences."}</p><div className="normal-client-link"><code>{profileUrl}</code><button type="button" className="crm-secondary-action" onClick={() => navigator.clipboard?.writeText(profileUrl)}>Copy link</button></div></> : <><strong>Collect client details before researching.</strong><p>Generate a private traveler profile after discovery. It collects travelers, dates, departure preferences, room needs, loyalty details, and planning priorities without collecting payment or passport information.</p><button className="crm-primary-action" type="button" disabled={createProfile.isPending} onClick={() => createProfile.mutate({ dealId: deal.id, validForDays: 60 })}>{createProfile.isPending ? "Creating link" : "Create traveler profile link"}</button>{createProfile.error ? <p className="stage-error">{createProfile.error.message}</p> : null}</>}</article>
+      {canResearch ? <article className="normal-client-panel"><p className="eyebrow">Advisor research</p><strong>Build a considered short list.</strong><p>Add only options Wendy has reviewed in an authorized advisor portal or directly with a supplier. Live availability, pricing, and booking remain outside this workspace.</p><form className="research-option-form" onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); createOption.mutate({ dealId: deal.id, optionType: String(form.get("optionType")) as "cruise" | "resort" | "tour" | "custom", title: String(form.get("title") || ""), provider: String(form.get("provider") || ""), shipOrProperty: String(form.get("shipOrProperty") || ""), destination: String(form.get("destination") || ""), travelDates: String(form.get("travelDates") || ""), departurePort: String(form.get("departurePort") || ""), clientFit: String(form.get("clientFit") || ""), advisorNotes: String(form.get("advisorNotes") || ""), sourceReference: String(form.get("sourceReference") || ""), reviewedOn: String(form.get("reviewedOn") || ""), status: "ready_to_review" }); event.currentTarget.reset(); }}><div className="form-grid"><div className="form-field"><label htmlFor="research-type">Type</label><select id="research-type" name="optionType"><option value="cruise">Cruise</option><option value="resort">Resort</option><option value="tour">Tour</option><option value="custom">Custom trip</option></select></div><Field id="research-title" label="Option title" name="title" defaultValue="" required /><Field id="research-provider" label="Cruise line or provider" name="provider" defaultValue="" /><Field id="research-ship" label="Ship or property" name="shipOrProperty" defaultValue="" /><Field id="research-destination" label="Destination" name="destination" defaultValue="" /><Field id="research-dates" label="Sailing or travel dates" name="travelDates" defaultValue="" /><Field id="research-port" label="Departure port" name="departurePort" defaultValue="" /><Field id="research-reviewed" label="Date checked" type="date" name="reviewedOn" defaultValue={new Date().toISOString().slice(0, 10)} /><Field id="research-source" label="Source reference" type="url" name="sourceReference" defaultValue="" wide /><Field id="research-fit" label="Why it fits this client" name="clientFit" defaultValue="" text wide /><Field id="research-private-notes" label="Private advisor notes" name="advisorNotes" defaultValue="" text wide /></div><button type="submit" className="crm-secondary-action" disabled={createOption.isPending}>{createOption.isPending ? "Saving option" : "Save reviewed option"}</button>{createOption.error ? <p className="stage-error">{createOption.error.message}</p> : null}</form>{researchOptions.length ? <ol className="research-option-list">{researchOptions.map((option) => <li key={option.id}><strong>{option.title}</strong><span>{[option.provider, option.shipOrProperty, option.destination, option.travelDates].filter(Boolean).join(" · ")}</span><p>{option.clientFit || "Client-fit notes are still being prepared."}</p></li>)}</ol> : <p className="crm-empty-clean">No options recorded yet. Add a reviewed option after using Wendy’s authorized supplier tools.</p>}</article> : null}
+    </div>
+  </section>;
 }
 
 function PublicInquiryIntake({ inquiry }: { inquiry: WebsiteInquiry }) {
@@ -255,11 +276,11 @@ function StageFields({ stage, data, meetingValue, deal, experiences }: { stage: 
   if (stage === "new_inquiry") { const legacyNextAction = deal.nextAction === "Review inquiry and schedule discovery call"; const callFirstAction = `Call ${deal.contactFirstName} and confirm the next step`; return <div className="form-grid"><Field id="stage-meeting" label="Discovery appointment" type="datetime-local" defaultValue={meetingValue} name="meetingAt" /><Field id="stage-next" label="Next action after your call" defaultValue={legacyNextAction ? callFirstAction : deal.nextAction || callFirstAction} name="nextAction" required /><Field id="stage-response" label="Call outcome and first response notes" defaultValue={data.firstResponse || ""} name="stage_firstResponse" text wide /></div>; }
   if (stage === "discovery_call") return <div className="form-grid"><Field id="stage-meeting-notes" label="Discovery outcome and priorities" defaultValue={deal.meetingNotes || ""} name="meetingNotes" text required wide /><Field id="stage-dates" label="Travel window" defaultValue={data.travelWindow || ""} name="stage_travelWindow" /><Field id="stage-budget" label="Budget direction" defaultValue={data.budget || ""} name="stage_budget" /><Field id="stage-priorities" label="Client priorities" defaultValue={data.priorities || ""} name="stage_priorities" text wide /><Field id="stage-next" label="Next action" defaultValue={deal.nextAction || ""} name="nextAction" required wide /></div>;
   if (stage === "building_proposal") return <div className="form-grid"><div className="form-field form-field--wide"><label htmlFor="stage-experience">Approved experience</label><select id="stage-experience" name="experience" defaultValue={deal.experienceId || ""}><option value="">Tailored trip proposal</option>{experiences.map((experience) => <option value={experience.id} key={experience.id}>{experience.shipName} · {experience.sailingSummary}</option>)}</select></div><Field id="stage-proposal-title" label="Proposal title if tailored" defaultValue={data.proposalTitle || ""} name="stage_proposalTitle" /><Field id="stage-client-action" label="Client action requested" defaultValue={data.clientAction || ""} name="stage_clientAction" required /><Field id="stage-proposal-notes" label="Proposal preparation notes" defaultValue={data.preparationNotes || ""} name="stage_preparationNotes" text wide /></div>;
-  if (stage === "proposal_shared") return <div className="form-grid"><Field id="stage-link-recipient" label="Link sent to" defaultValue={data.linkRecipient || deal.email} name="stage_linkRecipient" required /><Field id="stage-sent-date" label="Sent date" type="date" defaultValue={data.sentDate || new Date().toISOString().slice(0, 10)} name="stage_sentDate" required /><Field id="stage-next" label="Follow up action" defaultValue={data.followUp || deal.nextAction || ""} name="nextAction" required wide /><Field id="stage-client-question" label="Client questions or response" defaultValue={data.clientQuestion || ""} name="stage_clientQuestion" text wide /></div>;
-  if (stage === "family_details") return <div className="form-grid"><Field id="stage-review-note" label="Family details review" defaultValue={data.reviewNote || ""} name="stage_reviewNote" text required wide /><Field id="stage-follow-up" label="Missing details or follow up" defaultValue={data.followUp || deal.nextAction || ""} name="stage_followUp" required wide /></div>;
+  if (stage === "proposal_shared") return <div className="form-grid"><Field id="stage-link-recipient" label="Recommendations reviewed with" defaultValue={data.linkRecipient || deal.email} name="stage_linkRecipient" required /><Field id="stage-sent-date" label="Review date" type="date" defaultValue={data.sentDate || new Date().toISOString().slice(0, 10)} name="stage_sentDate" required /><Field id="stage-next" label="Decision or further-research next step" defaultValue={data.followUp || deal.nextAction || ""} name="nextAction" required wide /><Field id="stage-client-question" label="Client preference and discussion outcome" defaultValue={data.clientQuestion || ""} name="stage_clientQuestion" text wide /></div>;
+  if (stage === "family_details") return <div className="form-grid"><Field id="stage-review-note" label="Traveler-profile review" defaultValue={data.reviewNote || ""} name="stage_reviewNote" text required wide /><Field id="stage-follow-up" label="Missing detail or follow-up" defaultValue={data.followUp || deal.nextAction || ""} name="stage_followUp" required wide /></div>;
   if (stage === "ready_to_book") return <div className="form-grid"><Field id="stage-quote-reference" label="Verified supplier quote reference" defaultValue={data.quoteReference || ""} name="stage_quoteReference" required /><Field id="stage-quote-valid" label="Quote valid until" type="date" defaultValue={data.quoteValidUntil || ""} name="stage_quoteValidUntil" required /><Field id="stage-quote-notes" label="Verified room, price, deposit, and policy notes" defaultValue={data.quoteNotes || ""} name="stage_quoteNotes" text wide /></div>;
   if (stage === "booking") return <div className="form-grid"><Field id="stage-reference" label="Supplier confirmation reference" defaultValue={deal.reservationReference || ""} name="reservationReference" required /><Field id="stage-next" label="Client confirmation action" defaultValue={deal.nextAction || ""} name="nextAction" required /><Field id="stage-booking-notes" label="Booking notes" defaultValue={data.bookingNotes || ""} name="stage_bookingNotes" text wide /></div>;
-  if (stage === "booked") return <div className="form-grid"><Field id="stage-care-action" label="Travel care action" defaultValue={data.careAction || deal.nextAction || ""} name="stage_careAction" required wide /><Field id="stage-final-notes" label="Final itinerary and support notes" defaultValue={data.finalNotes || ""} name="stage_finalNotes" text wide /></div>;
+  if (stage === "booked") return <div className="form-grid"><Field id="stage-care-action" label="Travel care action" defaultValue={data.careAction || deal.nextAction || ""} name="stage_careAction" required wide /><Field id="stage-itinerary-link" label="Private itinerary link, if prepared" defaultValue={data.itineraryLink || ""} name="stage_itineraryLink" type="url" wide /><Field id="stage-final-notes" label="Final itinerary and support notes" defaultValue={data.finalNotes || ""} name="stage_finalNotes" text wide /></div>;
   return null;
 }
 

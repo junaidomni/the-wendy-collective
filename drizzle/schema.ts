@@ -95,7 +95,7 @@ export const groupCabinRequestTravelers = mysqlTable("group_cabin_request_travel
 
 export const advisorAlerts = mysqlTable("advisor_alerts", {
   id: int("id").autoincrement().primaryKey(),
-  sourceType: mysqlEnum("sourceType", ["public_inquiry", "group_request", "proposal_response"]).notNull(),
+  sourceType: mysqlEnum("sourceType", ["public_inquiry", "group_request", "proposal_response", "traveler_profile"]).notNull(),
   sourceId: int("sourceId").notNull(),
   groupKey: varchar("groupKey", { length: 120 }),
   title: varchar("title", { length: 180 }).notNull(),
@@ -205,6 +205,49 @@ export const advisorDeals = mysqlTable("advisor_deals", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+export const travelerProfileLinks = mysqlTable("traveler_profile_links", {
+  id: int("id").autoincrement().primaryKey(),
+  dealId: int("dealId").notNull(),
+  privateToken: varchar("privateToken", { length: 96 }).notNull().unique(),
+  status: mysqlEnum("status", ["draft", "shared", "response_received", "closed"]).default("draft").notNull(),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const travelerProfileResponses = mysqlTable("traveler_profile_responses", {
+  id: int("id").autoincrement().primaryKey(),
+  travelerProfileLinkId: int("travelerProfileLinkId").notNull(),
+  contactFirstName: varchar("contactFirstName", { length: 80 }).notNull(),
+  contactLastName: varchar("contactLastName", { length: 80 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 40 }).notNull(),
+  travelerDetailsJson: text("travelerDetailsJson").notNull(),
+  travelPreferencesJson: text("travelPreferencesJson").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const advisorResearchOptions = mysqlTable("advisor_research_options", {
+  id: int("id").autoincrement().primaryKey(),
+  dealId: int("dealId").notNull(),
+  optionType: mysqlEnum("optionType", ["cruise", "resort", "tour", "custom"]).default("cruise").notNull(),
+  title: varchar("title", { length: 180 }).notNull(),
+  provider: varchar("provider", { length: 120 }),
+  shipOrProperty: varchar("shipOrProperty", { length: 180 }),
+  destination: varchar("destination", { length: 180 }),
+  travelDates: varchar("travelDates", { length: 180 }),
+  departurePort: varchar("departurePort", { length: 180 }),
+  itinerarySummary: text("itinerarySummary"),
+  sourceReference: text("sourceReference"),
+  reviewedOn: varchar("reviewedOn", { length: 10 }),
+  clientFit: text("clientFit"),
+  advisorNotes: text("advisorNotes"),
+  status: mysqlEnum("status", ["researching", "ready_to_review", "presented", "selected", "not_selected"]).default("researching").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const clientProposals = mysqlTable("client_proposals", {
   id: int("id").autoincrement().primaryKey(),
   dealId: int("dealId").notNull(),
@@ -271,6 +314,12 @@ export type CruiseExperience = typeof cruiseExperiences.$inferSelect;
 export type InsertCruiseExperience = typeof cruiseExperiences.$inferInsert;
 export type AdvisorDeal = typeof advisorDeals.$inferSelect;
 export type InsertAdvisorDeal = typeof advisorDeals.$inferInsert;
+export type TravelerProfileLink = typeof travelerProfileLinks.$inferSelect;
+export type InsertTravelerProfileLink = typeof travelerProfileLinks.$inferInsert;
+export type TravelerProfileResponse = typeof travelerProfileResponses.$inferSelect;
+export type InsertTravelerProfileResponse = typeof travelerProfileResponses.$inferInsert;
+export type AdvisorResearchOption = typeof advisorResearchOptions.$inferSelect;
+export type InsertAdvisorResearchOption = typeof advisorResearchOptions.$inferInsert;
 export type ClientProposal = typeof clientProposals.$inferSelect;
 export type InsertClientProposal = typeof clientProposals.$inferInsert;
 export type ProposalResponse = typeof proposalResponses.$inferSelect;
