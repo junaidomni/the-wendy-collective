@@ -251,3 +251,8 @@
 - [x] Add a Wendy-only typed-confirmation deletion control for public website inquiries in the Clients and New Inquiry pipeline views.
 - [x] Permanently remove only the selected public inquiry, its derived client pipeline record, and its scoped public alert while preserving group and private proposal submissions.
 - [x] Add regression coverage and responsive validation proving public-inquiry deletion is protected, confirmed, and isolated from every other CRM source.
+- [x] Redesign the New Inquiry client profile so the client name and inquiry title lead together without the oversized, separated summary treatment.
+- [x] Present the original public website submission as a structured intake record beneath the New Inquiry workspace, including contact, destination, timing, travelers, and message details.
+- [x] Refocus the first-stage workspace on Wendy’s immediate personal call, first-response note, and deliberate discovery appointment or next step before moving the record forward.
+- [x] Preserve forward-only stage gates, completed-stage history, public-inquiry deletion safeguards, and separate group or proposal response routing.
+- [x] Add regression coverage and desktop/mobile validation for the redesigned public New Inquiry profile and call-first workflow.

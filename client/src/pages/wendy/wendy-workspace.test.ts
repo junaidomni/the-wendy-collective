@@ -65,6 +65,16 @@ describe("focused Wendy CRM workspace", () => {
     expect(control).toContain('deal.sourceType === "trip_inquiry"');
   });
 
+  it("shows the original website intake and a call-first workspace for New Inquiry client profiles", () => {
+    const clients = readSource("client/src/pages/wendy/WendyClients.tsx");
+    expect(clients).toContain("PublicInquiryIntake");
+    expect(clients).toContain("Original website submission");
+    expect(clients).toContain("Inquiry details");
+    expect(clients).toContain("Call first, then schedule the next conversation.");
+    expect(clients).toContain("Save call outcome and schedule discovery");
+    expect(clients).toContain("Original intake saved");
+  });
+
   it("registers a token-gated household portal with a retained update link and confirmation message", () => {
     const app = readSource("client/src/App.tsx");
     const cruise = readSource("client/src/pages/SchoolCruise.tsx");

@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, deletePublicWebsiteInquiry, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, listAdvisorAlerts, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
+import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorDeal, createClientProposal, createCruiseExperience, createProposalResponse, deletePublicWebsiteInquiry, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, getTripInquiries, listAdvisorAlerts, listAdvisorDeals, listClientProposals, listCruiseExperiences, listProposalResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { storagePut } from "../storage";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
@@ -22,8 +22,8 @@ export const crmRouter = router({
     const grimsleyExperience = await ensureGrimsleyCruiseExperience();
     await ensureGrimsleyGroupProfile();
     await syncExistingRequestsToAdvisorDeals();
-    const [deals, experiences, proposals, responses, grimsleyProfile, alerts] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027"), listAdvisorAlerts()]);
-    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile, alerts };
+    const [deals, experiences, proposals, responses, grimsleyProfile, alerts, websiteInquiries] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027"), listAdvisorAlerts(), getTripInquiries()]);
+    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile, alerts, websiteInquiries };
   }),
   markAlertRead: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
     await markAdvisorAlertRead(input.id);
