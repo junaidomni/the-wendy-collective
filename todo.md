@@ -265,3 +265,8 @@
 - [x] Preserve New Inquiry stage gates and CRM history while recording appointment details locally and explicitly marking client invitation, calendar creation, and Google Meet generation as pending Google connection.
 - [x] Add a documented, guarded future Google Calendar and Google Meet integration boundary with no live API calls, external event creation, or client email before Wendy authorizes the connection.
 - [x] Add regression coverage and responsive validation for the local appointment flow, availability management, navigation, and inactive Google safeguards.
+- [x] Research the authorized data sources, partner permissions, and operational limits for Carnival, Norwegian, and IntelliTravel cruise availability, sailing dates, and itinerary discovery.
+- [x] Design a Proposal Build search workflow that filters the internal cruise library and, later, authorized inventory by destination, dates, departure port, cruise line, and trip preferences.
+- [x] Design a generic private comparison link that shows a Wendy-curated set of cruise options without public prices and collects one selected option, rooms, travelers, and preferences.
+- [x] Define how Wendy’s internal cruise library, live availability lookup, proposal comparison, traveler intake, quote verification, and booking stages exchange data without automated booking or unsupported supplier access.
+- [x] Document the proposed implementation, privacy safeguards, provider activation gates, and phased rollout for Wendy’s approval before any supplier-search or comparison-link feature is built.
