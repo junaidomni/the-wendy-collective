@@ -83,6 +83,9 @@ describe("public site content", () => {
     expect(schoolCruise).toContain("Explore Mardi Gras on Carnival");
     expect(schoolCruise).toContain('scrollToProposalSection("mardi-gras")');
     expect(schoolCruise).not.toContain("Something for every kind of");
+    expect(schoolCruise).toContain("Sailing at a glance");
+    expect(schoolCruise).toContain("Day by day");
+    expect(schoolCruise).not.toContain("A ship worth getting to");
     expect(schoolCruise).toContain("Travel documents made");
     expect(schoolCruise).toContain("Frequently asked questions");
     expect(schoolCruise).toContain("Rate qualifiers");

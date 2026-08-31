@@ -227,3 +227,6 @@
 - [x] Audit the completed Grimsley proposal for redundant sections, uneven visual pacing, and mobile scanability while preserving approved rates and advisor safeguards.
 - [x] Refine the section order, visual hierarchy, and client-facing transitions into a cohesive final Grimsley proposal draft.
 - [x] Verify final desktop and mobile proposal presentation, clean sharing behavior, official Carnival links, cabin-planner calculations, and private request submission safeguards before release.
+- [x] Combine the Grimsley ship-at-a-glance facts and day-by-day itinerary into one coherent Sailing at a glance section with a shared heading and reduced whitespace.
+- [x] Preserve all sailing facts and day content while improving the desktop and mobile visual sequence between Mardi Gras highlights and cabin guidance.
+- [x] Verify the consolidated Grimsley sailing section on desktop and mobile before release.
