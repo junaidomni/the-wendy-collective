@@ -73,6 +73,15 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
   const shipImage = experience?.heroImageUrl || "/manus-storage/mardi-gras-approved_10fa6e55.png";
   const shipImageAlt = experience?.heroImageAlt || "Carnival Mardi Gras at sea near Port Canaveral";
   const savePlanning = useCallback((snapshot: GrimsleyPlanningSnapshot) => setPlanning(snapshot), []);
+  const scrollToProposalSection = useCallback((sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}`);
+  }, []);
+
+  useEffect(() => {
+    if (!window.location.hash) return;
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}`);
+  }, []);
 
   const updateContact = (field: keyof Contact, value: string | boolean) => setContact((current) => ({ ...current, [field]: value }));
   const updateRoom = <K extends keyof Omit<Room, "travelers">>(roomIndex: number, field: K, value: Room[K]) => {
@@ -130,7 +139,7 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
         <p className="eyebrow">{privateToken || familyPortalToken ? "Private family proposal" : groupName}</p>
         <h1 className="display">{groupTitle.replace(" 2027", "")} <em>2027.</em></h1>
         <p>{sailingSummary} · {embarkPort}</p>
-        <div className="hero-actions"><a className="button-link button-link--ghost" href="https://www.carnival.com/cruise-ships/mardi-gras" target="_blank" rel="noreferrer">Explore the ship <span aria-hidden="true">↗</span></a><a className="button-link button-link--ghost" href="#ship">See ship details <span aria-hidden="true">↓</span></a><a className="button-link" href="#estimate">Pick your cabin <span aria-hidden="true">↗</span></a></div>
+        <div className="hero-actions"><a className="button-link button-link--ghost" href="https://www.carnival.com/cruise-ships/mardi-gras" target="_blank" rel="noreferrer">Explore the ship <span aria-hidden="true">↗</span></a><button type="button" className="button-link button-link--ghost" onClick={() => scrollToProposalSection("ship")}>See ship details <span aria-hidden="true">↓</span></button><button type="button" className="button-link" onClick={() => scrollToProposalSection("estimate")}>Pick your cabin <span aria-hidden="true">↗</span></button></div>
         {familyPortalToken && initialRequest ? <aside className="family-status-card"><p className="eyebrow">Your request status</p><strong>{familyStatusLabels[initialRequest.status] || "Request received"}</strong><span>Latest update submitted {new Date(initialRequest.createdAt).toLocaleDateString()}</span><small>{revisionCount > 1 ? `${revisionCount} saved versions. The latest is current.` : "Your first saved request is current."}</small></aside> : null}
       </div>
     </section>
@@ -150,7 +159,7 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
 
     <GrimsleyCabinEstimator onPlanningChange={savePlanning} />
 
-    <section className="page-section page-section--ink school-protection"><div className="page-wrap"><div><p className="eyebrow">Vacation Protection</p><h2 className="display display--medium">A little more confidence when plans <em>change.</em></h2></div><aside><p>Vacation Protection may include eligible trip cancellation or interruption, travel delay, baggage loss or delay, emergency medical benefits, evacuation, and around the clock assistance. Benefits, exclusions, and eligibility depend on the selected plan.</p><a className="button-link button-link--ghost" href="#estimate">Add it to your estimate <span aria-hidden="true">↑</span></a></aside></div></section>
+    <section className="page-section page-section--ink school-protection"><div className="page-wrap"><div><p className="eyebrow">Vacation Protection</p><h2 className="display display--medium">A little more confidence when plans <em>change.</em></h2></div><aside><p>Vacation Protection may include eligible trip cancellation or interruption, travel delay, baggage loss or delay, emergency medical benefits, evacuation, and around the clock assistance. Benefits, exclusions, and eligibility depend on the selected plan.</p><button type="button" className="button-link button-link--ghost" onClick={() => scrollToProposalSection("estimate")}>Add it to your estimate <span aria-hidden="true">↑</span></button></aside></div></section>
 
     <section className="page-section school-documents" id="documents"><div className="page-wrap"><div className="section-heading"><div><p className="eyebrow">Travel documents</p><h2 className="display display--medium">Travel documents made <em>simple.</em></h2></div><p className="body-copy">Wendy will help your household confirm the appropriate documents before travel. Do not upload or enter passport numbers, images, or other document details on this website.</p></div><div className="school-documents__grid"><article><p className="eyebrow">Best choice</p><h3>A passport</h3><p>A valid United States passport book is strongly recommended for every traveler. It offers the greatest flexibility if an unexpected event requires a flight home from outside the United States.</p></article><article><p className="eyebrow">Closed loop alternative</p><h3>Eligible United States travelers</h3><p>Eligible United States citizens may generally travel with an original or government certified birth certificate and a valid government issued photo ID for guests age 16 and older. Minor documentation rules also apply.</p></article><aside><strong>Confirm before booking</strong><p>Requirements vary by citizenship and residency status. Names must match reservation documents. Wendy will confirm current cruise line requirements for minors and guests under 21 before any reservation is completed.</p></aside></div></div></section>
 

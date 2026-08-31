@@ -219,3 +219,5 @@
 - [x] Correct the active WhatsApp failure in which a newly sent Grimsley private link shows its title and description but omits the approved ship image.
 - [x] Change the Grimsley hero Explore the Ship action to open Carnival’s official Mardi Gras ship page in a new tab and retain a separate on-page ship-details path.
 - [x] Make every Grimsley cabin selector option lead with the per-traveler reference price and remove redundant cabin-category wording from the option description.
+- [x] Ensure copied Grimsley family links are always clean canonical share URLs with no page fragment, including when copied after navigating within the proposal.
+- [x] Validate the clean Grimsley share URL and direct social image response against the active production domain for WhatsApp-compatible delivery.
