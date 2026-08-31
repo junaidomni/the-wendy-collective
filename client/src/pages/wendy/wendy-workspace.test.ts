@@ -75,6 +75,16 @@ describe("focused Wendy CRM workspace", () => {
     expect(clients).toContain("Original intake saved");
   });
 
+  it("places the client journey rail before the trip profile and intake content", () => {
+    const clients = readSource("client/src/pages/wendy/WendyClients.tsx");
+    const railPosition = clients.indexOf("<JourneyRail current={deal.stage} />");
+    const profilePosition = clients.indexOf('<section className={`profile-hero');
+    const intakePosition = clients.indexOf("<PublicInquiryIntake inquiry={inquiry}");
+    expect(railPosition).toBeGreaterThan(-1);
+    expect(profilePosition).toBeGreaterThan(railPosition);
+    expect(intakePosition).toBeGreaterThan(profilePosition);
+  });
+
   it("registers a token-gated household portal with a retained update link and confirmation message", () => {
     const app = readSource("client/src/App.tsx");
     const cruise = readSource("client/src/pages/SchoolCruise.tsx");

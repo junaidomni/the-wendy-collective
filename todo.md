@@ -256,3 +256,6 @@
 - [x] Refocus the first-stage workspace on Wendy’s immediate personal call, first-response note, and deliberate discovery appointment or next step before moving the record forward.
 - [x] Preserve forward-only stage gates, completed-stage history, public-inquiry deletion safeguards, and separate group or proposal response routing.
 - [x] Add regression coverage and desktop/mobile validation for the redesigned public New Inquiry profile and call-first workflow.
+- [x] Move the individual-client stage rail directly below the client name on every profile, before the trip summary and original inquiry content.
+- [x] Preserve the complete, current, and locked stage states and existing client-profile actions after repositioning the workflow rail.
+- [x] Verify the revised client-profile hierarchy on desktop and mobile across New Inquiry and later-stage records.

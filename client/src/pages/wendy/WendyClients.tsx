@@ -156,12 +156,12 @@ function ClientProfile({ deal, experiences, inquiry, onRefresh }: { deal: Client
   };
 
   return <WendyShell active="/wendy/clients" eyebrow={isNewInquiry ? "New inquiry" : "Client profile"} title={`${deal.contactFirstName} ${deal.contactLastName}`} action={<Link href="/wendy/pipeline" className="crm-secondary-action">View pipeline</Link>}>
+    <JourneyRail current={deal.stage} />
     <section className={`profile-hero${isNewInquiry ? " profile-hero--inquiry" : ""}`}>
       <div><span>{isNewInquiry ? "Website inquiry" : dealStageLabels[deal.stage]}</span><h2>{deal.title}</h2><p>{deal.travelSummary || "No discovery details have been recorded yet."}</p></div>
       <div className="profile-hero__contact"><a href={`tel:${deal.phone}`}>Call {deal.contactFirstName}</a><a href={`mailto:${deal.email}`}>{deal.email}</a></div>
     </section>
     {isNewInquiry && inquiry ? <PublicInquiryIntake inquiry={inquiry} /> : null}
-    <JourneyRail current={deal.stage} />
     <section className="stage-profile-layout">
       <article className={`stage-workspace${isNewInquiry ? " stage-workspace--call-first" : ""}`}>
         <p className="eyebrow">{isNewInquiry ? "First response" : "Current stage"}</p>
