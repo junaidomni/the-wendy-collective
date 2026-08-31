@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
-const mocks = vi.hoisted(() => ({ createFamilyPortalCabinRequest: vi.fn(), createFamilyPortalRevision: vi.fn(), createAdvisorAlert: vi.fn(), getGroupCabinRequests: vi.fn(), getPrivateFamilyPortal: vi.fn(), updateGroupCabinRequestStatus: vi.fn(), notifyOwner: vi.fn(), sendGroupCabinRequestEmail: vi.fn() }));
-vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createFamilyPortalCabinRequest: mocks.createFamilyPortalCabinRequest, createFamilyPortalRevision: mocks.createFamilyPortalRevision, createAdvisorAlert: mocks.createAdvisorAlert, getGroupCabinRequests: mocks.getGroupCabinRequests, getPrivateFamilyPortal: mocks.getPrivateFamilyPortal, updateGroupCabinRequestStatus: mocks.updateGroupCabinRequestStatus }));
+const mocks = vi.hoisted(() => ({ createFamilyPortalCabinRequest: vi.fn(), createFamilyPortalRevision: vi.fn(), createAdvisorAlert: vi.fn(), deleteGroupCabinRequestHousehold: vi.fn(), getGroupCabinRequests: vi.fn(), getPrivateFamilyPortal: vi.fn(), updateGroupCabinRequestStatus: vi.fn(), notifyOwner: vi.fn(), sendGroupCabinRequestEmail: vi.fn() }));
+vi.mock("./db", async (importOriginal) => ({ ...(await importOriginal<typeof import("./db")>()), createFamilyPortalCabinRequest: mocks.createFamilyPortalCabinRequest, createFamilyPortalRevision: mocks.createFamilyPortalRevision, createAdvisorAlert: mocks.createAdvisorAlert, deleteGroupCabinRequestHousehold: mocks.deleteGroupCabinRequestHousehold, getGroupCabinRequests: mocks.getGroupCabinRequests, getPrivateFamilyPortal: mocks.getPrivateFamilyPortal, updateGroupCabinRequestStatus: mocks.updateGroupCabinRequestStatus }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
 vi.mock("./resendAlerts", async (importOriginal) => ({ ...(await importOriginal<typeof import("./resendAlerts")>()), sendGroupCabinRequestEmail: mocks.sendGroupCabinRequestEmail }));
 
@@ -28,7 +28,7 @@ const request = {
 };
 
 describe("group cabin request workflow", () => {
-  beforeEach(() => { mocks.createFamilyPortalCabinRequest.mockReset(); mocks.createFamilyPortalRevision.mockReset(); mocks.createAdvisorAlert.mockReset(); mocks.getGroupCabinRequests.mockReset(); mocks.getPrivateFamilyPortal.mockReset(); mocks.updateGroupCabinRequestStatus.mockReset(); mocks.notifyOwner.mockReset(); mocks.sendGroupCabinRequestEmail.mockReset(); mocks.createFamilyPortalCabinRequest.mockResolvedValue({ id: 28, familyPortalToken: "f".repeat(43), revisionNumber: 1 }); mocks.createAdvisorAlert.mockResolvedValue({ id: 38 }); mocks.getGroupCabinRequests.mockResolvedValue([]); mocks.getPrivateFamilyPortal.mockResolvedValue({ profile: { groupKey: "grimsley-hs-graduation-cruise-2027" } }); mocks.notifyOwner.mockResolvedValue(true); mocks.sendGroupCabinRequestEmail.mockResolvedValue("not_configured"); });
+  beforeEach(() => { mocks.createFamilyPortalCabinRequest.mockReset(); mocks.createFamilyPortalRevision.mockReset(); mocks.createAdvisorAlert.mockReset(); mocks.deleteGroupCabinRequestHousehold.mockReset(); mocks.getGroupCabinRequests.mockReset(); mocks.getPrivateFamilyPortal.mockReset(); mocks.updateGroupCabinRequestStatus.mockReset(); mocks.notifyOwner.mockReset(); mocks.sendGroupCabinRequestEmail.mockReset(); mocks.createFamilyPortalCabinRequest.mockResolvedValue({ id: 28, familyPortalToken: "f".repeat(43), revisionNumber: 1 }); mocks.createAdvisorAlert.mockResolvedValue({ id: 38 }); mocks.deleteGroupCabinRequestHousehold.mockResolvedValue({ deletedRequestIds: [28, 29], groupKey: request.groupKey }); mocks.getGroupCabinRequests.mockResolvedValue([]); mocks.getPrivateFamilyPortal.mockResolvedValue({ profile: { groupKey: "grimsley-hs-graduation-cruise-2027" } }); mocks.notifyOwner.mockResolvedValue(true); mocks.sendGroupCabinRequestEmail.mockResolvedValue("not_configured"); });
 
   it("stores room and traveler details then alerts Wendy without payment or passport fields", async () => {
     const result = await appRouter.createCaller(context()).groupCruises.createCabinRequest(request);
@@ -61,5 +61,13 @@ describe("group cabin request workflow", () => {
     await expect(appRouter.createCaller(context(visitor)).groupCruises.listCabinRequests()).rejects.toMatchObject({ code: "FORBIDDEN" });
     await appRouter.createCaller(context(owner)).groupCruises.updateCabinRequestStatus({ id: 28, status: "quote_in_progress", advisorNotes: "Checking live availability." });
     expect(mocks.updateGroupCabinRequestStatus).toHaveBeenCalledWith(28, "quote_in_progress", "Checking live availability.");
+  });
+
+  it("requires Wendy and an explicit confirmation before deleting only the selected household", async () => {
+    const visitor = { ...owner, id: 8, openId: "visitor-8", role: "user" as const };
+    await expect(appRouter.createCaller(context(visitor)).groupCruises.deleteCabinRequestHousehold({ id: 28, confirmation: "DELETE" })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(appRouter.createCaller(context(owner)).groupCruises.deleteCabinRequestHousehold({ id: 28, confirmation: "DELETE" })).resolves.toMatchObject({ success: true, deletedCount: 2, groupKey: request.groupKey });
+    expect(mocks.deleteGroupCabinRequestHousehold).toHaveBeenCalledWith(28);
+    await expect(appRouter.createCaller(context(owner)).groupCruises.deleteCabinRequestHousehold({ id: 28, confirmation: "DELETE" as never })).resolves.toMatchObject({ success: true });
   });
 });

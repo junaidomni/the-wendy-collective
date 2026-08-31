@@ -41,6 +41,9 @@ describe("focused Wendy CRM workspace", () => {
     expect(source).toContain("family-revision-history");
     expect(source).toContain("New family response");
     expect(source).toContain("Review families");
+    expect(source).toContain("Manage submissions");
+    expect(source).toContain("Type DELETE to confirm");
+    expect(source).toContain("deleteCabinRequestHousehold");
   });
 
   it("keeps public inquiries and linked package responses distinct in Wendy Today", () => {

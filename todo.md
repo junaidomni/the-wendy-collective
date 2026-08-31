@@ -245,3 +245,6 @@
 - [x] Reserve the New Inquiry pipeline for forms submitted from the public Wendy Collective website.
 - [x] Add Wendy portal alerts that distinguish a new public inquiry requiring contact from a new or updated response within a specific cruise or vacation proposal.
 - [x] Test source-specific routing, in-portal alert visibility, CRM preservation, and private request safeguards before release.
+- [x] Add a Wendy-only Delete submission control to each private group or proposal household record with a clear permanent-deletion confirmation step.
+- [x] Remove only the selected household’s request revisions, room and traveler records, associated portal record, and scoped alerts while preserving the originating group, proposal, and active share link.
+- [x] Add regression coverage and desktop/mobile verification proving deletion is protected, confirmed, and isolated to the selected submission.

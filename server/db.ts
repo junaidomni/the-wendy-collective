@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
@@ -231,6 +231,27 @@ export async function updateGroupCabinRequestStatus(id: number, status: "new" | 
   const db = await getDb();
   if (!db) throw new Error("Group cabin request storage is unavailable");
   await db.update(groupCabinRequests).set({ status, advisorNotes: advisorNotes || null }).where(eq(groupCabinRequests.id, id));
+}
+
+export async function deleteGroupCabinRequestHousehold(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Group cabin request storage is unavailable");
+  const target = (await db.select().from(groupCabinRequests).where(eq(groupCabinRequests.id, id)).limit(1))[0];
+  if (!target) throw new Error("Household submission not found.");
+  const requestRows = target.familyPortalId
+    ? await db.select({ id: groupCabinRequests.id }).from(groupCabinRequests).where(eq(groupCabinRequests.familyPortalId, target.familyPortalId))
+    : [{ id: target.id }];
+  const requestIds = requestRows.map((request) => request.id);
+  const roomRows = requestIds.length ? await db.select({ id: groupCabinRequestRooms.id }).from(groupCabinRequestRooms).where(inArray(groupCabinRequestRooms.cabinRequestId, requestIds)) : [];
+  const roomIds = roomRows.map((room) => room.id);
+  if (roomIds.length) await db.delete(groupCabinRequestTravelers).where(inArray(groupCabinRequestTravelers.roomId, roomIds));
+  if (requestIds.length) {
+    await db.delete(advisorAlerts).where(and(eq(advisorAlerts.sourceType, "group_request"), inArray(advisorAlerts.sourceId, requestIds)));
+    await db.delete(groupCabinRequestRooms).where(inArray(groupCabinRequestRooms.cabinRequestId, requestIds));
+    await db.delete(groupCabinRequests).where(inArray(groupCabinRequests.id, requestIds));
+  }
+  if (target.familyPortalId) await db.delete(groupFamilyPortals).where(eq(groupFamilyPortals.id, target.familyPortalId));
+  return { deletedRequestIds: requestIds, groupKey: target.groupKey };
 }
 
 export type CreateExperienceInput = {

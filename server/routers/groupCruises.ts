@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createAdvisorAlert, createFamilyPortalCabinRequest, createFamilyPortalRevision, getGroupCabinRequests, getPrivateFamilyPortal, getPrivateGroupTravelProfile, updateGroupCabinRequestStatus } from "../db";
+import { createAdvisorAlert, createFamilyPortalCabinRequest, createFamilyPortalRevision, deleteGroupCabinRequestHousehold, getGroupCabinRequests, getPrivateFamilyPortal, getPrivateGroupTravelProfile, updateGroupCabinRequestStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 import { sendGroupCabinRequestEmail } from "../resendAlerts";
@@ -107,5 +107,9 @@ export const groupCruisesRouter = router({
   updateCabinRequestStatus: adminProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(statuses), advisorNotes: z.string().trim().max(4000).default("") })).mutation(async ({ input }) => {
     await updateGroupCabinRequestStatus(input.id, input.status, input.advisorNotes);
     return { success: true };
+  }),
+  deleteCabinRequestHousehold: adminProcedure.input(z.object({ id: z.number().int().positive(), confirmation: z.literal("DELETE") })).mutation(async ({ input }) => {
+    const deleted = await deleteGroupCabinRequestHousehold(input.id);
+    return { success: true, deletedCount: deleted.deletedRequestIds.length, groupKey: deleted.groupKey };
   }),
 });
