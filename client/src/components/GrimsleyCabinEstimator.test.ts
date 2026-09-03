@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateGrimsleyEstimate } from "./GrimsleyCabinEstimator";
+import { calculateGrimsleyDepositCents, calculateGrimsleyEstimate } from "./GrimsleyCabinEstimator";
 
 describe("Grimsley cabin estimator", () => {
   it("uses the approved two-traveler balcony category and separates optional extras", () => {
@@ -34,5 +34,11 @@ describe("Grimsley cabin estimator", () => {
     expect(cove.fareCents).toBe(256800);
     expect(oceanView.selectedCategory?.title).toBe("Cloud 9 Spa Ocean View");
     expect(oceanView.fareCents).toBe(199000);
+  });
+
+  it("uses a $75 per-traveler deposit unless the returning Carnival guest exception applies", () => {
+    expect(calculateGrimsleyDepositCents(2)).toBe(15000);
+    expect(calculateGrimsleyDepositCents(2, true)).toBe(10000);
+    expect(calculateGrimsleyDepositCents(4)).toBe(30000);
   });
 });

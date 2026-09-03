@@ -26,6 +26,7 @@ export type GrimsleyPlanningSnapshot = {
     diningAdults: number;
     diningChildren: number;
     diningTotalCents: number;
+    priorCarnivalGuest: boolean;
     rateQualifiers?: ("military" | "interline" | "senior_55_plus")[];
   };
   estimate: {
@@ -142,6 +143,10 @@ function formatCurrency(cents: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 }
 
+export function calculateGrimsleyDepositCents(occupancy: number, priorCarnivalGuest = false) {
+  return occupancy * (priorCarnivalGuest ? 5000 : 7500);
+}
+
 export function calculateGrimsleyEstimate(input: { occupancy: 2 | 3 | 4; roomType: RoomType; categoryId: string; protection: boolean; wifiPlanId: string; wifiUsers: number; cheersAdults: number; diningExperience?: string; diningAdults?: number; diningChildren?: number }) {
   const choices = cabinCategories.filter((category) => category.occupancy === input.occupancy && category.roomType === input.roomType);
   const selectedCategory = choices.find((category) => category.id === input.categoryId) || choices[0];
@@ -172,10 +177,12 @@ export default function GrimsleyCabinEstimator({ onPlanningChange }: { onPlannin
   const [diningExperience, setDiningExperience] = useState("No dining preference");
   const [diningAdults, setDiningAdults] = useState(0);
   const [diningChildren, setDiningChildren] = useState(0);
+  const [priorCarnivalGuest, setPriorCarnivalGuest] = useState(false);
 
   useEffect(() => { setCategoryId(choices[0]?.id || ""); }, [choices]);
   const calculation = useMemo(() => calculateGrimsleyEstimate({ occupancy, roomType, categoryId, protection, wifiPlanId, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren }), [occupancy, roomType, categoryId, protection, wifiPlanId, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren]);
   const { selectedCategory, wifiPlan, diningRate, protectionPerTraveler, fareCents, gratuitiesCents, protectionCents, diningCents, cabinTotalCents, extrasTotalCents, tripTotalCents } = calculation;
+  const depositCents = calculateGrimsleyDepositCents(occupancy, priorCarnivalGuest);
 
   useEffect(() => {
     if (!selectedCategory) return;
@@ -186,10 +193,10 @@ export default function GrimsleyCabinEstimator({ onPlanningChange }: { onPlannin
       estimatedFareCents: fareCents,
       estimatedGratuitiesCents: gratuitiesCents,
       estimatedProtectionCents: protectionCents,
-      extras: { wifiPlan: wifiPlan.label, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren, diningTotalCents: diningCents },
-      estimate: { cabinTotalCents, extrasTotalCents, tripTotalCents, depositCents: occupancy * 5000, onboardCreditCents: 0 },
+      extras: { wifiPlan: wifiPlan.label, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren, diningTotalCents: diningCents, priorCarnivalGuest },
+      estimate: { cabinTotalCents, extrasTotalCents, tripTotalCents, depositCents, onboardCreditCents: 0 },
     });
-  }, [occupancy, roomType, selectedCategory, fareCents, gratuitiesCents, protectionCents, wifiPlan.label, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren, cabinTotalCents, extrasTotalCents, tripTotalCents, onPlanningChange]);
+  }, [occupancy, roomType, selectedCategory, fareCents, gratuitiesCents, protectionCents, wifiPlan.label, wifiUsers, cheersAdults, diningExperience, diningAdults, diningChildren, priorCarnivalGuest, cabinTotalCents, extrasTotalCents, tripTotalCents, depositCents, onPlanningChange]);
 
   return <section className="page-section page-section--ink" id="estimate"><div className="page-wrap">
     <div className="section-heading"><div><p className="eyebrow">Cabin and extras planner</p><h2 className="display display--medium">Build a starting point for your <em>household.</em></h2></div><p className="body-copy">Select a verified planning category, then explore extras separately. This is a reference estimate, not a live quote. Wendy will personally confirm the current price, taxes, terms, deck, and cabin location.</p></div>
@@ -200,8 +207,9 @@ export default function GrimsleyCabinEstimator({ onPlanningChange }: { onPlannin
         <div className="estimator-step estimator-step--wide"><span>03</span><div><label htmlFor="estimateCategory">Available category</label><select id="estimateCategory" value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>{choices.map((category) => <option key={category.id} value={category.id}>{formatCurrency(category.fare * 100)} per traveler · {category.title}</option>)}</select></div></div>
         <div className="estimator-cabin-detail"><p className="eyebrow">Selected cabin</p><h3>{selectedCategory?.title}</h3><p>{selectedCategory?.detail}</p></div>
         <label className="estimator-check"><input type="checkbox" checked={protection} onChange={(event) => setProtection(event.target.checked)} /><span><strong>Add Vacation Protection</strong><small>{formatCurrency(protectionPerTraveler * 100)} per traveler, optional</small></span></label>
+        <label className="estimator-check"><input type="checkbox" checked={priorCarnivalGuest} onChange={(event) => setPriorCarnivalGuest(event.target.checked)} /><span><strong>Prior Carnival guest</strong><small>Use the $50 per traveler deposit for an eligible returning Carnival guest. Otherwise the deposit is $75 per traveler.</small></span></label>
       </div>
-      <aside className="cruise-estimator__total"><p className="eyebrow">Reference estimate</p><strong>{formatCurrency(cabinTotalCents)}</strong><span>{formatCurrency(Math.round(cabinTotalCents / occupancy))} average per traveler</span><dl><div><dt>Cruise fare</dt><dd>{formatCurrency(fareCents)}</dd></div><div><dt>Gratuities</dt><dd>{formatCurrency(gratuitiesCents)}</dd></div><div><dt>Vacation Protection</dt><dd>{protection ? formatCurrency(protectionCents) : "Not selected"}</dd></div><div><dt>Nonrefundable deposit due to reserve</dt><dd>{formatCurrency(occupancy * 5000)}</dd></div></dl><p>Taxes or fees not reflected in the supplied fare data will be confirmed with your live quote. Fares may be recalculated if the number of travelers in the cabin changes.</p></aside>
+      <aside className="cruise-estimator__total"><p className="eyebrow">Reference estimate</p><strong>{formatCurrency(cabinTotalCents)}</strong><span>{formatCurrency(Math.round(cabinTotalCents / occupancy))} average per traveler</span><dl><div><dt>Cruise fare</dt><dd>{formatCurrency(fareCents)}</dd></div><div><dt>Gratuities</dt><dd>{formatCurrency(gratuitiesCents)}</dd></div><div><dt>Vacation Protection</dt><dd>{protection ? formatCurrency(protectionCents) : "Not selected"}</dd></div><div><dt>Nonrefundable deposit due to reserve</dt><dd>{formatCurrency(depositCents)}</dd></div></dl><p>{priorCarnivalGuest ? "Returning Carnival guest deposit selected. Wendy will confirm eligibility before reservation." : "Standard deposit shown at $75 per traveler. Wendy will confirm any returning-guest eligibility before reservation."} Taxes or fees not reflected in the supplied fare data will be confirmed with your live quote. Fares may be recalculated if the number of travelers in the cabin changes.</p></aside>
     </div>
     <div className="extras-planner"><div><p className="eyebrow">Optional planning costs</p><h3>Explore extras now. Add them later.</h3><p>Wi Fi, CHEERS!, and specialty dining are shown separately from the cabin estimate. Wendy confirms each optional item before reservation.</p></div><div className="extras-planner__fields"><label>Wi Fi plan<select value={wifiPlanId} onChange={(event) => setWifiPlanId(event.target.value)}>{wifiPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.label}{plan.perDay ? `, ${formatCurrency(plan.perDay * 100)} per day` : ""}</option>)}</select></label><label>Wi Fi users<select value={wifiUsers} onChange={(event) => setWifiUsers(Number(event.target.value))}>{[1, 2, 3, 4].map((value) => <option key={value} value={value}>{value}</option>)}</select></label><label>CHEERS! eligible adults<select value={cheersAdults} onChange={(event) => setCheersAdults(Number(event.target.value))}>{Array.from({ length: occupancy + 1 }, (_, value) => <option key={value} value={value}>{value}</option>)}</select></label><label>Specialty dining preference<select value={diningExperience} onChange={(event) => setDiningExperience(event.target.value)}>{diningChoices.map((choice) => <option key={choice}>{choice}</option>)}</select></label><label>Dining adults<select value={diningAdults} onChange={(event) => { const nextAdults = Number(event.target.value); setDiningAdults(nextAdults); setDiningChildren((current) => Math.min(current, occupancy - nextAdults)); }}>{Array.from({ length: occupancy + 1 }, (_, value) => <option key={value} value={value}>{value}</option>)}</select></label><label>Dining children<select value={diningChildren} onChange={(event) => setDiningChildren(Number(event.target.value))}>{Array.from({ length: occupancy - diningAdults + 1 }, (_, value) => <option key={value} value={value}>{value}</option>)}</select></label></div><aside><span>Optional extras selected</span><strong>{formatCurrency(extrasTotalCents)}</strong><p>Estimated vacation total</p><b>{formatCurrency(tripTotalCents)}</b><small>{diningExperience === "No dining preference" ? "Select a restaurant to add a specialty-dining planning cost." : `${diningExperience}: ${formatCurrency(diningCents)}. ${diningRate.note}`}</small></aside></div>
   </div></section>;
