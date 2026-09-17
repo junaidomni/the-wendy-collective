@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   calculateGrimsleyDepositCents,
   calculateGrimsleyEstimate,
+  getGrimsleyCabinStartingFare,
 } from "./GrimsleyCabinEstimator";
 
 describe("Grimsley cabin preference planner", () => {
@@ -17,6 +18,20 @@ describe("Grimsley cabin preference planner", () => {
     expect(estimate).not.toHaveProperty("fareCents");
     expect(estimate).not.toHaveProperty("cabinTotalCents");
     expect(estimate).not.toHaveProperty("tripTotalCents");
+  });
+
+  it("updates the cabin starting fare card to match the selected preference", () => {
+    expect(getGrimsleyCabinStartingFare("interior")).toEqual({
+      fare: "Inside cabins from $708 pp",
+      basis: "Based on double occupancy",
+    });
+    expect(getGrimsleyCabinStartingFare("balcony")).toEqual({
+      fare: "Balconies from $938 pp",
+      basis: "Based on double occupancy",
+    });
+    expect(getGrimsleyCabinStartingFare("ocean_view").fare).toBe(
+      "Ocean View fare to be confirmed"
+    );
   });
 
   it("adds the selected JiJi adult and child dining reference to optional planning costs", () => {

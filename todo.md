@@ -285,3 +285,4 @@
 - [x] Commit and push the validated website source to GitHub for Wendy’s independent AI-system handoff.
 - [x] Add a discreet footer login and password-protected CRM access for Wendy and Junaid without changing existing private client links.
 - [x] Replace the detailed public Grimsley cabin-rate selector with approved Inside and Balcony starting fares while retaining the issued private URL, intake, deposits, optional-planning preferences, and existing submissions.
+- [x] Make the Grimsley starting-fare card update with the selected cabin preference while retaining the approved published Inside and Balcony starting fares.

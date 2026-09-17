@@ -36,6 +36,29 @@ const roomTypeLabels: Record<RoomType, string> = {
   suite: "Suite",
 };
 
+const cabinStartingFares: Record<RoomType, { fare: string; basis: string }> = {
+  interior: {
+    fare: "Inside cabins from $708 pp",
+    basis: "Based on double occupancy",
+  },
+  ocean_view: {
+    fare: "Ocean View fare to be confirmed",
+    basis: "Wendy will confirm the current fare",
+  },
+  balcony: {
+    fare: "Balconies from $938 pp",
+    basis: "Based on double occupancy",
+  },
+  suite: {
+    fare: "Suite fare to be confirmed",
+    basis: "Wendy will confirm the current fare",
+  },
+};
+
+export function getGrimsleyCabinStartingFare(roomType: RoomType) {
+  return cabinStartingFares[roomType];
+}
+
 const wifiPlans = [
   { id: "none", label: "No Wi Fi plan", perDay: 0 },
   { id: "social", label: "Social", perDay: 20.4 },
@@ -191,6 +214,7 @@ export default function GrimsleyCabinEstimator({
     occupancy,
     priorCarnivalGuest
   );
+  const cabinStartingFare = getGrimsleyCabinStartingFare(roomType);
 
   useEffect(() => {
     onPlanningChange({
@@ -330,8 +354,8 @@ export default function GrimsleyCabinEstimator({
           </div>
           <aside className="cruise-estimator__total">
             <p className="eyebrow">Cabin starting fares</p>
-            <strong>Inside from $708 pp</strong>
-            <span>Balconies from $938 pp</span>
+            <strong>{cabinStartingFare.fare}</strong>
+            <span>{cabinStartingFare.basis}</span>
             <dl>
               <div>
                 <dt>Basis</dt>
