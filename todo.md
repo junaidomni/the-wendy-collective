@@ -283,3 +283,4 @@
 - [x] Add protected routing, regression coverage, desktop/mobile verification, and explicit checks that Grimsley records and current private-link behavior are unchanged.
 - [x] Update the active Grimsley deposit to $75 per traveler, retain the $50 prior-Carnival-member exception, and preserve every previously issued private client URL.
 - [x] Commit and push the validated website source to GitHub for Wendy’s independent AI-system handoff.
+- [x] Add a discreet footer login and password-protected CRM access for Wendy and Junaid without changing existing private client links.

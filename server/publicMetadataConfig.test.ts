@@ -15,4 +15,8 @@ describe("public metadata configuration", () => {
     expect(meta).toMatchObject({ title: "Private Traveler Profile | The Wendy Collective", noindex: true });
     expect(meta.canonicalPath).toBeUndefined();
   });
+
+  it("marks the staff login route as private during server rendering", () => {
+    expect(prefetchForPath("/wendy/login")).toMatchObject({ title: "Staff Login | The Wendy Collective", noindex: true });
+  });
 });

@@ -17,6 +17,8 @@ import SchoolCruise from "@/pages/SchoolCruise";
 import GroupProposalView from "@/pages/GroupProposalView";
 import FamilyPortalView from "@/pages/FamilyPortalView";
 import TravelerProfileView from "@/pages/TravelerProfileView";
+import StaffLogin from "@/pages/StaffLogin";
+import StaffPortalGuard from "@/components/StaffPortalGuard";
 import WendyPipeline from "@/pages/wendy/WendyPipeline";
 import WendyClients from "@/pages/wendy/WendyClients";
 import WendyCalendar from "@/pages/wendy/WendyCalendar";
@@ -42,18 +44,19 @@ function Router() {
       <Route path="/family/:token" component={FamilyPortalView} />
       <Route path="/traveler-profile/:token" component={TravelerProfileView} />
       <Route path="/proposal/:token" component={ProposalView} />
-    <Route path="/wendy/pipeline/:stage"><ClientOnly><WendyPipeline /></ClientOnly></Route>
-    <Route path="/wendy/pipeline"><ClientOnly><WendyPipeline /></ClientOnly></Route>
-    <Route path="/wendy/clients/new"><ClientOnly><WendyClients /></ClientOnly></Route>
-    <Route path="/wendy/clients/:id"><ClientOnly><WendyClients /></ClientOnly></Route>
-    <Route path="/wendy/clients"><ClientOnly><WendyClients /></ClientOnly></Route>
-    <Route path="/wendy/calendar"><ClientOnly><WendyCalendar /></ClientOnly></Route>
-    <Route path="/wendy/groups/:key"><ClientOnly><WendyGroups /></ClientOnly></Route>
-    <Route path="/wendy/groups"><ClientOnly><WendyGroups /></ClientOnly></Route>
-    <Route path="/wendy/proposals/new/:dealId"><ClientOnly><WendyProposals /></ClientOnly></Route>
-    <Route path="/wendy/proposals"><ClientOnly><WendyProposals /></ClientOnly></Route>
-    <Route path="/wendy/library"><ClientOnly><WendyLibrary /></ClientOnly></Route>
-    <Route path="/wendy"><ClientOnly><PrivateExperience /></ClientOnly></Route>
+    <Route path="/wendy/login" component={StaffLogin} />
+    <Route path="/wendy/pipeline/:stage"><ClientOnly><StaffPortalGuard><WendyPipeline /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/pipeline"><ClientOnly><StaffPortalGuard><WendyPipeline /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/clients/new"><ClientOnly><StaffPortalGuard><WendyClients /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/clients/:id"><ClientOnly><StaffPortalGuard><WendyClients /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/clients"><ClientOnly><StaffPortalGuard><WendyClients /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/calendar"><ClientOnly><StaffPortalGuard><WendyCalendar /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/groups/:key"><ClientOnly><StaffPortalGuard><WendyGroups /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/groups"><ClientOnly><StaffPortalGuard><WendyGroups /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/proposals/new/:dealId"><ClientOnly><StaffPortalGuard><WendyProposals /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/proposals"><ClientOnly><StaffPortalGuard><WendyProposals /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/library"><ClientOnly><StaffPortalGuard><WendyLibrary /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy"><ClientOnly><StaffPortalGuard><PrivateExperience /></StaffPortalGuard></ClientOnly></Route>
     <Route path="/404" component={NotFound} />
     <Route component={NotFound} />
   </Switch>;

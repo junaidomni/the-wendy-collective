@@ -15,6 +15,7 @@ const routeMetadata: Record<string, PageMetadata> = {
   "/privacy": { title: "Privacy Policy | The Wendy Collective", description: "Learn how The Wendy Collective handles the information you share when beginning a travel conversation.", indexable: true },
   "/experiences/grimsley-hs-graduation-cruise-2027": { title: "Grimsley High School Graduation Cruise 2027 | The Wendy Collective", description: "Explore the Class of 2027 Carnival Mardi Gras graduation cruise and request a cabin with personal support from Wendy.", indexable: false },
   "/wendy": { title: "Wendy Workspace | The Wendy Collective", description: "Protected trip brief workspace for The Wendy Collective.", indexable: false },
+  "/wendy/login": { title: "Staff Login | The Wendy Collective", description: "Private staff access for The Wendy Collective.", indexable: false },
 };
 
 const guideMetadata: Record<string, PageMetadata> = {

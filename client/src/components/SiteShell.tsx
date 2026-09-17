@@ -96,7 +96,7 @@ export default function SiteShell({ children, darkHeader = false }: SiteShellPro
           <div className="footer-bottom">
             <span>© {new Date().getFullYear()} The Wendy Collective</span>
             <span>Thoughtfully planned travel</span>
-            <Link href="/wendy" className="wendy-login">Wendy login</Link>
+            <Link href="/wendy/login" className="wendy-login">Staff login</Link>
           </div>
         </div>
       </footer>

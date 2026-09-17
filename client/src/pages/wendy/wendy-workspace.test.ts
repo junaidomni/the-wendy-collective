@@ -108,10 +108,15 @@ describe("focused Wendy CRM workspace", () => {
 
   it("registers each internal workspace view behind the Wendy route namespace", () => {
     const source = readSource("client/src/App.tsx");
+    const shell = readSource("client/src/components/SiteShell.tsx");
     expect(source).toContain('path="/wendy/pipeline/:stage"');
     expect(source).toContain('path="/wendy/clients/:id"');
     expect(source).toContain('path="/wendy/groups/:key"');
     expect(source).toContain('path="/wendy/proposals"');
     expect(source).toContain('path="/wendy/library"');
+    expect(source).toContain('path="/wendy/login"');
+    expect(source).toContain("StaffPortalGuard");
+    expect(shell).toContain('href="/wendy/login"');
+    expect(shell).toContain("Staff login");
   });
 });
