@@ -2,9 +2,9 @@ import { Link } from "wouter";
 import SiteShell from "@/components/SiteShell";
 
 const travelStyles = [
-  { number: "01", title: "Caribbean", meta: "Salt air, still water, unhurried days", image: "/manus-storage/twc-caribbean_1a3e0036.jpg", href: "/destinations/caribbean" },
-  { number: "02", title: "Mexico", meta: "Culture, coastlines, and exquisite stays", image: "/manus-storage/twc-mexico_b427d449.jpg", href: "/destinations/mexico" },
-  { number: "03", title: "At Sea", meta: "Space to gather, time to explore", image: "/manus-storage/twc-hero-travel-film_89224a2a.jpg", href: "/destinations/cruises" },
+  { title: "Caribbean", meta: "Salt air, still water, unhurried days", image: "/manus-storage/twc-caribbean_1a3e0036.jpg", href: "/destinations/caribbean" },
+  { title: "Mexico", meta: "Culture, coastlines, and exquisite stays", image: "/manus-storage/twc-mexico_b427d449.jpg", href: "/destinations/mexico" },
+  { title: "At Sea", meta: "Space to gather, time to explore", image: "/manus-storage/twc-hero-travel-film_89224a2a.jpg", href: "/destinations/cruises" },
 ];
 
 const services = [
@@ -45,7 +45,7 @@ export default function Home() {
 
       <section className="page-section wendy-way-section">
         <div className="page-wrap intro-grid">
-          <div className="wendy-way-aside"><p className="eyebrow">The Wendy way</p><div className="wendy-way-portrait"><img src="/manus-storage/wendy-rome_0ee9b386.png" alt="Wendy, your personal travel advisor" /><span aria-hidden="true">01</span></div><p><span>Meet Wendy.</span>Your personal travel advisor.</p></div>
+          <div className="wendy-way-aside"><p className="eyebrow">The Wendy way</p><div className="wendy-way-portrait"><img src="/manus-storage/wendy-rome_0ee9b386.png" alt="Wendy, your personal travel advisor" /></div><p><span>Meet Wendy.</span>Your personal travel advisor.</p></div>
           <div className="wendy-way-content">
             <h2 className="display display--medium">Travel should feel <em>like you</em> from the very first conversation.</h2>
             <p className="body-copy">The Wendy Collective is a personal travel advisory for people who value both beautiful experiences and a calm, thoughtfully considered plan. Share the feeling you are after; Wendy will help shape the details that make it real.</p>
@@ -63,7 +63,7 @@ export default function Home() {
             <p className="body-copy">Begin with a place, an occasion, or simply the desire for a different kind of week. The rest can take shape from there.</p>
           </div>
           <div className="experience-grid">
-            {travelStyles.map((style) => <Link href={style.href} className="experience-card" key={style.title}><img className="experience-card__image" src={style.image} alt="" /><div className="experience-card__copy"><p className="experience-card__index">{style.number}</p><h3 className="experience-card__title">{style.title}</h3><p className="experience-card__meta">{style.meta} <span aria-hidden="true">↗</span></p></div></Link>)}
+            {travelStyles.map((style) => <Link href={style.href} className="experience-card" key={style.title}><img className="experience-card__image" src={style.image} alt="" /><div className="experience-card__copy"><h3 className="experience-card__title">{style.title}</h3><p className="experience-card__meta">{style.meta} <span aria-hidden="true">↗</span></p></div></Link>)}
           </div>
         </div>
       </section>

@@ -29,6 +29,19 @@ describe("public site content", () => {
     expect(page).toContain("/contact");
   });
 
+  it("removes decorative sequence numbers from public image treatments", () => {
+    const homeSource = readFileSync(new URL("./Home.tsx", import.meta.url), "utf8");
+    const destinationsSource = readFileSync(new URL("./Destinations.tsx", import.meta.url), "utf8");
+    const guideSource = readFileSync(new URL("./DestinationGuide.tsx", import.meta.url), "utf8");
+
+    expect(homeSource).not.toContain("experience-card__index");
+    expect(homeSource).not.toContain('aria-hidden="true">01</span>');
+    expect(destinationsSource).not.toContain("guide.number");
+    expect(destinationsSource).toContain("{guide.label}");
+    expect(guideSource).not.toContain("guide.number");
+    expect(destinationGuides.every(guide => !("number" in guide))).toBe(true);
+  });
+
   it("keeps visitor-facing copy free of dash punctuation", () => {
     const publicText = [
       renderPage(<Home />),

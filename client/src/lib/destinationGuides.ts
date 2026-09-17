@@ -2,7 +2,6 @@ export type TravelType = "caribbean" | "mexico" | "allInclusive" | "groupTravel"
 
 export type DestinationGuide = {
   slug: string;
-  number: string;
   label: string;
   title: string;
   italic: string;
@@ -19,7 +18,6 @@ export type DestinationGuide = {
 export const destinationGuides: DestinationGuide[] = [
   {
     slug: "caribbean",
-    number: "01",
     label: "Caribbean",
     title: "Caribbean, at your",
     italic: "own pace.",
@@ -34,7 +32,6 @@ export const destinationGuides: DestinationGuide[] = [
   },
   {
     slug: "mexico",
-    number: "02",
     label: "Mexico",
     title: "Coast, culture, and",
     italic: "calm.",
@@ -49,7 +46,6 @@ export const destinationGuides: DestinationGuide[] = [
   },
   {
     slug: "all-inclusive",
-    number: "03",
     label: "All Inclusive Escapes",
     title: "Everything considered.",
     italic: "Nothing rushed.",
@@ -64,7 +60,6 @@ export const destinationGuides: DestinationGuide[] = [
   },
   {
     slug: "groups",
-    number: "04",
     label: "Group Journeys",
     title: "Together, beautifully",
     italic: "planned.",
@@ -79,7 +74,6 @@ export const destinationGuides: DestinationGuide[] = [
   },
   {
     slug: "cruises",
-    number: "05",
     label: "Cruises and Coastlines",
     title: "See more. Settle",
     italic: "in.",
