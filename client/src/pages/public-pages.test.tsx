@@ -99,7 +99,12 @@ describe("public site content", () => {
     expect(schoolCruise).toContain("createPortal");
     expect(schoolCruise).toContain("document.body");
     const estimator = readFileSync(new URL("../components/GrimsleyCabinEstimator.tsx", import.meta.url), "utf8");
-    expect(estimator).toContain("{formatCurrency(category.fare * 100)} per traveler · {category.title}");
+    expect(schoolCruise).toContain("Inside cabins start at $708 per traveler");
+    expect(schoolCruise).toContain("Balcony cabins start at $938 per traveler");
+    expect(estimator).toContain("Inside from $708 pp");
+    expect(estimator).toContain("Balconies from $938 pp");
+    expect(estimator).not.toContain('id="estimateCategory"');
+    expect(estimator).not.toContain("cabinCategories");
     expect(schoolCruise).toContain("does not hold a cabin or create a reservation");
     expect(schoolCruise).not.toMatch(/[—–]/);
   });
