@@ -5,13 +5,12 @@ export type LegacyProposalArchiveItem = {
   occasion: string;
   travelWindow: string;
   route: string | null;
+  hostedUrl: string | null;
+  hosting: string;
   source: string;
   sourceStatus: string;
-  reviewStatus:
-    | "source access needed"
-    | "supplier refresh needed"
-    | "content reconciliation needed"
-    | "historical reference only";
+  reviewStatus: "source access needed" | "supplier refresh needed" | "content reconciliation needed" | "historical reference only";
+  proposalMode: string;
   summary: string;
   knownDetails: string[];
   requiredBeforeSharing: string[];
@@ -19,12 +18,7 @@ export type LegacyProposalArchiveItem = {
   sharePolicy: "not_shareable";
 };
 
-/**
- * Internal reconstruction index derived only from the legacy handoff materials
- * supplied to this project. These are intentionally not public proposal pages,
- * client links, or booking records. Source access and Wendy's review are
- * required before any client-facing proposal can be created or shared.
- */
+/** Internal, nonshareable index reconstructed from the uploaded Wendy Collective repository. */
 export const legacyProposalArchive: LegacyProposalArchiveItem[] = [
   {
     id: "monroe-maldives-2027",
@@ -33,135 +27,139 @@ export const legacyProposalArchive: LegacyProposalArchiveItem[] = [
     occasion: "70th Birthday Celebration",
     travelWindow: "June 22 to 28, 2027",
     route: "/experiences/monroe-maldives",
-    source: "Monroe Maldives 2027 Manus Handoff",
-    sourceStatus:
-      "Listed as a native route in Wendy's former Next.js repository and centralized private area. The referenced repository is not accessible in this workspace.",
+    hostedUrl: null,
+    hosting: "Legacy Next.js proposal route. No verified live public deployment URL was present in the uploaded archive.",
+    source: "Uploaded Wendy Collective repository: app/experiences/monroe-maldives",
+    sourceStatus: "Source route recovered. Live host and current deployment status still need verification.",
     reviewStatus: "supplier refresh needed",
-    summary:
-      "A six night Maldives celebration for three couples seeking three private pool overwater villas with an all inclusive meal plan.",
+    proposalMode: "Resort shortlist and itinerary guide",
+    summary: "A six night Maldives celebration for three couples seeking three private pool overwater villas with an all inclusive meal plan.",
     knownDetails: [
       "Six adults, three couples",
       "Three private pool overwater villas, double occupancy",
       "Shortlist included OBLU SELECT Sangeli, VARU by Atmosphere, RIU Palace Maldivas, and OZEN LIFE MAADHOO",
-      "Original handoff marked flights, itinerary, excursions, and personalized travel protection as pending",
+      "Linda’s birthday is June 26, 2027",
+      "Flights and personalized travel protection pricing remained pending",
     ],
     requiredBeforeSharing: [
-      "Confirm access to the original source and former private record",
+      "Confirm a current host or rebuild a private current route in this workspace",
       "Recheck resort availability, group inventory, pricing, and applicable terms",
       "Confirm a client approved proposal before any new link is created",
     ],
-    notes:
-      "Historical reference only. The original pricing verification was dated July 24, 2026 and must not be treated as current.",
+    notes: "The source route is preserved as an internal recovery record. Original resort pricing must not be treated as current.",
     sharePolicy: "not_shareable",
   },
   {
     id: "chanelle-turns-30",
-    title: "Chanelle's 30th Birthday Celebration",
+    title: "Chanelle’s 30th Birthday Celebration",
     client: "Chanelle Spotswood",
     occasion: "30th Birthday Celebration",
     travelWindow: "February 10 to 14, 2027",
     route: "/experiences/chanelle-turns-30",
-    source: "Chanelle 30th Birthday Celebration Manus Handoff",
-    sourceStatus:
-      "Former Wendy route was an iframe wrapper for a separate Vercel experience. Standalone source and Vercel project access are not available in this workspace.",
+    hostedUrl: null,
+    hosting: "Legacy Next.js proposal route. The source repository does not include a verified public host for this route.",
+    source: "Uploaded Wendy Collective repository: app/experiences/chanelle-turns-30",
+    sourceStatus: "Source route recovered. Legacy handoff notes and visible proposal content conflict on the selected Riu property.",
     reviewStatus: "content reconciliation needed",
-    summary:
-      "A four adult Jamaica birthday trip with a legacy land package and a separate external traveler form.",
+    proposalMode: "Hotel package, excursions, and traveler intake guide",
+    summary: "A four adult Jamaica birthday trip with hotel options, transportation, excursions, and a former traveler information workflow.",
     knownDetails: [
       "Former visible proposal selected Hotel Riu Montego Bay in Jamaica",
       "Legacy private notes conflict with the visible proposal and mention Riu Reggae instead",
-      "Original plan used two connecting garden view rooms for four adults",
-      "The external traveler form and standalone hosted experience are not activated here",
+      "Two rooms with two double beds were requested, priced on double occupancy",
+      "Legacy notes listed garden view and sea view room figures",
+      "Airfare was not included in the legacy planning notes",
     ],
     requiredBeforeSharing: [
-      "Obtain standalone source and Vercel project access",
-      "Confirm the selected hotel, package scope, protection language, excursions, and payment schedule",
-      "Recheck all pricing, form privacy settings, and notification recipients",
+      "Confirm the selected hotel and package scope with Wendy",
+      "Recheck current hotel availability, pricing, protection, excursions, and payment terms",
+      "Use a safe traveler profile workflow instead of the legacy passport and sensitive data form",
     ],
-    notes:
-      "Do not treat the former iframe or form as available. Conflicting legacy content requires Wendy's approval before rebuilding a client facing proposal.",
+    notes: "The uploaded source contains a client intake form that should not be reused because it requests passport and other sensitive information.",
     sharePolicy: "not_shareable",
   },
   {
     id: "denise-ruff-family-holiday-2026",
-    title: "Denise Ruff's Family Holiday 2026",
+    title: "Denise Ruff’s Family Holiday 2026",
     client: "Denise Ruff",
     occasion: "Family Holiday",
-    travelWindow:
-      "December 26, 2026 to January 2, 2027, or December 28 to 31, 2026",
+    travelWindow: "December 26, 2026 to January 2, 2027, or December 28 to 31, 2026",
     route: "/experiences/denise-ruff-family-holiday-2026",
-    source: "Denise Ruff Family Holiday 2026 Manus Handoff",
-    sourceStatus:
-      "Unmigrated legacy source in the older OneDrive checkout. It was absent from the former active repository and private dashboard.",
+    hostedUrl: null,
+    hosting: "Legacy Next.js proposal route. No verified live public deployment URL was present in the uploaded archive.",
+    source: "Uploaded Wendy Collective repository: app/experiences/denise-ruff-family-holiday-2026",
+    sourceStatus: "Source route recovered. Legacy comparison content is available for review but prices and promotions are stale.",
     reviewStatus: "supplier refresh needed",
-    summary:
-      "A two ship holiday comparison between Carnival Mardi Gras from Port Canaveral and Royal Caribbean Wonder of the Seas from Miami.",
+    proposalMode: "Two ship comparison guide",
+    summary: "A two ship holiday comparison between Carnival Mardi Gras from Port Canaveral and Royal Caribbean Wonder of the Seas from Miami.",
     knownDetails: [
-      "Carnival Mardi Gras: seven nights from Port Canaveral",
-      "Royal Caribbean Wonder of the Seas: three nights from Miami",
-      "Legacy interface exposed supplier category codes that should not be client facing",
+      "Carnival Mardi Gras: seven nights from Port Canaveral, December 26 through January 2",
+      "Royal Caribbean Wonder of the Seas: three nights from Miami, December 28 through December 31",
+      "The legacy comparison included cabin categories, date tradeoffs, and supplier actions",
       "The original promotion expired on August 22, 2026",
     ],
     requiredBeforeSharing: [
       "Confirm whether this family still wants the comparison and these travel dates",
       "Obtain fresh supplier quotes, availability, deposit terms, and promotion details",
-      "Use client friendly room labels if a new approved proposal is built",
+      "Create a new approved private proposal rather than reusing stale fare cards",
     ],
-    notes:
-      "This is distinct from the older Denise 50th cruise brochure. Do not merge the two records.",
+    notes: "This is distinct from the older Denise 50th cruise brochure. Do not merge the two records.",
     sharePolicy: "not_shareable",
   },
   {
     id: "osx-command-bahamas",
     title: "OSX Command Bahamas",
-    client: "Client details unavailable in supplied handoff",
-    occasion: "Bahamas proposal",
-    travelWindow: "Travel dates unavailable in supplied handoff",
+    client: "OmniScope",
+    occasion: "Executive Retreat",
+    travelWindow: "Dates to be confirmed",
     route: null,
-    source: "Legacy proposal recovery notes",
-    sourceStatus:
-      "Referenced as a separate Vercel project whose source was not available locally. The original social image hostname was reported as broken.",
+    hostedUrl: "https://omniscope-bahamas-resorts.wendailey.chatgpt.site",
+    hosting: "Separate hosted proposal at wendailey.chatgpt.site. The uploaded repository’s private registry points to this external host.",
+    source: "Uploaded Wendy Collective repository: private registry and recovery notes",
+    sourceStatus: "Verified external host responds, but source ownership, client privacy, and current proposal state still require Wendy confirmation.",
     reviewStatus: "source access needed",
-    summary:
-      "A legacy Bahamas proposal preserved as a reference entry while its original project, source, and client scope are recovered.",
+    proposalMode: "Luxury resort shortlist with anonymous resort vote",
+    summary: "Four Bahamas resort finalists for an executive retreat and team travel, with a password protected results experience referenced in the legacy registry.",
     knownDetails: [
-      "Formerly referenced as OmniScope Bahamas in handoff notes",
-      "Separate project and source location were not available to the prior implementation",
-      "Original social preview configuration requires review",
+      "Current finalists were The Cove Eleuthera, Pink Sands Resort, French Leave Resort, and Grand Isle Resort & Residences",
+      "The group intended to stay together while a small team traveled to Grand Bahama for same day meetings",
+      "Final dates, adult and child counts, and villa or suite mix remained open",
+      "Legacy registry referenced an anonymous resort vote and password protected results page",
     ],
     requiredBeforeSharing: [
-      "Obtain source control and Vercel project access",
-      "Confirm client, dates, itinerary, pricing, images, and privacy requirements",
-      "Repair and validate sharing metadata only after the authoritative route is confirmed",
+      "Confirm Wendy’s authorization to open the external host from the CRM",
+      "Confirm current client, dates, itinerary, images, and privacy settings",
+      "Verify the external host and results page before sharing any link",
     ],
-    notes:
-      "Named OSX Command Bahamas in this archive. No client link, proposal content, or pricing has been recreated.",
+    notes: "The external proposal is the only recovered legacy record with a verified live host. It remains an external link and is not copied into the public website.",
     sharePolicy: "not_shareable",
   },
   {
     id: "denise-ruff-50th-cruise",
-    title: "Denise Ruff's 50th Birthday Cruise",
+    title: "Denise Ruff’s 50th Birthday Cruise",
     client: "Denise Ruff",
     occasion: "50th Birthday Cruise",
-    travelWindow: "Travel dates unavailable in supplied handoff",
+    travelWindow: "Travel dates unavailable in supplied archive",
     route: null,
-    source: "Denise Ruff Family Holiday 2026 Manus Handoff",
-    sourceStatus:
-      "Referenced only as an older, separate cruise brochure in the legacy checkout. Its route, source files, and current status are not available in this workspace.",
+    hostedUrl: null,
+    hosting: "Standalone legacy brochure recovered at public/brochures/denise-50th-cruise.html. No verified external host was supplied.",
+    source: "Uploaded Wendy Collective repository: public/brochures/denise-50th-cruise.html",
+    sourceStatus: "Static brochure recovered. It contains historical cruise comparison content and a legacy form that must not be reused.",
     reviewStatus: "historical reference only",
-    summary:
-      "A separate older Denise cruise brochure retained to prevent it from being confused with Denise Ruff's Family Holiday 2026 comparison.",
+    proposalMode: "Cruise comparison brochure",
+    summary: "A separate older Denise cruise brochure retained to prevent it from being confused with Denise Ruff’s Family Holiday 2026 comparison.",
     knownDetails: [
-      "Separate artifact from the Family Holiday 2026 comparison",
-      "No verified itinerary, dates, pricing, or source route was included in the supplied handoff",
+      "The brochure compared Norwegian, Royal Caribbean, and MSC options",
+      "It included ship links, activity highlights, and historical planning notes",
+      "It included a legacy form requesting disallowed sensitive information",
+      "No current itinerary, quote, or approved client link was included in the archive",
     ],
     requiredBeforeSharing: [
-      "Locate authoritative source files and confirm the correct client record",
+      "Locate the authoritative source and confirm the correct client record",
       "Confirm whether the proposal is active or historical only",
-      "Rebuild only with Wendy approved current itinerary and pricing",
+      "Rebuild only with Wendy approved current itinerary and a safe traveler profile form",
     ],
-    notes:
-      "Reference entry only. It must remain separate from Denise Ruff's Family Holiday 2026 record.",
+    notes: "Reference entry only. This separate legacy form is intentionally excluded from the current CRM because it requests disallowed sensitive information.",
     sharePolicy: "not_shareable",
   },
 ];

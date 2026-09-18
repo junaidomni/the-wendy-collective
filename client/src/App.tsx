@@ -53,6 +53,7 @@ function Router() {
     <Route path="/wendy/calendar"><ClientOnly><StaffPortalGuard><WendyCalendar /></StaffPortalGuard></ClientOnly></Route>
     <Route path="/wendy/groups/:key"><ClientOnly><StaffPortalGuard><WendyGroups /></StaffPortalGuard></ClientOnly></Route>
     <Route path="/wendy/groups"><ClientOnly><StaffPortalGuard><WendyGroups /></StaffPortalGuard></ClientOnly></Route>
+    <Route path="/wendy/proposals/archive/:archiveId"><ClientOnly><StaffPortalGuard><WendyProposals /></StaffPortalGuard></ClientOnly></Route>
     <Route path="/wendy/proposals/new/:dealId"><ClientOnly><StaffPortalGuard><WendyProposals /></StaffPortalGuard></ClientOnly></Route>
     <Route path="/wendy/proposals"><ClientOnly><StaffPortalGuard><WendyProposals /></StaffPortalGuard></ClientOnly></Route>
     <Route path="/wendy/library"><ClientOnly><StaffPortalGuard><WendyLibrary /></StaffPortalGuard></ClientOnly></Route>

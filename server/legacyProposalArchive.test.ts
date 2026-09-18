@@ -31,8 +31,19 @@ describe("legacy proposal archive", () => {
     expect(familyHoliday?.notes).toContain("distinct");
     expect(fiftieth?.notes).toContain("separate");
     expect(chanelle?.reviewStatus).toBe("content reconciliation needed");
-    expect(chanelle?.requiredBeforeSharing).toContain(
-      "Obtain standalone source and Vercel project access"
-    );
+    expect(chanelle?.requiredBeforeSharing).toContain("Confirm the selected hotel and package scope with Wendy");
+  });
+
+  it("records recovered route and hosting details without importing unsafe legacy intake fields", () => {
+    const archive = getLegacyProposalArchive();
+    const bahamas = archive.find(item => item.id === "osx-command-bahamas");
+    const chanelle = archive.find(item => item.id === "chanelle-turns-30");
+    const brochure = archive.find(item => item.id === "denise-ruff-50th-cruise");
+
+    expect(bahamas?.hostedUrl).toBe("https://omniscope-bahamas-resorts.wendailey.chatgpt.site");
+    expect(chanelle?.route).toBe("/experiences/chanelle-turns-30");
+    expect(brochure?.proposalMode).toContain("Cruise comparison");
+    expect(JSON.stringify(archive).toLowerCase()).not.toContain("passport number");
+    expect(JSON.stringify(archive).toLowerCase()).not.toContain("emergency contact");
   });
 });

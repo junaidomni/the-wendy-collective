@@ -10,7 +10,10 @@ type LegacyProposal = {
   occasion: string;
   travelWindow: string;
   route: string | null;
+  hostedUrl: string | null;
+  hosting: string;
   source: string;
+  proposalMode: string;
   sourceStatus: string;
   reviewStatus: string;
   summary: string;
@@ -22,6 +25,7 @@ type LegacyProposal = {
 
 export default function WendyProposals() {
   const [, params] = useRoute("/wendy/proposals/new/:dealId");
+  const [, archiveParams] = useRoute("/wendy/proposals/archive/:archiveId");
   const crm = trpc.crm.dashboard.useQuery();
   if (crm.isLoading || !crm.data)
     return (
@@ -40,6 +44,10 @@ export default function WendyProposals() {
     return (
       <ProposalBuilder deal={selectedDeal} experiences={crm.data.experiences} />
     );
+  const selectedArchive = archiveParams
+    ? (crm.data.legacyProposals as LegacyProposal[]).find(item => item.id === archiveParams.archiveId)
+    : undefined;
+  if (archiveParams && selectedArchive) return <LegacyProposalDetail proposal={selectedArchive} />;
   const responseCount = (proposalId: number) =>
     crm.data?.responses.filter(response => response.proposalId === proposalId)
       .length || 0;
@@ -62,19 +70,15 @@ export default function WendyProposals() {
           </p>
         </div>
         <div className="proposal-list-clean">
-          {crm.data.proposals.length ? (
-            crm.data.proposals.map(proposal => (
-              <ProposalRow
-                key={proposal.id}
-                proposal={proposal}
-                responses={responseCount(proposal.id)}
-              />
-            ))
-          ) : (
-            <p className="crm-empty-clean">
-              Start from a client profile to prepare a private proposal.
-            </p>
-          )}
+          <ActiveGrimsleyProposal profile={crm.data.grimsleyProfile} experience={crm.data.grimsleyExperience} />
+          {crm.data.proposals.map(proposal => (
+            <ProposalRow
+              key={proposal.id}
+              proposal={proposal}
+              responses={responseCount(proposal.id)}
+            />
+          ))}
+          {!crm.data.proposals.length ? <p className="crm-empty-clean">Start from a client profile to prepare another private proposal.</p> : null}
         </div>
       </section>
       <LegacyProposalArchive proposals={legacyProposals} />
@@ -135,14 +139,26 @@ function LegacyProposalCard({ proposal }: { proposal: LegacyProposal }) {
         <p className="legacy-proposal-card__client">{proposal.client}</p>
         <p>{proposal.travelWindow}</p>
         <p>{proposal.summary}</p>
+        <div className="legacy-proposal-card__actions">
+          <Link href={`/wendy/proposals/archive/${proposal.id}`} className="crm-secondary-action">Open recovered record</Link>
+          {proposal.hostedUrl ? <a href={proposal.hostedUrl} target="_blank" rel="noreferrer" className="crm-text-link">Open external host ↗</a> : null}
+        </div>
       </div>
       <details>
         <summary>Review archived details</summary>
         <div className="legacy-proposal-card__details">
           <dl>
             <div>
-              <dt>Former route</dt>
+              <dt>Recovered route</dt>
               <dd>{proposal.route || "No verified route available"}</dd>
+            </div>
+            <div>
+              <dt>Hosting and access</dt>
+              <dd>{proposal.hosting}</dd>
+            </div>
+            <div>
+              <dt>Proposal format</dt>
+              <dd>{proposal.proposalMode}</dd>
             </div>
             <div>
               <dt>Source status</dt>
@@ -178,6 +194,19 @@ function LegacyProposalCard({ proposal }: { proposal: LegacyProposal }) {
       </footer>
     </article>
   );
+}
+
+function ActiveGrimsleyProposal({ profile, experience }: { profile: unknown; experience: unknown }) {
+  const group = profile as { profile?: { title?: string; workflowStage?: string; shareStatus?: string; privateToken?: string | null; expiresAt?: Date | null }; cabinRequests?: Array<{ id: number; contactFirstName: string; contactLastName: string; email: string; roomCount: number; revisionNumber: number; status: string }> } | null;
+  const ship = experience as { shipName?: string; sailingSummary?: string; title?: string } | null;
+  if (!group?.profile) return null;
+  const requests = group.cabinRequests || [];
+  const link = group.profile.privateToken ? `${window.location.origin}/experiences/grimsley-hs-graduation-cruise-2027?family=${group.profile.privateToken}` : null;
+  return <article className="proposal-row proposal-row--group"><div><span>Active group proposal</span><h3>{group.profile.title || "Grimsley High School Graduation Cruise 2027"}</h3><p>{ship?.shipName || "Carnival Mardi Gras"} · {ship?.sailingSummary || "Existing client proposal"} · {requests.length} submission{requests.length === 1 ? "" : "s"}</p></div><div><small>{group.profile.shareStatus === "shared" ? "Shared link retained" : "Link not activated"}</small><Link href="/wendy/groups/grimsley" className="crm-secondary-action">Open proposal workspace</Link>{link ? <a href={link} target="_blank" rel="noreferrer" className="crm-text-link">Open client link ↗</a> : null}</div><details><summary>View submissions</summary><div className="proposal-submission-list">{requests.length ? requests.map(request => <div key={request.id}><strong>{request.contactFirstName} {request.contactLastName}</strong><span>{request.email} · {request.roomCount} room{request.roomCount === 1 ? "" : "s"} · Update {request.revisionNumber} · {request.status}</span></div>) : <p>No family submissions yet.</p>}</div></details></article>;
+}
+
+function LegacyProposalDetail({ proposal }: { proposal: LegacyProposal }) {
+  return <WendyShell active="/wendy/proposals" eyebrow="Recovered proposal" title={proposal.title} action={<Link href="/wendy/proposals" className="crm-secondary-action">Back to proposals</Link>}><section className="legacy-proposal-detail"><header><div><p className="eyebrow">{proposal.occasion}</p><h2>{proposal.title}</h2><p className="legacy-proposal-card__client">{proposal.client}</p><p>{proposal.travelWindow}</p></div><strong>{proposal.reviewStatus}</strong></header><div className="legacy-proposal-detail__banner"><span>Internal recovery record</span><p>This view is for Wendy’s review. Client sharing is disabled until source, dates, supplier details, and the safe intake workflow are approved.</p></div><dl><div><dt>Proposal format</dt><dd>{proposal.proposalMode}</dd></div><div><dt>Recovered route</dt><dd>{proposal.route || "No verified route available"}</dd></div><div><dt>Hosting</dt><dd>{proposal.hosting}</dd></div><div><dt>Source status</dt><dd>{proposal.sourceStatus}</dd></div><div><dt>Source</dt><dd>{proposal.source}</dd></div></dl><section><h3>Known details</h3><ul>{proposal.knownDetails.map(item => <li key={item}>{item}</li>)}</ul></section><section><h3>Required before sharing</h3><ul>{proposal.requiredBeforeSharing.map(item => <li key={item}>{item}</li>)}</ul></section><p className="legacy-proposal-card__note">{proposal.notes}</p>{proposal.hostedUrl ? <a href={proposal.hostedUrl} target="_blank" rel="noreferrer" className="crm-secondary-action">Open recovered external proposal ↗</a> : null}</section></WendyShell>;
 }
 
 function ProposalBuilder({

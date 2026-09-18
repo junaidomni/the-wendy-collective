@@ -287,3 +287,7 @@
 - [x] Replace the detailed public Grimsley cabin-rate selector with approved Inside and Balcony starting fares while retaining the issued private URL, intake, deposits, optional-planning preferences, and existing submissions.
 - [x] Make the Grimsley starting-fare card update with the selected cabin preference while retaining the approved published Inside and Balcony starting fares.
 - [x] Remove decorative sequence numbers from public homepage and destination image treatments while retaining meaningful service and process steps.
+
+- [x] Import safe proposal metadata and hosting details from Wendy Collective archive into the protected Proposals workspace.
+- [x] Show active Grimsley client link and family submissions within Proposals while preserving the existing group workflow and URL.
+- [x] Add protected recovered-record detail views and keep legacy sensitive intake fields excluded.
