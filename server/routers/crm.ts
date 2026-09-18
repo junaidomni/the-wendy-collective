@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { advanceAdvisorDealWorkflow, advanceGroupWorkflow, createAdvisorAlert, createAdvisorAvailabilityBlock, createAdvisorDeal, createAdvisorResearchOption, createClientProposal, createCruiseExperience, createProposalResponse, createTravelerProfileLink, createTravelerProfileResponse, deleteAdvisorAvailabilityBlock, deletePublicWebsiteInquiry, ensureGrimsleyCruiseExperience, ensureGrimsleyGroupProfile, getGroupTravelProfile, getPrivateClientProposal, getPrivateGroupTravelProfile, getPrivateTravelerProfile, getTripInquiries, listAdvisorAlerts, listAdvisorAppointments, listAdvisorAvailabilityBlocks, listAdvisorDeals, listAdvisorResearchOptions, listClientProposals, listCruiseExperiences, listProposalResponses, listTravelerProfileLinks, listTravelerProfileResponses, listWorkflowStageEvents, markAdvisorAlertRead, markClientProposalShared, reopenAdvisorDealWorkflow, reopenGroupWorkflow, saveGroupWorkflowDetails, scheduleLocalDiscoveryAppointment, shareGroupTravelProfile, syncExistingRequestsToAdvisorDeals, updateAdvisorDeal, updateGroupTravelProfile, updateProposalResponseStatus } from "../db";
 import { notifyOwner } from "../_core/notification";
+import { getLegacyProposalArchive } from "../legacyProposalArchive";
 import { storagePut } from "../storage";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 
@@ -23,7 +24,7 @@ export const crmRouter = router({
     await ensureGrimsleyGroupProfile();
     await syncExistingRequestsToAdvisorDeals();
     const [deals, experiences, proposals, responses, grimsleyProfile, alerts, websiteInquiries, appointments, availabilityBlocks, travelerProfileLinks, travelerProfileResponses, researchOptions] = await Promise.all([listAdvisorDeals(), listCruiseExperiences(), listClientProposals(), listProposalResponses(), getGroupTravelProfile("grimsley-hs-graduation-cruise-2027"), listAdvisorAlerts(), getTripInquiries(), listAdvisorAppointments(), listAdvisorAvailabilityBlocks(), listTravelerProfileLinks(), listTravelerProfileResponses(), listAdvisorResearchOptions()]);
-    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile, alerts, websiteInquiries, appointments, availabilityBlocks, travelerProfileLinks, travelerProfileResponses, researchOptions };
+    return { deals, experiences, proposals, responses, grimsleyExperience, grimsleyProfile, alerts, websiteInquiries, appointments, availabilityBlocks, travelerProfileLinks, travelerProfileResponses, researchOptions, legacyProposals: getLegacyProposalArchive() };
   }),
   markAlertRead: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
     await markAdvisorAlertRead(input.id);

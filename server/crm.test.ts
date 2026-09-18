@@ -47,6 +47,14 @@ describe("advisor CRM and private proposal workflow", () => {
     expect(dashboard.grimsleyExperience).toMatchObject({ shipName: "Mardi Gras" });
     expect(dashboard.grimsleyProfile).toMatchObject({ profile: { groupKey: "grimsley-hs-graduation-cruise-2027" } });
     expect(dashboard.alerts).toEqual([]);
+    expect(dashboard.legacyProposals.map((proposal) => proposal.id)).toEqual([
+      "monroe-maldives-2027",
+      "chanelle-turns-30",
+      "denise-ruff-family-holiday-2026",
+      "osx-command-bahamas",
+      "denise-ruff-50th-cruise",
+    ]);
+    expect(dashboard.legacyProposals.every((proposal) => proposal.sharePolicy === "not_shareable")).toBe(true);
   });
 
   it("keeps source-specific portal alerts inside Wendy’s protected workspace", async () => {
