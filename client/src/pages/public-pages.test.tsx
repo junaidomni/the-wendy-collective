@@ -156,6 +156,10 @@ describe("public site content", () => {
     expect(estimator).toContain("Inside cabins from $708 pp");
     expect(estimator).toContain("Balconies from $938 pp");
     expect(estimator).toContain("getGrimsleyCabinStartingFare(roomType)");
+    expect(estimator).toContain(
+      "Rates, onboard credit, and other promotions are subject to change until the required deposit is secured."
+    );
+    expect(estimator).not.toContain("$25 onboard credit");
     expect(estimator).not.toContain('id="estimateCategory"');
     expect(estimator).not.toContain("cabinCategories");
     expect(schoolCruise).toContain(

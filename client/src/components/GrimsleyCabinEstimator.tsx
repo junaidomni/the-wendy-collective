@@ -374,7 +374,7 @@ export default function GrimsleyCabinEstimator({
               {priorCarnivalGuest
                 ? "Returning Carnival guest deposit selected. Wendy will confirm eligibility before reservation."
                 : "Standard deposit shown at $75 per traveler. Wendy will confirm any returning guest eligibility before reservation."}{" "}
-              Fares are subject to change until deposit is secured.
+              Rates, onboard credit, and other promotions are subject to change until the required deposit is secured. Wendy will confirm the current Carnival offer before reservation.
             </p>
           </aside>
         </div>
