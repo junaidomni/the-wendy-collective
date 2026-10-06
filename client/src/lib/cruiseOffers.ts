@@ -1,0 +1,10 @@
+// Dates and Spring Break departure ports are Wendy's supplied selections.
+// Artwork is visual reference only. Source-backed details are in offerDetails.ts.
+export const cruiseOffers = [
+ {id:"valentines-conquest-2027",slug:"love-is-in-the-air-and-sea",art:"valentines",title:"Love is in the Air and Sea!",ship:"Carnival Conquest",dates:"February 12–15, 2027",port:"Miami, Florida",season:"February",timing:"February 12–15, 2027",nights:3,summary:"A Valentine’s weekend for love, laughter, and a little time away together.",note:"Itinerary from the recovered Carnival statement; final terms need confirmation."},
+ {id:"spring-pride-2027",slug:"spring-break-unleashed",art:"pride",title:"Spring Break Unleashed",ship:"Carnival Pride",dates:"March 14–21, 2027",port:"Baltimore, Maryland",season:"March",timing:"March 14–21, 2027",nights:7,summary:"Gather your favorite people. Your spring escape begins in Baltimore.",note:"Itinerary supplied by Wendy; current booking terms need confirmation."},
+ {id:"spring-mardi-gras-2027",slug:"spring-break-mardi-gras-takeover",art:"mardi",title:"Spring Break Mardi Gras Takeover",ship:"Carnival Mardi Gras",dates:"March 13–20, 2027",port:"Port Canaveral, Florida",season:"March",timing:"March 13–20, 2027",nights:7,summary:"Bring your spring break spirit to a voyage departing from Port Canaveral.",note:"Itinerary from the supplied Carnival agenda; final terms need confirmation."},
+ {id:"alaska-virgin-2027",slug:"experience-alaska",art:"alaska",title:"Experience Alaska",ship:"Virgin Voyages · Brilliant Lady",dates:"July 8–15, 2027",port:"Seattle, Washington",season:"July",timing:"July 8–15, 2027",nights:7,summary:"Glacier-blue water, forested coastlines, and a different kind of summer escape.",note:"Itinerary supplied by Wendy for BR2707087NKSEV; Seattle return time verified on Virgin’s matching sailing page."},
+] as const;
+export function offerInquiryHref(id:string){return `/contact?${new URLSearchParams({offer:id}).toString()}`;}
+export function findCruiseOffer(id:string|null){return cruiseOffers.find(o=>o.id===id);}

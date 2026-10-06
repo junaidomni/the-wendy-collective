@@ -27,6 +27,9 @@ import WendyProposals from "@/pages/wendy/WendyProposals";
 import WendyLibrary from "@/pages/wendy/WendyLibrary";
 import { usePageMetadata } from "./hooks/usePageMetadata";
 import ClientOnly from "./components/ClientOnly";
+import Offers from "./pages/Offers";
+import OfferDetail from "./pages/OfferDetail";
+import AlaskaOffer from "./pages/AlaskaOffer";
 
 function Router() {
   const [location] = useLocation();
@@ -37,6 +40,9 @@ function Router() {
     <Route path="/destinations" component={Destinations} />
     <Route path="/destinations/:slug" component={DestinationGuide} />
     <Route path="/faq" component={Faq} />
+    <Route path="/offers" component={Offers} />
+    <Route path="/offers/experience-alaska" component={AlaskaOffer} />
+    <Route path="/offers/:slug" component={OfferDetail} />
     <Route path="/contact" component={Contact} />
     <Route path="/privacy" component={Privacy} />
       <Route path="/experiences/grimsley-hs-graduation-cruise-2027" component={SchoolCruise} />
