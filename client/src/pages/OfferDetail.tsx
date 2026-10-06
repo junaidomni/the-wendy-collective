@@ -12,7 +12,7 @@ export default function OfferDetail(){
  if(!o||!d)return <NotFound/>;
  const inquiry=offerInquiryHref(o.id); const val=o.art==="valentines";
  const shipHref=o.art==="mardi"?"https://www.carnival.com/cruise-ships/mardi-gras":o.art==="pride"?"https://www.carnival.com/cruise-ships/carnival-pride":"https://www.carnival.com/cruise-ships/carnival-conquest";
- const cabinPhotos: Record<string,string> = val ? {Interior:"conquest-interior.jpg", "Ocean View":"conquest-ocean-view.jpg", Balcony:"conquest-balcony.jpg"} : o.art==="mardi" ? {Interior:"mardi-interior.jpg", "Ocean View":"mardi-ocean-view.jpg", "Cove Balcony":"mardi-cove-balcony.jpg"} : o.art==="pride" ? {Interior:"pride-interior.jpg"} : {};
+ const cabinPhotos: Record<string,string> = val ? {Interior:"conquest-interior.jpg", "Ocean View":"conquest-ocean-view.jpg", Balcony:"conquest-balcony.jpg"} : o.art==="mardi" ? {Interior:"mardi-interior.jpg", "Ocean View":"mardi-ocean-view.jpg", "Cove Balcony":"mardi-cove-balcony.jpg"} : o.art==="pride" ? {Interior:"pride-interior.jpg", "Ocean View":"pride-ocean-view.jpg"} : {};
  const jumpTo = (id:string) => { const section=document.getElementById(id); section?.scrollIntoView({behavior:"instant",block:"start"}); section?.focus({preventScroll:true}); };
  const journey=o.art==="pride"?"Leave the everyday behind with seven nights aboard Carnival Pride, departing Baltimore March 14–21, 2027. Gather your favorite people and make time for a spring break together.":"Set sail from Port Canaveral for seven nights of Caribbean discovery aboard Carnival Mardi Gras. Explore Nassau, RelaxAway Half Moon Cay, Amber Cove, and Celebration Key, with days at sea to enjoy your own pace.";
 
