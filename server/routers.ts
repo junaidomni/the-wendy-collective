@@ -10,6 +10,7 @@ import { sendTripBriefEmail } from "./resendAlerts";
 import { groupCruisesRouter } from "./routers/groupCruises";
 import { crmRouter } from "./routers/crm";
 import { sdk } from "./_core/sdk";
+import { ENV } from "./_core/env";
 import { STAFF_SESSION_DURATION_MS, verifyStaffCredentials } from "./staffAuth";
 
 const tripInquiryInput = z.object({
@@ -42,6 +43,9 @@ const STAFF_LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const STAFF_LOGIN_MAX_ATTEMPTS = 5;
 
 function staffLoginAttemptKey(headers: Record<string, string | string[] | undefined>, ip?: string) {
+  // Self-host sets `trust proxy`, so req.ip is the real client address and a
+  // spoofed X-Forwarded-For header cannot be used to dodge the rate limit.
+  if (ENV.selfHost && ip) return ip;
   const forwarded = headers["x-forwarded-for"];
   const clientAddress = Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(",")[0] ?? ip ?? "unknown";
   return clientAddress.trim();

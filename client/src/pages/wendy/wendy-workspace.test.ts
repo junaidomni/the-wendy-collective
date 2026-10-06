@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { dealStages, groupPipelineStage } from "./types";
 
-const projectRoot = "/home/ubuntu/the-wendy-collective";
+const projectRoot = path.resolve(import.meta.dirname, "../../../..");
 const readSource = (relativePath: string) => readFileSync(`${projectRoot}/${relativePath}`, "utf8");
 
 describe("focused Wendy CRM workspace", () => {

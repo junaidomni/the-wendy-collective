@@ -7,6 +7,7 @@ import { SignJWT, jwtVerify } from "jose";
 import type { User } from "../../drizzle/schema";
 import * as db from "../db";
 import { ENV } from "./env";
+import { STAFF_OPEN_ID_PREFIX, isEnabledStaffOpenId } from "../staffAuth";
 import type {
   ExchangeTokenRequest,
   ExchangeTokenResponse,
@@ -30,6 +31,10 @@ const GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserI
 
 class OAuthService {
   constructor(private client: ReturnType<typeof axios.create>) {
+    if (ENV.selfHost) {
+      console.log("[OAuth] Self-host mode: Manus OAuth disabled; staff portal password login only");
+      return;
+    }
     console.log("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
     if (!ENV.oAuthServerUrl) {
       console.error(
@@ -276,6 +281,8 @@ class SDKServer {
       throw ForbiddenError("Invalid session cookie");
     }
 
+    if (ENV.selfHost) return this.authenticateSelfHosted(session);
+
     if (session.openId.startsWith(CRON_OPEN_ID_PREFIX)) {
       const userInfo = await this.getUserInfoWithJwt(sessionToken ?? "");
       const taskUid = userInfo.taskUid ?? null;
@@ -316,6 +323,22 @@ class SDKServer {
       lastSignedIn: signedInAt,
     });
 
+    return user;
+  }
+
+  /**
+   * Self-host sessions: only staff portal-password sessions are honoured.
+   * No Manus OAuth user sync and no Manus cron sessions. A token minted by
+   * Manus (different appId) or for a non-staff user is rejected.
+   */
+  private async authenticateSelfHosted(session: SessionPayload): Promise<AuthenticatedUser> {
+    if (session.appId !== ENV.appId) throw ForbiddenError("Session issued for a different app");
+    if (!session.openId.startsWith(STAFF_OPEN_ID_PREFIX) || !isEnabledStaffOpenId(session.openId)) {
+      throw ForbiddenError("Only staff portal sessions are accepted");
+    }
+    const user = await db.getUserByOpenId(session.openId);
+    if (!user) throw ForbiddenError("User not found");
+    await db.upsertUser({ openId: user.openId, lastSignedIn: new Date() });
     return user;
   }
 }

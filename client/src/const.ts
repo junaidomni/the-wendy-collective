@@ -12,9 +12,17 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 // call would desync it from an in-flight login and the callback would reject it
 // with "invalid oauth state". It returns void by design, so there is no URL to
 // stash across renders.
+// Self-hosted builds have no Manus OAuth portal (VITE_OAUTH_PORTAL_URL unset),
+// so sign-in goes to the staff portal-password page instead.
+export const STAFF_LOGIN_PATH = "/wendy/login";
+
 export const startLogin = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
   const appId = import.meta.env.VITE_APP_ID;
+  if (!oauthPortalUrl) {
+    if (window.location.pathname !== STAFF_LOGIN_PATH) window.location.href = STAFF_LOGIN_PATH;
+    return;
+  }
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
 
   const nonce = crypto.randomUUID();

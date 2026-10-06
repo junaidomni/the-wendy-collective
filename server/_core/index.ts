@@ -1,12 +1,8 @@
 import "dotenv/config";
-import express from "express";
 import { createServer } from "http";
 import net from "net";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
-import { registerStorageProxy } from "./storageProxy";
-import { appRouter } from "../routers";
-import { createContext } from "./context";
+import { createApp } from "./app";
+import { ENV, selfHostConfigErrors, selfHostConfigWarnings } from "./env";
 import { serveStatic, setupVite } from "./vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -29,21 +25,18 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
-  const app = express();
+  if (ENV.selfHost) {
+    const errors = selfHostConfigErrors();
+    if (errors.length) {
+      for (const error of errors) console.error(`[Config] ${error}`);
+      throw new Error("Self-host configuration is incomplete; refusing to start");
+    }
+    for (const warning of selfHostConfigWarnings()) console.warn(`[Config] ${warning}`);
+    console.log("[Config] Running in self-host mode (no Manus dependencies)");
+  }
+
+  const app = createApp();
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
-  registerStorageProxy(app);
-  registerOAuthRoutes(app);
-  // tRPC API
-  app.use(
-    "/api/trpc",
-    createExpressMiddleware({
-      router: appRouter,
-      createContext,
-    })
-  );
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
@@ -52,7 +45,9 @@ async function startServer() {
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
+  // On a PaaS the platform routes traffic to exactly $PORT, so never hop ports
+  // in self-host production; fail loudly instead.
+  const port = ENV.selfHost && ENV.isProduction ? preferredPort : await findAvailablePort(preferredPort);
 
   if (port !== preferredPort) {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
@@ -61,6 +56,19 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+
+  if (!ENV.selfHost) return;
+  const shutdown = (signal: string) => {
+    console.log(`[Server] ${signal} received, closing`);
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 10_000).unref();
+  };
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
 }
 
-startServer().catch(console.error);
+startServer().catch(error => {
+  console.error(error);
+  // Let the platform restart / mark the deploy failed instead of idling.
+  if (ENV.selfHost) process.exit(1);
+});
