@@ -1273,3 +1273,5 @@ img { display: block; max-width: 100%; }
 .page-hero .page-wrap:has(.inquiry-return-nav) { width: 100%; }
 .inquiry-return-nav { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 0 0 22px; }
 .inquiry-return-nav a { color: var(--ivory); font-size: .95rem; text-decoration: none; border-bottom: 1px solid rgba(246,242,233,.4); }
+.form-check { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: .95rem; }
+.form-check input { width: auto; margin: 0; }
