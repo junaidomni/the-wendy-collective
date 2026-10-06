@@ -13,7 +13,7 @@ export const offerDetails = {
  source:"Carnival Pride itinerary supplied by Wendy on September 28, 2026; March 14–21 roundtrip Baltimore. Port times are subject to change.",
  cabins:["Interior","Ocean View","Obstructed View Balcony","Balcony"],
  cabinNote:"Categories listed in the recovered booking reference. Current availability and specific cabin details need confirmation.",
- pending:["Current fares, taxes, fees and cabin availability","Fare inclusions, group benefits, deposits and booking terms"],
+ pending:["Current fares, taxes, fees and stateroom availability","Fare inclusions, group benefits, deposits and booking terms"],
  },
  "spring-break-mardi-gras-takeover":{
  lead:"A brighter kind of spring break. From Port Canaveral.",
@@ -21,7 +21,7 @@ export const offerDetails = {
  source:"From the supplied Carnival itinerary agenda for March 13–20, 2027. Reconfirm the schedule before arranging travel.",
  cabins:["Interior","Ocean View","Cove Balcony"],
  cabinNote:"Categories listed in the recovered booking reference. Current availability and specific cabin details need confirmation.",
- pending:["Current fares, taxes, fees and cabin availability","Fare inclusions and any eligible group benefits","Deposit, final payment and cancellation terms"],
+ pending:["Current fares, taxes, fees and stateroom availability","Fare inclusions and any eligible group benefits","Deposit, final payment and cancellation terms"],
  }
 } satisfies Record<string,{lead:string;itinerary:string[][];source:string;cabins:string[];cabinNote:string;pending:string[]}>;
 
