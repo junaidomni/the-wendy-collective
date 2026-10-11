@@ -150,7 +150,26 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+// Drops the Manus-hosted Umami analytics tag when no endpoint is configured
+// (otherwise the literal "%VITE_ANALYTICS_ENDPOINT%/umami" ships as a 404).
+function vitePluginOptionalAnalytics(): Plugin {
+  return {
+    name: "optional-analytics",
+    transformIndexHtml: {
+      order: "pre",
+      handler(html) {
+        if (process.env.VITE_ANALYTICS_ENDPOINT) return html;
+        return html.replace(/\s*<script[^>]*%VITE_ANALYTICS_ENDPOINT%[^>]*><\/script>/, "");
+      },
+    },
+  };
+}
+
+// SELF_HOST=1 builds leave out the Manus preview runtime and debug collector.
+const isSelfHost = ["1", "true", "yes"].includes((process.env.SELF_HOST ?? "").toLowerCase());
+const plugins = isSelfHost
+  ? [react(), tailwindcss(), vitePluginOptionalAnalytics()]
+  : [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
 export default defineConfig({
   plugins,

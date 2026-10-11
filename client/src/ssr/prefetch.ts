@@ -29,6 +29,11 @@ const publicRoutes: Record<string, { title: string; description: string; noindex
   "/destinations/cruises": { title: "Cruise Travel Planning | The Wendy Collective", description: "Find a cruise and coastal journey with the right ship, itinerary, and time ashore for your group." },
   "/faq": { title: "Travel Planning FAQ | The Wendy Collective", description: "Answers to common travel planning questions about Wendy’s services, timing, group travel, insurance, and more." },
   "/contact": { title: "Plan Your Journey | The Wendy Collective", description: "Share your travel vision with Wendy and begin a thoughtfully planned journey made around you." },
+  "/offers": { title: "Current Cruise Offers | The Wendy Collective", description: "See current group cruise offers with The Wendy Collective, and ask Wendy about cabins and availability." },
+  "/offers/love-is-in-the-air-and-sea": { title: "Valentine's Cruise on Carnival Conquest | The Wendy Collective", description: "A Valentine's weekend cruise on Carnival Conquest, February 12 to 15, 2027. Ask Wendy about cabins and availability." },
+  "/offers/spring-break-unleashed": { title: "Spring Break Cruise on Carnival Pride | The Wendy Collective", description: "A spring break cruise on Carnival Pride, March 14 to 21, 2027. Ask Wendy about cabins and availability." },
+  "/offers/spring-break-mardi-gras-takeover": { title: "Spring Break Cruise on Carnival Mardi Gras | The Wendy Collective", description: "A spring break cruise on Carnival Mardi Gras, March 13 to 20, 2027. Ask Wendy about cabins and availability." },
+  "/offers/experience-alaska": { title: "Alaska Cruise on Virgin Voyages | The Wendy Collective", description: "An Alaska cruise on Brilliant Lady, July 8 to 15, 2027. Ask Wendy about cabins and availability." },
   "/privacy": { title: "Privacy Policy | The Wendy Collective", description: "Learn how The Wendy Collective handles the information you share when beginning a travel conversation." },
   "/experiences/grimsley-hs-graduation-cruise-2027": { title: "Grimsley High School Graduation Cruise 2027 | The Wendy Collective", description: "Explore the Class of 2027 Carnival Mardi Gras graduation cruise and request a cabin with personal support from Wendy.", noindex: true },
 };

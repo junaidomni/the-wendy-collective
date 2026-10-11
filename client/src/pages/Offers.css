@@ -1,0 +1,31 @@
+.offers-hero { background: var(--ink); color: var(--ivory); padding: 80px 0 60px; }
+.offers-hero .body-copy { color: rgba(246,242,233,.78); max-width: 640px; margin-top: 28px; }
+.offers-jump { display: flex; flex-wrap: wrap; gap: 16px 32px; margin-top: 38px; padding-top: 26px; border-top: 1px solid rgba(196,162,107,.35); }
+.offers-jump a { display: inline-flex; align-items: center; gap: 22px; min-height: 44px; color: var(--ivory); font-size: 13px; }
+.offers-jump span { color: var(--brass); }
+.offers-collection { padding: 72px 0 80px; background: var(--ivory); }
+.offers-intro { display: flex; justify-content: space-between; align-items: end; gap: 32px; margin-bottom: 38px; }
+.offers-intro > p { max-width: 390px; color: var(--sea); line-height: 1.7; margin: 0; }
+.offers-intro .eyebrow { color: var(--sea); }
+.offers-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
+.offer-card { display: flex; flex-direction: column; padding: 36px; background: var(--paper); border: 1px solid var(--line); scroll-margin-top: 24px; }
+.offer-card-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
+.offer-season { font: 500 24px var(--font-serif); }
+.offer-season span { margin-left: 6px; font: 11px var(--font-mono); color: var(--sea); }
+.offer-kind { font: 10px var(--font-mono); text-transform: uppercase; letter-spacing: .09em; color: var(--sea); }
+.offer-card h3 { margin: 0 0 10px; font: 500 clamp(1.9rem,3vw,2.65rem)/1.12 var(--font-serif); letter-spacing: -.04em; }
+.offer-ship { color: var(--sea); margin: 0; font-weight: 500; }
+.offer-summary { color: rgba(13,28,34,.74); line-height: 1.75; margin: 22px 0 26px; max-width: 430px; }
+.offer-facts { margin: auto 0 0; }
+.offer-facts > div { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.offer-facts dt { color: var(--sea); font: 10px/1.8 var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
+.offer-facts dd { margin: 0; font-size: 14px; }
+.offer-note { font-size: 12px; color: var(--sea); line-height: 1.6; margin: 10px 0 24px; }
+.offer-cta { align-self: flex-start; min-height: 48px; }
+.offer-card--alaska { background: var(--ink-soft); color: var(--ivory); border-color: var(--ink-soft); }
+.offer-card--alaska .offer-card-top, .offer-card--alaska .offer-facts > div { border-color: rgba(246,242,233,.2); }
+.offer-card--alaska .offer-ship, .offer-card--alaska .offer-kind, .offer-card--alaska .offer-season span, .offer-card--alaska dt { color: var(--brass); }
+.offer-card--alaska .offer-summary, .offer-card--alaska .offer-note { color: rgba(246,242,233,.8); }
+.offers-terms { font-size: 12px; max-width: 850px; line-height: 1.8; color: var(--sea); margin: 28px 0 0; }
+.offers-jump a:focus-visible, .offer-cta:focus-visible { outline: 2px solid var(--brass); outline-offset: 5px; }
+@media(max-width: 700px) { .offers-hero { padding: 52px 0 38px; } .offers-intro { display: block; } .offers-intro > p { margin-top: 20px; } .offers-grid { grid-template-columns: 1fr; } .offer-card { padding: 26px 22px; } .offers-collection { padding: 48px 0; } .offers-jump { gap: 6px 24px; } .offer-cta { width: 100%; padding-inline: 12px; } }

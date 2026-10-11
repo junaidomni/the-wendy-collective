@@ -1,11 +1,25 @@
 import type { Express } from "express";
 import { ENV } from "./env";
+import { s3ResolveDownloadUrl } from "./s3Storage";
 
 export function registerStorageProxy(app: Express) {
   app.get("/manus-storage/*", async (req, res) => {
     const key = (req.params as Record<string, string>)[0];
     if (!key) {
       res.status(400).send("Missing storage key");
+      return;
+    }
+
+    if (ENV.selfHost) {
+      try {
+        const { url, cacheable } = await s3ResolveDownloadUrl(key);
+        // Public CDN URLs are stable, so browsers may cache the redirect briefly.
+        res.set("Cache-Control", cacheable ? "public, max-age=3600" : "no-store");
+        res.redirect(307, url);
+      } catch (err) {
+        console.error("[StorageProxy] S3 resolve failed:", err);
+        res.status(502).send("Storage backend error");
+      }
       return;
     }
 

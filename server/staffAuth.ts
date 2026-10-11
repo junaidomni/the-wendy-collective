@@ -24,3 +24,11 @@ export function verifyStaffCredentials(username: string, password: string): Staf
   if (!timingSafeEqual(Buffer.from(expected), Buffer.from(candidate))) return null;
   return { username: normalized, openId: entry.openId, name: entry.name, email: entry.email };
 }
+
+export const STAFF_OPEN_ID_PREFIX = "twc_staff_";
+
+/** True when openId belongs to a staff account whose portal password is currently configured. */
+export function isEnabledStaffOpenId(openId: string): boolean {
+  const entry = Object.values(staff).find((candidate) => candidate.openId === openId);
+  return Boolean(entry && entry.password());
+}

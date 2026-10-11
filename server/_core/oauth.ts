@@ -3,6 +3,7 @@ import { parse as parseCookieHeader } from "cookie";
 import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
+import { ENV } from "./env";
 import { sdk } from "./sdk";
 
 function getQueryParam(req: Request, key: string): string | undefined {
@@ -11,6 +12,13 @@ function getQueryParam(req: Request, key: string): string | undefined {
 }
 
 export function registerOAuthRoutes(app: Express) {
+  if (ENV.selfHost) {
+    // Manus OAuth does not exist off-platform. Staff sign in at /wendy/login.
+    app.get("/api/oauth/callback", (_req: Request, res: Response) => {
+      res.status(404).json({ error: "Manus OAuth is disabled on this deployment. Sign in at /wendy/login." });
+    });
+    return;
+  }
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");

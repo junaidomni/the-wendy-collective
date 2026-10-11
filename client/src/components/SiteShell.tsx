@@ -4,6 +4,7 @@ import { Link, useLocation } from "wouter";
 const navigation = [
   { href: "/about", label: "About Wendy" },
   { href: "/destinations", label: "Destinations" },
+  { href: "/offers", label: "Offers" },
   { href: "/faq", label: "FAQ" },
 ];
 
@@ -33,7 +34,7 @@ function ScrollRevealObserver() {
 
 export default function SiteShell({ children, darkHeader = false }: SiteShellProps) {
   const [location] = useLocation();
-  const isActive = (href: string) => location === href || (href === "/destinations" && location.startsWith("/destinations/"));
+  const isActive = (href: string) => location === href || (["/destinations", "/offers"].includes(href) && location.startsWith(`${href}/`));
   const navClass = (href: string) => `nav-link${isActive(href) ? " nav-link--active" : ""}`;
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function SiteShell({ children, darkHeader = false }: SiteShellPro
   }, [location]);
 
   return (
-    <div className="site-shell">
+    <div className="site-shell" id="page-top" tabIndex={-1}>
       <header className={`site-header${darkHeader ? " site-header--solid" : ""}`}>
         <div className="header-inner">
           <Link href="/" className="brand-mark" aria-label="The Wendy Collective home">
@@ -65,6 +66,7 @@ export default function SiteShell({ children, darkHeader = false }: SiteShellPro
         </div>
       </header>
       <main className="page-main page-enter"><ScrollRevealObserver />{children}</main>
+      {location.startsWith("/offers") && <button type="button" className="offers-back-top" aria-label="Back to top" onClick={() => {window.scrollTo({top:0,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth"}); document.getElementById("page-top")?.focus({preventScroll:true});}}><span aria-hidden="true">↑</span> Top</button>}
       <footer className="site-footer">
         <div className="page-wrap">
           <div className="footer-grid">
@@ -80,6 +82,7 @@ export default function SiteShell({ children, darkHeader = false }: SiteShellPro
               <nav className="footer-links" aria-label="Explore The Wendy Collective">
                 <Link href="/about">About Wendy</Link>
                 <Link href="/destinations">Destinations</Link>
+                <Link href="/offers">Offers</Link>
                 <Link href="/faq">FAQ</Link>
                 <Link href="/contact">Plan Your Journey</Link>
               </nav>
