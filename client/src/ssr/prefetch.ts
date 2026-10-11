@@ -45,6 +45,7 @@ export function prefetchForPath(url: string): HeadMeta {
   try { path = decodeURI(rawPath); } catch { /* route will be treated as unknown */ }
   const clean = path.replace(/\/+$/, "") || "/";
   const route = publicRoutes[clean];
+  if (route && clean === "/offers/experience-alaska") return { ...route, canonicalPath: clean, ogUrlPath: cardVersion === "alaska-v2" ? `${clean}?card=alaska-v2` : clean, ogImage: "https://www.thewendycollective.com/images/offers/alaska-approved.jpg", ogImageAlt: "Experience Alaska aboard Brilliant Lady, July 8–15, 2027. Insider from $1,114 and Sea Terrace from $1,743 per sailor, based on double occupancy. Fares subject to availability and change.", ogImageWidth: 768, ogImageHeight: 1280 };
   if (route) return { ...route, canonicalPath: clean, ogImage: SOCIAL_IMAGE, ogImageAlt: SOCIAL_ALT };
   if (clean.startsWith("/group/")) return { title: `Grimsley Graduation Cruise 2027 | ${SITE}`, description: "A private request page for the Grimsley High School Graduation Cruise aboard Carnival Mardi Gras.", ogUrlPath: cardVersion === "2" ? `${clean}?card=2` : clean, ogImage: GRIMSLEY_SOCIAL_IMAGE, ogImageAlt: GRIMSLEY_SOCIAL_ALT, ogImageWidth: 695, ogImageHeight: 422, noindex: true };
   if (clean.startsWith("/family/")) return { title: `Your Grimsley Cruise Request | ${SITE}`, description: "Review or update your request for the Grimsley High School Graduation Cruise aboard Carnival Mardi Gras.", ogUrlPath: clean, ogImage: GRIMSLEY_SOCIAL_IMAGE, ogImageAlt: GRIMSLEY_SOCIAL_ALT, ogImageWidth: 695, ogImageHeight: 422, noindex: true };
