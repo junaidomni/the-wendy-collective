@@ -41,6 +41,20 @@ describe("group cabin request workflow", () => {
     expect(mocks.sendGroupCabinRequestEmail).toHaveBeenCalledWith(expect.objectContaining({ requestId: 28, revisionNumber: 1, notes: request.notes, amenities: request.amenities, extras: expect.objectContaining({ diningExperience: "Fahrenheit 555 Steakhouse" }), estimate: expect.objectContaining({ tripTotalCents: 252194 }), rooms: expect.arrayContaining([expect.objectContaining({ occupancy: 2, travelers: expect.arrayContaining([expect.objectContaining({ dateOfBirth: "2008-06-24" })]) })]) }));
   });
 
+  it("accepts a cabin request when the optional traveler birth dates are blank", async () => {
+    const rooms = request.rooms.map((room) => ({
+      ...room,
+      travelers: room.travelers.map((traveler) => ({ ...traveler, dateOfBirth: "" })),
+    }));
+
+    await expect(appRouter.createCaller(context()).groupCruises.createCabinRequest({ ...request, rooms })).resolves.toMatchObject({ success: true });
+    expect(mocks.createFamilyPortalCabinRequest).toHaveBeenCalledWith(expect.objectContaining({
+      rooms: expect.arrayContaining([expect.objectContaining({
+        travelers: expect.arrayContaining([expect.not.objectContaining({ dateOfBirth: "" })]),
+      })]),
+    }));
+  });
+
   it("adds a numbered current revision to the authenticated household portal without creating a pipeline record", async () => {
     const familyPortalToken = "u".repeat(43);
     mocks.createFamilyPortalRevision.mockResolvedValue({ id: 29, familyPortalToken, revisionNumber: 2 });

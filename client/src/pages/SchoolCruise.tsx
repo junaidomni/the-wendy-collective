@@ -139,7 +139,11 @@ export function SchoolCruiseContent({ privateToken, familyPortalToken, profile, 
         estimatedFareCents: planning?.estimatedFareCents,
         estimatedGratuitiesCents: planning?.estimatedGratuitiesCents,
         estimatedProtectionCents: planning?.estimatedProtectionCents,
-        travelers: room.travelers.map((traveler) => ({ ...traveler, age: Number(traveler.age) })),
+        travelers: room.travelers.map(({ dateOfBirth, ...traveler }) => ({
+          ...traveler,
+          age: Number(traveler.age),
+          ...(dateOfBirth ? { dateOfBirth } : {}),
+        })),
       })),
     });
     if (result.familyPortalToken) setSubmitted({ familyPortalToken: result.familyPortalToken, revisionNumber: result.revisionNumber });

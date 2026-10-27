@@ -9,7 +9,10 @@ const travelerInput = z.object({
   middleName: z.string().trim().max(80).optional().default(""),
   lastName: z.string().trim().min(1).max(80),
   age: z.number().int().min(0).max(120),
-  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  dateOfBirth: z.union([
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    z.literal("").transform(() => undefined),
+  ]).optional(),
   loyaltyNumber: z.string().trim().max(100).optional().default(""),
 });
 
